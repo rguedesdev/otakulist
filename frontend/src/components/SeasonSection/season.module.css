@@ -1,0 +1,121 @@
+.seasonsContainer {
+  max-width: 1065px;
+  width: 100%;
+  margin: 0;
+  color: var(--text-color);
+}
+
+.seasonSectionTitle {
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 10px;
+}
+
+.seasonCardsContainer {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.seasonCard {
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  /* background-color removido daqui para evitar o vazamento na imagem */
+  border-radius: 5px;
+  height: 130px;
+  min-width: 331px;
+  width: 100%;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+
+  /* Movimento nativo e imediato por GPU */
+  transform: translateY(0);
+  transition:
+    transform 0.2s ease-in-out,
+    box-shadow 0.2s ease-in-out;
+}
+
+/* Efeito ao passar o mouse */
+.seasonCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.25);
+}
+
+/* Container do lado direito que isola o fundo cinza */
+.seasonTextsContainer {
+  background-color: #2f3236;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+}
+
+/* --- Imagem --- */
+.seasonCover {
+  height: 130px;
+  width: 90px;
+  object-fit: cover;
+  min-width: 90px;
+  display: block;
+}
+
+/* --- Container dos Textos --- */
+.seasonTexts {
+  min-width: 0;
+  padding: 8px 12px 8px 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Título da Temporada */
+.seasonTitle {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0 0 10px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* --- Lista de Informações (dl) --- */
+.infoGroup {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Linha interna (div que envelopa dt + dd) */
+.infoLine {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Caixa do Ícone Opcional (dt) */
+.infoIcon {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  flex-shrink: 0;
+}
+
+/* Caixa de texto (dd) */
+.infoLine dd {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+}
+
+/* Estilo do texto interno */
+.seasonInfo {
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

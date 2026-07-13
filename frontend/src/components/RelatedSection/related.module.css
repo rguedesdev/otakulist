@@ -1,0 +1,122 @@
+.relatedContainer {
+  max-width: 1065px;
+  width: 100%;
+  margin: 16px 0 0 0;
+  color: var(--text-color);
+}
+
+.relatedSectionTitle {
+  font-size: 1em;
+  font-weight: 500;
+  margin-bottom: 10px;
+}
+
+.relatedCardsContainer {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.relatedCard {
+  display: grid;
+  grid-template-columns: 75px 1fr;
+  /* background-color removido para proteger as extremidades da imagem */
+  border-radius: 5px;
+  height: 110px;
+  min-width: 331px;
+  width: 100%;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+
+  /* Mantido o seu original estável e fluido por GPU */
+  transform: translateY(0);
+  transition:
+    transform 0.2s ease-in-out,
+    box-shadow 0.2s ease-in-out;
+}
+
+/* Efeito ao passar o mouse */
+.relatedCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.25);
+}
+
+/* Container que segura o fundo cinza de forma isolada na direita */
+.relatedTextsContainer {
+  background-color: #2f3236;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+}
+
+/* --- Imagem --- */
+.relatedCover {
+  height: 110px;
+  width: 75px;
+  object-fit: cover;
+  min-width: 75px;
+  display: block;
+}
+
+/* --- Container dos Textos --- */
+.relatedTexts {
+  height: 100%;
+  min-width: 0;
+  padding: 8px 12px 8px 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Envelopa o cabeçalho e o nome da obra */
+.topTexts {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+/* --- Lista de Informações (dl) --- */
+.infoGroup {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* Linha interna (div que envelopa dd) */
+.infoLine {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+/* Caixa de texto (dd) */
+.infoLine dd {
+  margin: 0;
+  padding: 0;
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  min-width: 0;
+}
+
+/* Título da obra relacionada */
+.relatedTitle {
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+/* Mídia e Status (ex: Manga · Finalizado) */
+.info {
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
