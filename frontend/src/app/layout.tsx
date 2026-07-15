@@ -18,8 +18,8 @@ export const metadata: Metadata = {
 };
 
 // Componentes
-import { Navbar } from "@/components/Navbar/page";
-import { Footer } from "@/components/Footer/page";
+import { Navbar } from "@/shared/components/Navbar/page";
+import { Footer } from "@/shared/components/Footer/page";
 
 function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (

@@ -1,0 +1,121 @@
+.anisongContainer {
+  max-width: 1065px;
+  width: 100%;
+  margin: 0;
+}
+
+.anisongSectionTitle {
+  color: var(--title-color);
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.anisongCardsContainer {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.anisongCard {
+  display: grid;
+  grid-template-columns: 60px 1fr;
+  /* background-color removido para sanar o vazamento no topo da foto */
+  border-radius: 5px;
+  height: 90px;
+  min-width: 331px;
+  width: 100%;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+
+  /* Seu efeito original preservado */
+  transform: translateY(0);
+  transition:
+    transform 0.2s ease-in-out,
+    box-shadow 0.2s ease-in-out;
+}
+
+/* Efeito ao passar o mouse */
+.anisongCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.25);
+}
+
+/* Container do lado direito que isola a cor cinza de fundo */
+.anisongTextsContainer {
+  background-color: #2f3236;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+}
+
+/* --- Imagem --- */
+.anisongCover {
+  height: 90px;
+  width: 60px;
+  object-fit: cover;
+  min-width: 60px;
+  display: block;
+}
+
+/* --- Container dos Textos --- */
+.anisongTexts {
+  min-width: 0;
+  padding: 8px 12px 8px 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Título da Temporada */
+.anisongTitle {
+  font-size: 13px;
+  font-weight: 600;
+  margin: 0 0 10px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* --- Lista de Informações (dl) --- */
+.infoGroup {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Linha interna (div que envelopa dt + dd) */
+.infoLine {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Caixa do Ícone Opcional (dt) */
+.infoIcon {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  flex-shrink: 0;
+}
+
+/* Caixa de texto (dd) */
+.infoLine dd {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+}
+
+/* Estilo do texto interno */
+.anisongInfo {
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

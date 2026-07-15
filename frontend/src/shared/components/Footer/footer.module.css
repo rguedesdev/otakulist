@@ -1,0 +1,23 @@
+.footerContainer {
+  background-color: var(--nav-bg-color);
+  padding: 70px 0;
+  margin: 80px 0 0 0;
+}
+
+.footer {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 40px 0;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.title {
+  font-size: 14px;
+}
+
+.titleVersion {
+  font-size: 14px;
+}

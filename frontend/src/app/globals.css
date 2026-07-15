@@ -11,11 +11,15 @@
   --nav-bg-color: #1a1a24;
   --color-primary: #702de6;
   --color-secondary: #3a009d;
+  --title-color: #1a1a24;
   --text-color: #ffffff;
 }
 
-/* [data-theme="dark"] {
-} */
+[data-theme="dark"] {
+  --title-color: #ffffff;
+  --text-color: #ffffff;
+}
 
 body {
+  color: var(--text-color);
 }

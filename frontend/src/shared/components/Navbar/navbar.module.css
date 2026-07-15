@@ -1,0 +1,166 @@
+.navbarContainer {
+  background-color: var(--nav-bg-color);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.navbar {
+  max-width: 1280px;
+  margin-inline: auto;
+  padding: 0 16px;
+  height: 80px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logoContainer {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+}
+
+.badgeVersion {
+  color: rgb(98, 167, 223);
+  background-color: rgba(38, 128, 202, 0.438);
+  padding: 4px 6px; /* Aumentar um pouco as laterais costuma dar melhor balanço visual */
+  border: 1px solid steelblue;
+  border-radius: 4px;
+
+  font-size: 12px;
+  font-weight: 700;
+
+  /* Solução: Força o texto a se alinhar perfeitamente dentro do próprio badge */
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+  transition: background-color ease 0.15s;
+}
+
+.badgeVersion:hover {
+  background-color: rgba(57, 155, 235, 0.624);
+}
+
+.navList {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 30px;
+}
+
+.navLink {
+  position: relative;
+  color: var(--text-color);
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 5px;
+
+  cursor: pointer;
+}
+
+.navLink:hover {
+  color: var(--color-primary);
+}
+
+.navLink::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  width: 100%;
+  height: 2px;
+  background-color: var(--color-primary);
+  transform: scale(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+}
+
+.navLink:hover::after {
+  transform: scale(1);
+}
+
+.profileDropdownWrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.avatar {
+  width: auto;
+  height: auto;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.menuDropdown {
+  position: absolute;
+  top: 68px; /* gap da imagem */
+  right: 0;
+  background: #1e1e1e;
+  border-radius: 8px;
+  padding: 10px;
+  width: 150px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.navButtons {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 30px;
+}
+
+.btnSignIn {
+  width: 110px;
+  height: 40px;
+  background-color: var(--color-primary);
+  border-radius: 5px;
+  color: var(--text-color);
+
+  cursor: pointer;
+  transition: all 0.15s ease-in;
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.btnSignIn:hover {
+  background-color: var(--color-secondary);
+}
+
+.btnSignIn:active {
+  transform: scale(0.97);
+}
+
+.btnSignUp {
+  width: 140px;
+  height: 40px;
+  background-color: var(--color-primary);
+  border-radius: 5px;
+  color: var(--text-color);
+
+  cursor: pointer;
+  transition: all 0.15s ease-in;
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.btnSignUp:hover {
+  background-color: var(--color-secondary);
+}
+
+.btnSignUp:active {
+  transform: scale(0.97);
+}

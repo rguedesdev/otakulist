@@ -1,0 +1,192 @@
+.heroSectionContainer {
+  background-color: #2f3236;
+  width: 100%;
+}
+
+.heroSection {
+  max-width: 1280px;
+  margin-inline: auto;
+  padding-inline: 16px;
+  padding-top: 16px;
+  padding-bottom: 16px;
+
+  display: flex;
+  flex-direction: row;
+  gap: 30px;
+}
+
+.coverContainer {
+  width: 200px;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.imageWrapper {
+  width: 100%;
+  max-height: 300px; /* Limite máximo estrito (proporção 2:3 para largura de 200px) */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  border-radius: 5px;
+  overflow: hidden;
+
+  /* Garante que o wrapper colapse e se ajuste à altura da imagem interna */
+  display: flex;
+}
+
+.cover {
+  width: 100% !important;
+  height: auto !important; /* Faz o Next.js respeitar a proporção REAL da imagem que carregou */
+  max-height: 300px; /* Garante que a imagem não passe do limite de 2:3 */
+  object-fit: cover; /* Se a imagem for mais alta que 2:3, ela será cortada elegantemente */
+}
+
+.buttons {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+}
+
+/* --- Base dos Botões (Comportamento comum) --- */
+.btnAddList,
+.btnAddFavorite {
+  border-radius: 5px;
+  border: none; /* Removido borda nativa do HTML que gera deformidade */
+  outline: none; /* Remove anel de foco inconsistente */
+  color: var(--text-color);
+  font-size: 14px;
+  font-weight: 500;
+
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+
+  /* Mantém as transformações estáveis de escala */
+  transform: scale(1) translateY(0);
+  transition:
+    transform 0.2s ease,
+    background-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.btnAddList {
+  width: 150px;
+  height: 40px;
+}
+
+.btnAddFavorite {
+  width: 40px;
+  height: 40px;
+}
+
+.btnAddList span,
+.btnAddFavorite span {
+  white-space: nowrap; /* Impede o texto de tentar quebrar linha na animação */
+}
+
+/* --- Botão Adicionar --- */
+.btnAddList {
+  background-color: lightseagreen;
+}
+
+.btnAddList:hover {
+  background-color: rgb(9, 126, 120);
+  /* REMOVIDO: transform: translateY(-2px) */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+}
+
+.btnAddList:active {
+  transform: scale(0.96); /* Agora o efeito de clique acontece no lugar fixo */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* --- Botão Favoritar --- */
+.btnAddFavorite {
+  background-color: red;
+}
+
+.btnAddFavorite:hover {
+  background-color: rgb(149, 1, 1);
+  /* REMOVIDO: transform: translateY(-2px) */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+}
+
+.btnAddFavorite:active {
+  transform: scale(0.96); /* Agora o efeito de clique acontece no lugar fixo */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* --- Seção de Conteúdo (Textos) --- */
+.textsContainer {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.texts {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.title {
+  color: var(--text-color);
+  font-size: 1.5em;
+  font-weight: 600;
+  margin: 0;
+}
+
+.description {
+  color: var(--text-color);
+  font-size: 0.95em;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.hrFaded {
+  display: block;
+  border: none;
+  height: 1px;
+  width: 100%;
+  background: linear-gradient(to right, transparent, white, transparent);
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.synonymsContainer {
+  display: flex;
+  flex-direction: column;
+  color: var(--text-color);
+}
+
+.synonymsTitle {
+  font-size: 1em;
+  font-weight: 500;
+  margin: 0 0 8px 0; /* Margem ajustada para o novo fluxo em linha */
+}
+
+/* Container que alinha todos os sinônimos na horizontal */
+.synonymsList {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap; /* Quebra de linha inteligente se a tela for pequena */
+  align-items: center;
+  gap: 8px; /* Espaçamento idêntico entre os itens e as barras */
+}
+
+.synonym {
+  font-size: 0.9em;
+}
+
+/* Estilo sutil para as barras separadoras */
+.separator {
+  font-size: 0.9em;
+  opacity: 0.6; /* Deixa a barra levemente opaca para não brigar com o texto */
+  user-select: none; /* Impede o usuário de selecionar a barra ao copiar o texto */
+}

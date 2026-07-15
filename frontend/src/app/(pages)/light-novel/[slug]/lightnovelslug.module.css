@@ -17,3 +17,9 @@
   margin-inline: auto;
   gap: 30px;
 }
+
+.centralContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
