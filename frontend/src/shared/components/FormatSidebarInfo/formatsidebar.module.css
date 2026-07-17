@@ -183,6 +183,105 @@
   color: #ffffff;
 }
 
+/* Link Instagram */
+.linkInstagram {
+  background-color: #2f3236;
+  padding: 6px;
+  border-radius: 4px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+
+  transition: background-color ease 0.2s;
+}
+
+.linkInstagram:hover {
+  background-color: #df5ab5;
+}
+
+.iconInstagramContainer {
+  background: radial-gradient(
+    circle at 30% 107%,
+    #fdf497 0%,
+    #fdf497 5%,
+    #fd5949 45%,
+    #d6249f 60%,
+    #285aeb 90%
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.iconInstagram {
+  color: #ffffff;
+  display: block;
+}
+
+.linkInstagram:hover .iconInstagramContainer {
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+}
+
+.linkText {
+  color: #ffffff;
+}
+
+/* Link Pixiv */
+.linkPixiv {
+  background-color: #2f3236;
+  padding: 6px;
+  border-radius: 4px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+
+  transition: background-color ease 0.2s;
+}
+
+.linkPixiv:hover {
+  background-color: #0196fa;
+}
+
+.iconPixivContainer {
+  background-color: #0196fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.iconPixiv {
+  color: #ffffff;
+  display: block;
+}
+
+.linkPixiv:hover .iconPixivContainer {
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+}
+
+.linkText {
+  color: #ffffff;
+}
+
 /* Link Youtube */
 .linkYoutube {
   background-color: #2f3236;

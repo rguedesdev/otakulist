@@ -9,6 +9,7 @@ import styles from "./formatsidebar.module.css";
 import { FaStar } from "react-icons/fa";
 import { HiOutlineLink } from "react-icons/hi";
 import { FaXTwitter } from "react-icons/fa6";
+import { FaInstagram } from "react-icons/fa";
 import { FaYoutube } from "react-icons/fa";
 
 import { GrAmazon } from "react-icons/gr";
@@ -44,7 +45,9 @@ function FormatSidebarInfo({ FormatInfo }) {
   return (
     <aside className={styles.sidebarWrapper}>
       {/* Bloco 1: Card de Nota Isolado */}
-      {FormatInfo.format == "anime" || FormatInfo.format == "manga" ? (
+      {FormatInfo.format == "anime" ||
+      FormatInfo.format == "manga" ||
+      FormatInfo.format == "light_novel" ? (
         <>
           <div className={styles.scoreCard}>
             <span className={styles.scoreTitle}>Score</span>
@@ -65,10 +68,64 @@ function FormatSidebarInfo({ FormatInfo }) {
       {/* Bloco 2: Card de Informações Tradicional */}
       <div className={styles.infoCard}>
         <dl className={styles.animeDescriptionList}>
-          <dt className={styles.animeDescriptionTerm}>Formato</dt>
-          <dd className={styles.animeDescriptionDetail}>
-            {formatTranslations[FormatInfo.format as keyof IFormatTranslations]}
-          </dd>
+          {FormatInfo.format == "anime" ||
+          FormatInfo.format == "manga" ||
+          FormatInfo.format == "light_novel" ||
+          FormatInfo.format == "magazine" ? (
+            <>
+              <dt className={styles.animeDescriptionTerm}>Formato</dt>
+              <dd className={styles.animeDescriptionDetail}>
+                {
+                  formatTranslations[
+                    FormatInfo.format as keyof IFormatTranslations
+                  ]
+                }
+              </dd>
+            </>
+          ) : (
+            <></>
+          )}
+
+          {FormatInfo.format == "mangaka" ||
+          FormatInfo.format == "mangaka" ||
+          FormatInfo.format == "seiyuu" ? (
+            <>
+              <>
+                <dt className={styles.animeDescriptionTerm}>Nome em Kanji</dt>
+                <dd className={styles.animeDescriptionDetail}>
+                  {FormatInfo.name_kanji}
+                </dd>
+
+                <dt className={styles.animeDescriptionTerm}>Nome em Romaji</dt>
+                <dd className={styles.animeDescriptionDetail}>
+                  {FormatInfo.name_romaji}
+                </dd>
+
+                <dt className={styles.animeDescriptionTerm}>
+                  Data de Nascimento
+                </dt>
+                <dd className={styles.animeDescriptionDetail}>
+                  {FormatInfo.date_of_birth}
+                </dd>
+
+                <dt className={styles.animeDescriptionTerm}>Cidade Natal</dt>
+                <dd className={styles.animeDescriptionDetail}>
+                  {FormatInfo.hometown}
+                </dd>
+
+                {FormatInfo.format == "seiyuu" && (
+                  <>
+                    <dt className={styles.animeDescriptionTerm}>Agência</dt>
+                    <dd className={styles.animeDescriptionDetail}>
+                      {FormatInfo.agency}
+                    </dd>
+                  </>
+                )}
+              </>
+            </>
+          ) : (
+            <></>
+          )}
 
           {FormatInfo.episodes ? (
             <>
@@ -122,10 +179,17 @@ function FormatSidebarInfo({ FormatInfo }) {
             <></>
           )}
 
-          <dt className={styles.animeDescriptionTerm}>Fundação</dt>
-          <dd className={styles.animeDescriptionDetail}>
-            {FormatInfo.foundation}
-          </dd>
+          {FormatInfo.format == "magazine" ||
+          FormatInfo.format == "publisher" ? (
+            <>
+              <dt className={styles.animeDescriptionTerm}>Fundado em</dt>
+              <dd className={styles.animeDescriptionDetail}>
+                {FormatInfo.foundation}
+              </dd>
+            </>
+          ) : (
+            <></>
+          )}
 
           {FormatInfo.season ? (
             <>
@@ -231,6 +295,25 @@ function FormatSidebarInfo({ FormatInfo }) {
             <FaXTwitter className={styles.iconXTwitter} size={16} />
           </span>
           <span className={styles.linkText}>X/Twitter</span>
+        </Link>
+
+        <Link className={styles.linkInstagram} href={`/`}>
+          <span className={styles.iconInstagramContainer}>
+            <FaInstagram className={styles.iconInstagram} size={18} />
+          </span>
+          <span className={styles.linkText}>Instagram</span>
+        </Link>
+
+        <Link className={styles.linkPixiv} href={`/`}>
+          <span className={styles.iconPixivContainer}>
+            <Image
+              src="/social-medias/pixiv.jpg"
+              alt="Pixiv Logo"
+              width={20}
+              height={20}
+            />
+          </span>
+          <span className={styles.linkText}>Pixiv</span>
         </Link>
 
         <Link className={styles.linkYoutube} href={`/`}>

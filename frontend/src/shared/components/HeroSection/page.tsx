@@ -25,8 +25,9 @@ function HeroSection({ FormatInfo }) {
             />
           </div>
 
-          {FormatInfo.format != "magazine" &&
-          FormatInfo.format != "publisher" ? (
+          {FormatInfo.format == "anime" ||
+          FormatInfo.format == "manga" ||
+          FormatInfo.format == "light_novel" ? (
             <>
               <div className={styles.buttons}>
                 <button className={styles.btnAddList}>
@@ -52,28 +53,44 @@ function HeroSection({ FormatInfo }) {
         {/* Container da Direita: Textos e Sinônimos */}
         <div className={styles.textsContainer}>
           <div className={styles.texts}>
-            <h1 className={styles.title}>{FormatInfo.title}</h1>
+            <h1 className={styles.title}>
+              {FormatInfo.format == "mangaka" ||
+              FormatInfo.format == "staff" ||
+              FormatInfo.format == "seiyuu"
+                ? FormatInfo.name_romaji
+                : FormatInfo.title}
+            </h1>
             <p className={styles.description}>{FormatInfo.description}</p>
           </div>
 
-          <hr className={styles.hrFaded} />
+          {FormatInfo.format == "anime" ||
+          FormatInfo.format == "manga" ||
+          FormatInfo.format == "light_novel" ? (
+            <>
+              <hr className={styles.hrFaded} />
 
-          <div className={styles.synonymsContainer}>
-            <h2 className={styles.synonymsTitle}>Títulos Alternativos</h2>
-            <div className={styles.synonymsList}>
-              <span className={styles.synonym}>Japonês: 会長はメイド様!</span>
-              <span className={styles.separator}>|</span>
-              <span className={styles.synonym}>
-                Romaji: Kaichou wa Meido-sama!
-              </span>
-              <span className={styles.separator}>|</span>
-              <span className={styles.synonym}>Inglês: Maid-sama!</span>
-              <span className={styles.separator}>|</span>
-              <span className={styles.synonym}>
-                Literal: Class President is a Maid!
-              </span>
-            </div>
-          </div>
+              <div className={styles.synonymsContainer}>
+                <h2 className={styles.synonymsTitle}>Títulos Alternativos</h2>
+                <div className={styles.synonymsList}>
+                  <span className={styles.synonym}>
+                    Japonês: 会長はメイド様!
+                  </span>
+                  <span className={styles.separator}>|</span>
+                  <span className={styles.synonym}>
+                    Romaji: Kaichou wa Meido-sama!
+                  </span>
+                  <span className={styles.separator}>|</span>
+                  <span className={styles.synonym}>Inglês: Maid-sama!</span>
+                  <span className={styles.separator}>|</span>
+                  <span className={styles.synonym}>
+                    Literal: Class President is a Maid!
+                  </span>
+                </div>
+              </div>
+            </>
+          ) : (
+            <></>
+          )}
         </div>
       </section>
     </div>
