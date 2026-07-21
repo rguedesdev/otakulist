@@ -1,0 +1,127 @@
+.characterBySeiyuuContainer {
+  max-width: 1065px;
+  width: 100%;
+  margin: 0;
+}
+
+.characterBySeiyuuSectionTitle {
+  color: var(--title-color);
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.characterBySeiyuuCardsContainer {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.characterBySeiyuuCard {
+  display: grid;
+
+  /* --- A MÁGICA ESTÁ AQUI ---
+     Pegamos a altura do card (--card-height) e calculamos a largura exata da imagem (2/3).
+     Você MUDARÁ apenas o valor de --card-height abaixo! */
+  --card-height: 80px;
+
+  grid-template-columns: calc(var(--card-height) * (2 / 3)) 1fr;
+  height: var(--card-height);
+
+  border-radius: 5px;
+  min-width: 331px;
+  width: 100%;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  transform: translateY(0);
+  transition:
+    transform 0.2s ease-in-out,
+    box-shadow 0.2s ease-in-out;
+}
+
+/* Efeito ao passar o mouse */
+.characterBySeiyuuCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.25);
+}
+
+/* Container do lado direito que isola o fundo cinza */
+.characterBySeiyuuTextsContainer {
+  background-color: #2f3236;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+}
+
+/* --- Imagem --- */
+.characterBySeiyuuCover {
+  height: 100%;
+  width: 100%;
+  object-fit: contain; /* Garante que a imagem inteira apareça sem cortes */
+  display: block;
+}
+
+/* --- Container dos Textos --- */
+.characterBySeiyuuTexts {
+  min-width: 0;
+  padding: 8px 12px 8px 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  /* --- A CORREÇÃO ESTÁ AQUI --- */
+  height: 100%;
+}
+
+/* Título da Temporada */
+.characterBySeiyuuTitle {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0 0 10px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* --- Lista de Informações (dl) --- */
+.infoGroup {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Linha interna (div que envelopa dt + dd) */
+.infoLine {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Caixa do Ícone Opcional (dt) */
+.infoIcon {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  flex-shrink: 0;
+}
+
+/* Caixa de texto (dd) */
+.infoLine dd {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+}
+
+/* Estilo do texto interno */
+.characterBySeiyuuInfo {
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
