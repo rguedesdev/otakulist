@@ -1,24 +1,656 @@
 .page {
   min-height: 100vh;
+  color: var(--color-text-primary);
+  background:
+    radial-gradient(circle at 78% 12%, var(--color-accent-soft), transparent 28rem),
+    var(--color-bg-base);
+}
+
+.factsBar {
+  max-width: 1280px;
+  margin: 22px auto 0;
+  padding: 14px 18px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-large);
+  box-shadow: var(--shadow-card);
+}
+
+.factItem {
+  min-width: 0;
+  padding: 2px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--color-text-primary);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.factItem + .factItem {
+  border-left: 1px solid var(--color-border);
+}
+
+.factItem > svg {
+  width: 21px;
+  height: 21px;
+  flex: 0 0 auto;
+  color: var(--color-accent);
+}
+
+.factItem span {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.factItem small {
+  color: var(--color-text-muted);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
 }
 
 .mangaSlugContainer {
   max-width: 1280px;
   margin-inline: auto;
+  padding-inline: 16px;
+}
+
+.sectionNav {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  margin-top: 22px;
+  padding: 0 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+  background: color-mix(in srgb, var(--color-bg-subtle) 90%, transparent);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-medium);
+  box-shadow: var(--shadow-card);
+  backdrop-filter: blur(14px);
+  scrollbar-width: none;
+}
+
+.sectionNav::-webkit-scrollbar {
+  display: none;
+}
+
+.sectionNav a {
+  position: relative;
+  padding: 15px 12px 13px;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: color 0.2s ease;
+}
+
+.sectionNav a:first-child {
+  color: var(--color-accent);
+}
+
+.sectionNav a:first-child::after,
+.sectionNav a:hover::after {
+  content: "";
+  position: absolute;
+  right: 12px;
+  bottom: -1px;
+  left: 12px;
+  height: 2px;
+  background: var(--color-accent);
+  border-radius: 999px;
+}
+
+.sectionNav a:hover {
+  color: var(--color-text-primary);
 }
 
 .contentContainer {
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  max-width: 1280px;
-  margin-top: 20px;
-  margin-inline: auto;
-  gap: 30px;
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  align-items: start;
+  margin-top: 24px;
+  gap: 20px;
+}
+
+.sidebarColumn {
+  min-width: 0;
+  padding: 10px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-large);
+  box-shadow: var(--shadow-card);
 }
 
 .centralContainer {
+  min-width: 0;
   display: flex;
   flex-direction: column;
+  gap: 24px;
+}
+
+.trackerSection,
+.contentSection {
+  scroll-margin-top: 76px;
+}
+
+.trackerSection {
+  overflow: hidden;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-large);
+  box-shadow: var(--shadow-card);
+}
+
+.trackerWrapper {
+  width: 100%;
+}
+
+.trackerSummary {
+  min-height: 72px;
+  padding: 13px 15px;
+  display: grid;
+  grid-template-columns: minmax(170px, 0.9fr) minmax(90px, 0.5fr) minmax(180px, 1.1fr) auto;
+  grid-template-areas: "identity status progress action";
+  align-items: center;
   gap: 16px;
+}
+
+.trackerIdentity {
+  grid-area: identity;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.trackerIdentity > span:last-child,
+.trackerStatus {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.trackerIdentity small,
+.trackerStatus small {
+  color: var(--color-text-muted);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.trackerIdentity strong,
+.trackerStatus strong {
+  overflow: hidden;
+  color: var(--color-text-primary);
+  font-size: 13px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.trackerIcon {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  color: var(--color-accent);
+  background: var(--color-accent-soft);
+  border: 1px solid var(--color-accent-border);
+  border-radius: var(--radius-medium);
+}
+
+.trackerIcon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.trackerStatus {
+  grid-area: status;
+}
+
+.summaryProgress {
+  grid-area: progress;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.summaryProgress > div:first-child {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--color-text-muted);
+  font-size: 10px;
+}
+
+.summaryProgress strong {
+  color: var(--color-text-secondary);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.summaryProgressTrack {
+  height: 5px;
+  overflow: visible;
+  background: var(--color-surface-hover);
+  border-radius: 999px;
+}
+
+.summaryProgressTrack span {
+  position: relative;
+  display: block;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    var(--color-accent-deep) 0%,
+    var(--color-accent-deep) 76%,
+    var(--color-accent-hover) 92%,
+    var(--color-accent) 100%
+  );
+  border-radius: inherit;
+  transition: width 0.25s ease;
+}
+
+.loginMessage {
+  grid-area: progress;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+
+.expandButton {
+  grid-area: action;
+  height: 38px;
+  padding-inline: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  color: var(--color-text-secondary);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-small);
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.expandButton:hover {
+  color: var(--color-text-primary);
+  background: var(--color-surface-hover);
+  border-color: var(--color-accent-border);
+}
+
+.expandButton svg:last-child {
+  transition: transform 0.2s ease;
+}
+
+.expandButton .chevronExpanded {
+  transform: rotate(180deg);
+}
+
+.trackerEditor {
+  padding: 18px;
+  background: var(--color-bg-subtle);
+  border-top: 1px solid var(--color-border);
+  animation: revealTracker 0.2s ease-out;
+}
+
+@keyframes revealTracker {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.trackerPanel {
+  display: grid;
+  grid-template-columns: minmax(260px, 1.7fr) minmax(130px, 0.7fr) minmax(110px, 0.55fr) auto;
+  align-items: end;
+  gap: 14px;
+}
+
+.progressArea {
+  min-width: 0;
+}
+
+.progressMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.progressMeta > div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.progressMeta strong {
+  font-size: 13px;
+}
+
+.progressMeta span {
+  color: var(--color-text-muted);
+  font-size: 11px;
+}
+
+.progressMeta .episodeCount {
+  color: var(--color-text-primary);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.progressTrack {
+  height: 7px;
+  margin-top: 10px;
+  overflow: visible;
+  background: var(--color-surface-hover);
+  border-radius: 999px;
+}
+
+.progressTrack span {
+  position: relative;
+  display: block;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    var(--color-accent-deep) 0%,
+    var(--color-accent-deep) 76%,
+    var(--color-accent-hover) 92%,
+    var(--color-accent) 100%
+  );
+  border-radius: inherit;
+  box-shadow: none;
+  transition: width 0.25s ease;
+}
+
+.summaryProgressTrack span::after,
+.progressTrack span::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 0;
+  width: 4px;
+  height: 4px;
+  background: var(--color-accent-highlight);
+  border-radius: 50%;
+  box-shadow:
+    0 0 4px var(--color-accent-highlight),
+    0 0 8px var(--color-accent);
+  transform: translate(35%, -50%);
+}
+
+.summaryProgressTrack span::before,
+.progressTrack span::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: min(28px, 35%);
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--color-accent-highlight) 72%, transparent)
+  );
+  border-radius: inherit;
+}
+
+.progressTrack span::after {
+  width: 5px;
+  height: 5px;
+}
+
+.episodeControls {
+  margin-top: 9px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.episodeControls span {
+  color: var(--color-text-secondary);
+  font-size: 11px;
+}
+
+.episodeControls button {
+  width: 23px;
+  height: 23px;
+  display: grid;
+  place-items: center;
+  color: var(--color-text-primary);
+  background: var(--color-surface-hover);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.episodeControls button:hover:not(:disabled) {
+  color: white;
+  background: var(--color-accent-hover);
+}
+
+.episodeControls button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.trackerField {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.trackerField label {
+  color: var(--color-text-secondary);
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.trackerField select {
+  width: 100%;
+  height: 40px;
+  padding: 0 30px 0 11px;
+  color: var(--color-text-primary);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: 7px;
+  outline: none;
+}
+
+.trackerField select:focus-visible {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px var(--color-accent-soft);
+}
+
+.saveButton {
+  min-width: 150px;
+  height: 40px;
+  padding-inline: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--color-text-primary);
+  background: linear-gradient(135deg, var(--color-accent-hover), var(--color-accent-deep));
+  border: 0;
+  border-radius: 7px;
+  box-shadow: 0 8px 18px var(--color-accent-soft);
+  font-size: 12px;
+  font-weight: 750;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.saveButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 11px 24px var(--color-accent-border);
+}
+
+.saveButton:active {
+  transform: translateY(0);
+}
+
+.trackerHint {
+  grid-column: 1 / -1;
+  padding-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--color-text-muted);
+  border-top: 1px solid var(--color-border);
+  font-size: 10px;
+}
+
+.trackerHint svg {
+  color: var(--color-info);
+}
+
+.contentSection {
+  padding: 20px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-large);
+  box-shadow: var(--shadow-card);
+}
+
+@media (max-width: 1040px) {
+  .factsBar {
+    margin-inline: 16px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    row-gap: 18px;
+  }
+
+  .factItem:nth-child(3) {
+    border-left: 0;
+  }
+
+  .trackerPanel {
+    grid-template-columns: minmax(260px, 1fr) 1fr 1fr;
+  }
+
+  .trackerSummary {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "identity action"
+      "status progress";
+  }
+
+  .saveButton {
+    grid-column: 2 / -1;
+  }
+}
+
+@media (max-width: 760px) {
+  .factsBar {
+    grid-template-columns: 1fr;
+  }
+
+  .factItem {
+    padding: 4px 2px;
+  }
+
+  .factItem + .factItem {
+    padding-top: 14px;
+    border-top: 1px solid var(--color-border);
+    border-left: 0;
+  }
+
+  .contentContainer {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .sidebarColumn {
+    order: 2;
+  }
+
+  .centralContainer {
+    order: 1;
+  }
+
+  .trackerPanel {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .progressArea,
+  .saveButton,
+  .trackerHint {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 480px) {
+  .sectionNav {
+    margin-inline: -16px;
+    border-right: 0;
+    border-left: 0;
+    border-radius: 0;
+  }
+
+  .trackerSection {
+    border-radius: var(--radius-medium);
+  }
+
+  .contentSection {
+    padding: 16px;
+  }
+
+  .trackerSummary {
+    padding: 14px;
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "identity"
+      "status"
+      "progress"
+      "action";
+  }
+
+  .loginMessage {
+    grid-area: progress;
+  }
+
+  .expandButton {
+    width: 100%;
+  }
+
+  .trackerEditor {
+    padding: 14px;
+  }
+
+  .trackerPanel {
+    grid-template-columns: 1fr;
+  }
+
+  .progressArea,
+  .saveButton,
+  .trackerHint {
+    grid-column: auto;
+  }
 }

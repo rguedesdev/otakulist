@@ -1,13 +1,14 @@
 .footerContainer {
-  background-color: var(--nav-bg-color);
-  padding: 70px 0;
-  margin: 80px 0 0 0;
+  margin-top: 72px;
+  padding: 44px 16px 32px;
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
 }
 
 .footer {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 40px 0;
+  padding: 0;
 
   display: flex;
   flex-direction: column;
@@ -21,6 +22,12 @@
   gap: 16px;
 }
 
+.socialMediasContainer p {
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+}
+
 .socialMedias {
   display: flex;
   flex-direction: row;
@@ -28,11 +35,27 @@
   gap: 10px;
 }
 
+.instagramIcon,
+.twitterXIcon,
+.blueskyIcon,
+.discordIcon,
+.githubIcon {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-secondary);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-small);
+  transition: 0.2s ease;
+}
+
 .instagramIcon {
   position: relative; /* Necessário para posicionar o gradiente atrás */
-  padding: 4px;
-  border-radius: 3px;
-  background-color: transparent;
+  border-radius: var(--radius-small);
   z-index: 1; /* Garante que o ícone fique acima do fundo */
   display: inline-flex; /* Alinha o ícone corretamente se necessário */
 }
@@ -45,7 +68,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  border-radius: 3px; /* Mesma curvatura do pai */
+  border-radius: var(--radius-small); /* Mesma curvatura do pai */
   background: radial-gradient(
     circle at 30% 107%,
     #fdf497 0%,
@@ -65,9 +88,6 @@
 }
 
 .twitterXIcon {
-  background-color: transparent;
-  padding: 6px 4px;
-  border-radius: 3px;
   /* Adicionamos uma borda transparente por padrão para evitar que o ícone "pule" ou mude de tamanho no hover */
   border: 1px solid transparent;
   transition:
@@ -86,9 +106,6 @@
 }
 
 .blueskyIcon {
-  background-color: transparent;
-  padding: 4px;
-  border-radius: 3px;
   transition: background-color 0.2s ease;
 }
 
@@ -97,9 +114,6 @@
 }
 
 .discordIcon {
-  background-color: transparent;
-  padding: 4px;
-  border-radius: 3px;
   transition: background-color 0.2s ease;
 }
 
@@ -108,9 +122,6 @@
 }
 
 .githubIcon {
-  background-color: transparent;
-  padding: 6px 4px;
-  border-radius: 3px;
   /* Adicionamos uma borda transparente por padrão para evitar que o ícone "pule" ou mude de tamanho no hover */
   border: 1px solid transparent;
   transition:
@@ -132,14 +143,9 @@
   border: none;
   width: 100%;
   height: 1px;
-  background: linear-gradient(
-    to right,
-    transparent,
-    rgba(255, 255, 255, 0.5),
-    transparent
-  );
+  background: linear-gradient(to right, transparent, var(--color-border-strong), transparent);
 
-  margin: 16px 0;
+  margin: 24px 0;
 }
 
 .copyrightVersionContainer {
@@ -147,12 +153,26 @@
   flex-direction: row;
   justify-content: space-between;
   width: 100%; /* Força o container a ocupar toda a largura disponível */
-  padding: 0 100px;
+  padding: 0;
+  color: var(--color-text-muted);
 }
+
 .copyright {
-  font-size: 14px;
+  font-size: 12px;
+  font-weight: 500;
 }
 
 .titleVersion {
-  font-size: 14px;
+  color: var(--color-accent);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+@media (max-width: 600px) {
+  .copyrightVersionContainer {
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    text-align: center;
+  }
 }

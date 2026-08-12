@@ -1,88 +1,98 @@
 .navbarContainer {
-  background-color: var(--nav-bg-color);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  position: relative;
+  z-index: 10;
+  background: color-mix(in srgb, var(--color-surface) 96%, transparent);
+  border-bottom: 1px solid var(--color-border);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.18);
 }
 
 .navbar {
   max-width: 1280px;
+  min-height: 76px;
   margin-inline: auto;
-  padding: 0 16px;
-  height: 80px;
-
+  padding: 12px 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 28px;
 }
 
 .logoContainer {
   display: flex;
-  flex-direction: row;
   align-items: center;
   gap: 10px;
+  flex: 0 0 auto;
 }
 
 .badgeVersion {
-  color: rgb(98, 167, 223);
-  background-color: rgba(38, 128, 202, 0.438);
-  padding: 4px 6px; /* Aumentar um pouco as laterais costuma dar melhor balanço visual */
-  border: 1px solid steelblue;
-  border-radius: 4px;
-
-  font-size: 12px;
-  font-weight: 700;
-
-  /* Solução: Força o texto a se alinhar perfeitamente dentro do próprio badge */
-  line-height: 1;
+  padding: 4px 7px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-
+  color: var(--color-accent);
+  background: var(--color-accent-soft);
+  border: 1px solid var(--color-accent-border);
+  border-radius: var(--radius-small);
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
   cursor: pointer;
-  transition: background-color ease 0.15s;
+  transition: 0.2s ease;
 }
 
 .badgeVersion:hover {
-  background-color: rgba(57, 155, 235, 0.624);
+  color: var(--color-text-primary);
+  background: var(--color-accent);
 }
 
 .navList {
+  margin: 0;
+  padding: 0;
   display: flex;
-  flex-direction: row;
   align-items: center;
-  gap: 30px;
+  justify-content: center;
+  gap: 26px;
+  list-style: none;
 }
 
 .navLink {
-  position: relative;
-  color: var(--text-color);
-
+  min-height: 38px;
+  padding: 8px 11px;
   display: flex;
-  flex-direction: row;
   align-items: center;
-  gap: 5px;
-
+  gap: 6px;
+  color: var(--color-text-secondary);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-small);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
   cursor: pointer;
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
 }
 
 .navLink:hover {
-  color: var(--color-primary);
+  color: var(--color-text-primary);
+  background: var(--color-surface-hover);
+  border-color: var(--color-border-strong);
 }
 
-.navLink::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  bottom: -4px;
-  width: 100%;
-  height: 2px;
-  background-color: var(--color-primary);
-  transform: scale(0);
-  transform-origin: left;
-  transition: transform 0.3s ease;
+.navLinkActive,
+.navLinkActive:hover {
+  color: var(--color-accent);
+  background: var(--color-accent-soft);
+  border-color: var(--color-accent-border);
 }
 
-.navLink:hover::after {
-  transform: scale(1);
+.navLink:active {
+  transform: scale(0.97);
 }
 
 .profileDropdownWrapper {
@@ -91,76 +101,115 @@
 }
 
 .avatar {
-  width: auto;
-  height: auto;
+  width: 40px;
+  height: 40px;
+  border: 2px solid var(--color-accent-border);
   border-radius: 50%;
+  object-fit: cover;
   cursor: pointer;
 }
 
 .menuDropdown {
   position: absolute;
-  top: 68px; /* gap da imagem */
+  top: 56px;
   right: 0;
-  background: #1e1e1e;
-  border-radius: 8px;
+  width: 160px;
   padding: 10px;
-  width: 150px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  color: var(--color-text-secondary);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-medium);
+  box-shadow: var(--shadow-card-hover);
+  list-style: none;
 }
 
 .navButtons {
   display: flex;
-  flex-direction: row;
   align-items: center;
-  gap: 30px;
+  gap: 10px;
+  flex: 0 0 auto;
+}
+
+.btnSignIn,
+.btnSignUp {
+  height: 38px;
+  padding-inline: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--color-text-primary);
+  border-radius: var(--radius-small);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s ease;
 }
 
 .btnSignIn {
-  width: 110px;
-  height: 40px;
-  background-color: var(--color-primary);
-  border-radius: 5px;
-  color: var(--text-color);
-
-  cursor: pointer;
-  transition: all 0.15s ease-in;
-
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
+  background: transparent;
+  border: 1px solid var(--color-border-strong);
 }
 
 .btnSignIn:hover {
-  background-color: var(--color-secondary);
-}
-
-.btnSignIn:active {
-  transform: scale(0.97);
+  color: var(--color-accent);
+  background: var(--color-accent-soft);
+  border-color: var(--color-accent-border);
 }
 
 .btnSignUp {
-  width: 140px;
-  height: 40px;
-  background-color: var(--color-primary);
-  border-radius: 5px;
-  color: var(--text-color);
-
-  cursor: pointer;
-  transition: all 0.15s ease-in;
-
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
+  background: linear-gradient(135deg, var(--color-accent-hover), var(--color-accent-deep));
+  border: 1px solid transparent;
+  box-shadow: 0 8px 18px var(--color-accent-soft);
 }
 
 .btnSignUp:hover {
-  background-color: var(--color-secondary);
+  filter: brightness(1.08);
+  box-shadow: 0 10px 24px var(--color-accent-border);
 }
 
+.btnSignIn:active,
 .btnSignUp:active {
   transform: scale(0.97);
+}
+
+@media (max-width: 940px) {
+  .navbar {
+    flex-wrap: wrap;
+    gap: 8px 18px;
+  }
+
+  .navList {
+    order: 3;
+    width: 100%;
+    padding-top: 6px;
+    justify-content: flex-start;
+    overflow-x: auto;
+    border-top: 1px solid var(--color-border);
+    scrollbar-width: none;
+  }
+
+  .navList::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@media (max-width: 520px) {
+  .navbar {
+    gap: 8px;
+  }
+
+  .logoContainer img {
+    width: 120px;
+    height: auto;
+  }
+
+  .btnSignIn,
+  .btnSignUp {
+    padding-inline: 10px;
+  }
+
+  .navList {
+    gap: 20px;
+  }
 }

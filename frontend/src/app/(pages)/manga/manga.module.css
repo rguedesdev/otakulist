@@ -1,0 +1,944 @@
+.page {
+  min-height: 100vh;
+  padding: 34px 0 72px;
+  color: var(--color-text-primary);
+  background:
+    radial-gradient(circle at 82% 4%, var(--color-accent-soft), transparent 30rem),
+    var(--color-bg-base);
+}
+
+.container {
+  width: min(100% - 32px, 1280px);
+  margin-inline: auto;
+}
+
+.pageHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 28px;
+}
+
+.eyebrow,
+.sectionKicker {
+  color: var(--color-accent-highlight);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.pageHeader h1 {
+  margin-top: 7px;
+  font-size: clamp(30px, 4vw, 46px);
+  line-height: 1.05;
+  letter-spacing: -0.045em;
+}
+
+.pageHeader p {
+  margin-top: 10px;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+}
+
+.searchBox {
+  width: min(340px, 100%);
+  min-height: 44px;
+  padding: 0 13px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--color-text-muted);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-medium);
+}
+
+.searchBox:focus-within {
+  border-color: var(--color-accent-border);
+  box-shadow: 0 0 0 3px var(--color-accent-soft);
+}
+
+.searchBox input {
+  min-width: 0;
+  width: 100%;
+  color: var(--color-text-primary);
+  background: transparent;
+  border: 0;
+  outline: 0;
+  font-size: 12px;
+}
+
+.searchBox input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.filterBar {
+  margin-top: 24px;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-large);
+  scrollbar-width: none;
+}
+
+.filterBar::-webkit-scrollbar {
+  display: none;
+}
+
+.filterLabel,
+.filterBar button {
+  min-height: 34px;
+  padding: 7px 11px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  flex: 0 0 auto;
+  border-radius: var(--radius-small);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.filterLabel {
+  color: var(--color-text-primary);
+  border-right: 1px solid var(--color-border);
+  border-radius: 0;
+}
+
+.filterLabel svg {
+  color: var(--color-accent);
+}
+
+.filterBar button {
+  color: var(--color-text-muted);
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+
+.filterBar button:hover {
+  color: var(--color-text-primary);
+  background: var(--color-surface-hover);
+  border-color: var(--color-border-strong);
+}
+
+.filterBar .filterActive,
+.filterBar .filterActive:hover {
+  color: var(--color-accent-highlight);
+  background: var(--color-accent-soft);
+  border-color: var(--color-accent-border);
+}
+
+.spotlight {
+  position: relative;
+  min-height: 410px;
+  margin-top: 18px;
+  overflow: hidden;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 18px;
+  box-shadow: var(--shadow-card);
+}
+
+.spotlight > img {
+  object-fit: cover;
+  object-position: center 28%;
+}
+
+.spotlightShade {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(14, 14, 20, 0.98) 0%, rgba(14, 14, 20, 0.83) 39%, rgba(14, 14, 20, 0.16) 74%),
+    linear-gradient(0deg, rgba(14, 14, 20, 0.82), transparent 55%);
+}
+
+.spotlightContent {
+  position: relative;
+  z-index: 1;
+  width: min(600px, 66%);
+  min-height: 410px;
+  padding: clamp(30px, 5vw, 58px);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.spotlightLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--color-accent-highlight);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.spotlightContent h2 {
+  margin-top: 10px;
+  font-size: clamp(36px, 5vw, 58px);
+  letter-spacing: -0.045em;
+  line-height: 1;
+}
+
+.spotlightMeta {
+  margin-top: 13px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-text-secondary);
+  font-size: 11px;
+}
+
+.spotlightMeta span + span::before {
+  content: "•";
+  margin-right: 8px;
+  color: var(--color-text-muted);
+}
+
+.spotlightMeta strong {
+  color: var(--color-accent-highlight);
+}
+
+.spotlightContent > p {
+  max-width: 520px;
+  margin-top: 17px;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.spotlightGenres {
+  margin-top: 15px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.spotlightGenres span,
+.cardGenres span {
+  padding: 4px 7px;
+  color: var(--color-text-secondary);
+  background: rgba(32, 32, 45, 0.78);
+  border: 1px solid var(--color-border-strong);
+  border-radius: 999px;
+  font-size: 9px;
+}
+
+.spotlightContent > a {
+  min-height: 40px;
+  margin-top: 22px;
+  padding: 9px 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, var(--color-accent), var(--color-accent-deep));
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-medium);
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.spotlightAside {
+  position: absolute;
+  z-index: 1;
+  right: 22px;
+  bottom: 22px;
+  padding: 13px 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+  background: rgba(14, 14, 20, 0.76);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-medium);
+  backdrop-filter: blur(12px);
+}
+
+.spotlightAside span,
+.spotlightAside small {
+  color: var(--color-text-muted);
+  font-size: 9px;
+  text-transform: uppercase;
+}
+
+.spotlightAside strong {
+  font-size: 12px;
+}
+
+.spotlightAside small {
+  margin-top: 3px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--color-accent-highlight);
+}
+
+.section {
+  margin-top: 58px;
+}
+
+.sectionHeading,
+.panelHeading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.sectionHeading {
+  margin-bottom: 18px;
+}
+
+.sectionHeading h2,
+.panelHeading h2 {
+  margin-top: 4px;
+  font-size: clamp(21px, 2.5vw, 28px);
+  letter-spacing: -0.025em;
+}
+
+.periodControls {
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-small);
+}
+
+.periodControls button {
+  width: 34px;
+  align-self: stretch;
+  color: var(--color-text-secondary);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.periodControls button:hover {
+  color: var(--color-text-primary);
+  background: var(--color-surface-hover);
+}
+
+.periodControls strong {
+  padding-inline: 9px;
+  color: var(--color-text-secondary);
+  border-inline: 1px solid var(--color-border);
+  font-size: 10px;
+}
+
+.mangaGrid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.mangaCard {
+  min-width: 0;
+  overflow: hidden;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-large);
+  box-shadow: var(--shadow-card);
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.mangaCard:hover {
+  transform: translateY(-4px);
+  border-color: var(--color-accent-border);
+  box-shadow: var(--shadow-card-hover);
+}
+
+.mangaCover {
+  position: relative;
+  aspect-ratio: 0.72;
+  overflow: hidden;
+  background: var(--color-surface-raised);
+}
+
+.mangaCover img {
+  object-fit: cover;
+}
+
+.cardScore,
+.publishingBadge {
+  position: absolute;
+  z-index: 1;
+  top: 9px;
+  padding: 5px 7px;
+  border-radius: var(--radius-small);
+  font-size: 9px;
+  font-weight: 750;
+  backdrop-filter: blur(10px);
+}
+
+.cardScore {
+  right: 9px;
+  color: var(--color-accent-highlight);
+  background: rgba(14, 14, 20, 0.8);
+}
+
+.publishingBadge {
+  left: 9px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--color-text-primary);
+  background: rgba(14, 14, 20, 0.76);
+}
+
+.publishingBadge > span {
+  width: 6px;
+  height: 6px;
+  background: var(--color-accent);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--color-accent);
+}
+
+.mangaInfo {
+  padding: 13px;
+}
+
+.mangaInfo h3 {
+  overflow: hidden;
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mangaInfo > p {
+  margin-top: 6px;
+  display: flex;
+  gap: 6px;
+  color: var(--color-text-muted);
+  font-size: 9px;
+}
+
+.cardGenres {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.cardGenres span {
+  padding: 3px 6px;
+  background: var(--color-surface-raised);
+  border-color: var(--color-border);
+  font-size: 8px;
+}
+
+.mangaInfo small {
+  margin-top: 11px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-text-muted);
+  font-size: 9px;
+}
+
+.mangaInfo small svg {
+  color: var(--color-accent);
+}
+
+.sectionAction {
+  width: fit-content;
+  min-height: 38px;
+  margin: 18px auto 0;
+  padding: 8px 13px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--color-text-secondary);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-small);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.sectionAction:hover,
+.headingLink:hover {
+  color: var(--color-accent-highlight);
+  border-color: var(--color-accent-border);
+}
+
+.middleGrid {
+  margin-top: 58px;
+  display: grid;
+  grid-template-columns: minmax(320px, 0.8fr) minmax(0, 1.2fr);
+  gap: 20px;
+}
+
+.trendingPanel,
+.releasesPanel {
+  padding: 20px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-large);
+  box-shadow: var(--shadow-card);
+}
+
+.panelHeading {
+  align-items: flex-start;
+}
+
+.panelHeading > svg {
+  color: var(--color-accent);
+  font-size: 20px;
+}
+
+.trendingPanel ol {
+  margin-top: 16px;
+  list-style: none;
+}
+
+.trendingPanel li {
+  position: relative;
+}
+
+.trendingPanel li + li::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 10px;
+  left: 10px;
+  height: 1px;
+  background: var(--color-border);
+  transition: opacity 0.2s ease;
+}
+
+.trendingPanel li:hover::before,
+.trendingPanel li:focus-within::before,
+.trendingPanel li:hover + li::before,
+.trendingPanel li:focus-within + li::before {
+  opacity: 0;
+}
+
+.trendingPanel li a {
+  min-height: 74px;
+  padding-inline: 10px;
+  display: grid;
+  grid-template-columns: 28px 42px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 11px;
+  border-radius: var(--radius-medium);
+  transition:
+    background-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.trendingPanel li a:hover,
+.trendingPanel li a:focus-visible {
+  background: var(--color-surface-hover);
+  box-shadow: inset 3px 0 0 var(--color-accent);
+}
+
+.trendingPanel li a:hover .rankTitle strong,
+.trendingPanel li a:focus-visible .rankTitle strong {
+  color: var(--color-accent-highlight);
+}
+
+.trendingPanel li a:focus-visible {
+  outline: none;
+}
+
+.trendingPanel img {
+  width: 42px;
+  height: 58px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.rank {
+  color: var(--color-text-muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.rankTitle {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rankTitle strong {
+  overflow: hidden;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rankTitle small {
+  color: var(--color-accent-highlight);
+  font-size: 9px;
+}
+
+.rankUp,
+.rankChange {
+  font-size: 9px;
+  font-weight: 750;
+}
+
+.rankUp {
+  color: var(--color-accent-highlight);
+}
+
+.rankChange {
+  color: var(--color-text-muted);
+}
+
+.releaseDays {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.releaseDays button {
+  min-height: 58px;
+  padding: 7px 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  color: var(--color-text-muted);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-small);
+  cursor: pointer;
+}
+
+.releaseDays strong {
+  font-size: 10px;
+}
+
+.releaseDays span {
+  font-size: 8px;
+}
+
+.releaseDays button:hover {
+  color: var(--color-text-primary);
+  background: var(--color-surface-hover);
+}
+
+.releaseDays .releaseDayActive,
+.releaseDays .releaseDayActive:hover {
+  color: var(--color-accent-highlight);
+  background: var(--color-accent-soft);
+  border-color: var(--color-accent-border);
+}
+
+.chapterRelease {
+  min-height: 82px;
+  margin-top: 10px;
+  padding: 10px 12px;
+  display: grid;
+  grid-template-columns: 44px 46px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 11px;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-medium);
+}
+
+.releaseTime {
+  color: var(--color-accent-highlight);
+  font-size: 10px;
+  font-weight: 750;
+}
+
+.chapterRelease img {
+  width: 46px;
+  height: 62px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.chapterRelease > span:nth-of-type(2) {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.chapterRelease strong {
+  overflow: hidden;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chapterRelease small {
+  color: var(--color-text-muted);
+  font-size: 9px;
+}
+
+.releaseState {
+  padding: 5px 7px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--color-accent-highlight);
+  background: var(--color-accent-soft);
+  border: 1px solid var(--color-accent-border);
+  border-radius: 999px;
+  font-size: 8px;
+  font-weight: 750;
+}
+
+.headingLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--color-text-secondary);
+  border-bottom: 1px solid transparent;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.upcomingGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.upcomingCard {
+  position: relative;
+  min-width: 0;
+  min-height: 168px;
+  padding: 12px 42px 12px 12px;
+  display: grid;
+  grid-template-columns: 104px minmax(0, 1fr);
+  align-items: center;
+  gap: 15px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-large);
+  box-shadow: var(--shadow-card);
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.upcomingCard:hover {
+  background: var(--color-surface-raised);
+  border-color: var(--color-accent-border);
+}
+
+.upcomingCard > img {
+  width: 104px;
+  height: 144px;
+  object-fit: cover;
+  border-radius: var(--radius-small);
+}
+
+.upcomingCard > div {
+  min-width: 0;
+}
+
+.releaseDate {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-accent-highlight);
+  font-size: 9px;
+  font-weight: 750;
+}
+
+.upcomingCard h3 {
+  margin-top: 8px;
+  font-size: 13px;
+  line-height: 1.25;
+}
+
+.upcomingCard small {
+  margin-top: 5px;
+  display: block;
+  color: var(--color-text-muted);
+  font-size: 9px;
+}
+
+.upcomingCard p {
+  margin-top: 9px;
+  color: var(--color-text-secondary);
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.cardArrow {
+  position: absolute;
+  right: 15px;
+  color: var(--color-text-muted);
+}
+
+.upcomingCard:hover .cardArrow {
+  color: var(--color-accent-highlight);
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 1060px) {
+  .mangaGrid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .mangaCard:last-child {
+    display: none;
+  }
+
+  .middleGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .upcomingGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 780px) {
+  .pageHeader {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .searchBox {
+    width: 100%;
+  }
+
+  .spotlightContent {
+    width: 84%;
+  }
+
+  .spotlightShade {
+    background: linear-gradient(90deg, rgba(14, 14, 20, 0.98), rgba(14, 14, 20, 0.5));
+  }
+
+  .mangaGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .mangaCard:last-child {
+    display: block;
+  }
+}
+
+@media (max-width: 580px) {
+  .page {
+    padding: 24px 0 48px;
+  }
+
+  .container {
+    width: min(100% - 24px, 1280px);
+  }
+
+  .spotlight {
+    min-height: 480px;
+  }
+
+  .spotlightContent {
+    width: 100%;
+    min-height: 480px;
+    padding: 28px 20px 112px;
+    justify-content: flex-end;
+  }
+
+  .spotlightShade {
+    background: linear-gradient(0deg, rgba(14, 14, 20, 0.99) 0%, rgba(14, 14, 20, 0.54) 72%, transparent);
+  }
+
+  .spotlightAside {
+    right: 20px;
+    bottom: 20px;
+    left: 20px;
+    align-items: flex-start;
+  }
+
+  .section {
+    margin-top: 48px;
+  }
+
+  .sectionHeading {
+    align-items: flex-start;
+  }
+
+  .periodControls {
+    display: none;
+  }
+
+  .mangaGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .mangaCard:last-child {
+    display: none;
+  }
+
+  .middleGrid {
+    margin-top: 48px;
+  }
+
+  .trendingPanel,
+  .releasesPanel {
+    padding: 16px;
+  }
+
+  .releaseDays {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .chapterRelease {
+    grid-template-columns: 42px 46px minmax(0, 1fr);
+  }
+
+  .releaseState {
+    display: none;
+  }
+
+  .upcomingCard {
+    grid-template-columns: 82px minmax(0, 1fr);
+  }
+
+  .upcomingCard > img {
+    width: 82px;
+    height: 116px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mangaCard,
+  .upcomingCard {
+    transition: none;
+  }
+}

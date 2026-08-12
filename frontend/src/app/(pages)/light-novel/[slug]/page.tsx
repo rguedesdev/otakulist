@@ -4,10 +4,14 @@ import styles from "./lightnovelslug.module.css";
 // Components
 import { HeroSection } from "@/shared/components/HeroSection/page";
 import { FormatSidebarInfo } from "@/shared/components/FormatSidebarInfo/page";
-import { SeasonSection } from "@/shared/components/SeasonSection/page";
 import { CharacterSection } from "@/shared/components/CharacterSection/page";
 import { StaffSection } from "@/shared/components/StaffSection/page";
 import { RelatedSection } from "@/shared/components/RelatedSection/page";
+import { LightNovelTrackerPanel } from "./components/LightNovelTrackerPanel/LightNovelTrackerPanel";
+
+// Icones
+import { FiBookOpen, FiCalendar, FiLayers } from "react-icons/fi";
+import { TbWorld } from "react-icons/tb";
 
 function LightNovelBySlug() {
   const LightNovelInfo = {
@@ -22,18 +26,77 @@ function LightNovelBySlug() {
     publisher: "Kadokawa",
     source: "Light Novel",
     genders: ["Comédia", "Romance"],
+    chapters: 42,
+    volumes: 7,
+    publication: "Publicação por volume",
+    country: "Japão",
+    rating: "PG-13",
   };
 
   return (
     <div className={styles.page}>
       <HeroSection FormatInfo={LightNovelInfo} />
+
+      <div className={styles.factsBar} aria-label="Resumo da light novel">
+        <div className={styles.factItem}>
+          <FiBookOpen aria-hidden="true" />
+          <span>
+            <small>Formato</small>
+            Light Novel · {LightNovelInfo.chapters} capítulos
+          </span>
+        </div>
+        <div className={styles.factItem}>
+          <FiLayers aria-hidden="true" />
+          <span>
+            <small>Volumes</small>
+            {LightNovelInfo.volumes} publicados
+          </span>
+        </div>
+        <div className={styles.factItem}>
+          <FiCalendar aria-hidden="true" />
+          <span>
+            <small>Publicação</small>
+            {LightNovelInfo.publication}
+          </span>
+        </div>
+        <div className={styles.factItem}>
+          <TbWorld aria-hidden="true" />
+          <span>
+            <small>Origem</small>
+            {LightNovelInfo.country} · {LightNovelInfo.rating}
+          </span>
+        </div>
+      </div>
+
       <main className={styles.lightNovelSlugContainer}>
+        <nav className={styles.sectionNav} aria-label="Seções da página">
+          <a href="#acompanhar">Acompanhar</a>
+          <a href="#personagens">Personagens</a>
+          <a href="#staff">Staff</a>
+          <a href="#relacionados">Relacionados</a>
+        </nav>
+
         <div className={styles.contentContainer}>
-          <FormatSidebarInfo FormatInfo={LightNovelInfo} />
+          <div className={styles.sidebarColumn}>
+            <FormatSidebarInfo FormatInfo={LightNovelInfo} />
+          </div>
           <div className={styles.centralContainer}>
-            <CharacterSection />
-            <StaffSection />
-            <RelatedSection />
+            <section id="acompanhar" className={styles.trackerSection}>
+              <LightNovelTrackerPanel
+                totalChapters={LightNovelInfo.chapters}
+                isAuthenticated
+              />
+            </section>
+
+            <div id="personagens" className={styles.contentSection}>
+              <CharacterSection />
+            </div>
+            <div id="staff" className={styles.contentSection}>
+              <StaffSection />
+            </div>
+            <div id="relacionados" className={styles.contentSection}>
+              <RelatedSection />
+            </div>
           </div>
         </div>
       </main>

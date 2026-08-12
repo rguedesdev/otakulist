@@ -1,13 +1,27 @@
 .heroSectionContainer {
-  background-color: #2f3236;
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 85% 25%, var(--color-accent-soft), transparent 32rem),
+    linear-gradient(135deg, var(--color-surface-raised), var(--color-surface) 70%);
+  border-bottom: 1px solid var(--color-border);
   width: 100%;
+}
+
+.heroSectionContainer::after {
+  content: "";
+  position: absolute;
+  inset: auto -8% -100px 34%;
+  height: 170px;
+  background: color-mix(in srgb, var(--color-accent) 7%, transparent);
+  filter: blur(60px);
+  pointer-events: none;
 }
 
 .heroSection {
   max-width: 1280px;
   margin-inline: auto;
-  padding-inline: 16px;
-  padding: 40px 0;
+  padding: 42px 16px;
 
   display: flex;
   flex-direction: row;
@@ -26,8 +40,9 @@
 .imageWrapper {
   width: 100%;
   max-height: 300px; /* Limite máximo estrito (proporção 2:3 para largura de 200px) */
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-  border-radius: 5px;
+  border: 1px solid var(--color-border-strong);
+  box-shadow: var(--shadow-card-hover);
+  border-radius: var(--radius-medium);
   overflow: hidden;
 
   /* Garante que o wrapper colapse e se ajuste à altura da imagem interna */
@@ -42,46 +57,43 @@
 }
 
 .buttons {
+  width: 100%;
   display: flex;
-  flex-direction: row;
-  gap: 10px;
+  gap: 8px;
 }
 
 /* --- Base dos Botões (Comportamento comum) --- */
 .btnAddList,
 .btnAddFavorite {
-  border-radius: 5px;
-  border: none; /* Removido borda nativa do HTML que gera deformidade */
-  outline: none; /* Remove anel de foco inconsistente */
-  color: var(--text-color);
-  font-size: 14px;
-  font-weight: 500;
-
+  height: 40px;
+  overflow: hidden;
   display: flex;
-  flex-direction: row;
   justify-content: center;
   align-items: center;
-  gap: 8px;
-
+  color: var(--color-text-primary);
+  border-radius: var(--radius-small);
+  outline: none;
+  appearance: none;
+  font-size: 12px;
+  font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-
-  /* Mantém as transformações estáveis de escala */
-  transform: scale(1) translateY(0);
   transition:
-    transform 0.2s ease,
     background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    filter 0.2s ease,
     box-shadow 0.2s ease;
 }
 
 .btnAddList {
-  width: 150px;
-  height: 40px;
+  min-width: 0;
+  flex: 1;
+  gap: 7px;
 }
 
 .btnAddFavorite {
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  flex: 0 0 42px;
 }
 
 .btnAddList span,
@@ -91,39 +103,46 @@
 
 /* --- Botão Adicionar --- */
 .btnAddList {
-  background-color: lightseagreen;
+  background: linear-gradient(135deg, var(--color-accent-hover), var(--color-accent-deep));
+  border: 1px solid var(--color-accent-border);
+  box-shadow: none;
 }
 
 .btnAddList:hover {
-  background-color: rgb(9, 126, 120);
-  /* REMOVIDO: transform: translateY(-2px) */
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+  filter: brightness(1.08);
+  box-shadow: none;
 }
 
-.btnAddList:active {
-  transform: scale(0.96); /* Agora o efeito de clique acontece no lugar fixo */
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+.btnAddList:focus-visible,
+.btnAddFavorite:focus-visible {
+  box-shadow: 0 0 0 3px var(--color-accent-soft);
 }
 
 /* --- Botão Favoritar --- */
 .btnAddFavorite {
-  background-color: red;
+  color: var(--color-danger);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border-strong);
+  box-shadow: none;
 }
 
 .btnAddFavorite:hover {
-  background-color: rgb(149, 1, 1);
-  /* REMOVIDO: transform: translateY(-2px) */
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+  background: var(--color-surface-hover);
+  border-color: color-mix(in srgb, var(--color-danger) 38%, transparent);
 }
 
+.btnAddList:active,
 .btnAddFavorite:active {
-  transform: scale(0.96); /* Agora o efeito de clique acontece no lugar fixo */
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  transform: none;
+  filter: brightness(0.9);
+  box-shadow: inset 0 0 0 1px var(--color-border-strong);
+  border-radius: var(--radius-small);
 }
 
 /* --- Seção de Conteúdo (Textos) --- */
 .textsContainer {
   min-width: 0;
+  padding-block: 8px 4px;
   display: flex;
   flex-direction: column;
 }
@@ -131,48 +150,70 @@
 .texts {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 18px;
 }
 
 .title {
   color: var(--text-color);
-  font-size: 1.5em;
-  font-weight: 600;
+  font-size: clamp(1.6rem, 3vw, 2.35rem);
+  font-weight: 700;
+  line-height: 1.12;
+  letter-spacing: -0.035em;
   margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-wrap: balance;
+}
+
+.title::before {
+  content: "";
+  width: 4px;
+  height: 30px;
+  flex: 0 0 auto;
+  background: linear-gradient(var(--color-accent-deep), var(--color-accent));
+  border-radius: 999px;
+  box-shadow: 0 0 18px var(--color-accent-border);
 }
 
 .description {
-  color: var(--text-color);
-  font-size: 0.95em;
-  line-height: 1.5;
+  width: 100%;
+  max-width: none;
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.7;
   margin: 0;
 }
 
 .hrFaded {
   display: block;
-  border: none;
-  height: 1px;
   width: 100%;
-  background: linear-gradient(
-    to right,
-    transparent,
-    rgba(255, 255, 255, 0.5),
-    transparent
-  );
-  margin-top: 20px;
-  margin-bottom: 20px;
+  height: 0;
+  margin: 20px 0 16px;
+  background: none;
+  border: 0;
+  border-top: 1px solid var(--color-border);
 }
 
 .synonymsContainer {
+  width: 100%;
+  padding: 12px 14px;
   display: flex;
   flex-direction: column;
   color: var(--text-color);
+  background: color-mix(in srgb, var(--color-surface-hover) 55%, transparent);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-medium);
 }
 
 .synonymsTitle {
-  font-size: 1em;
-  font-weight: 500;
-  margin: 0 0 8px 0; /* Margem ajustada para o novo fluxo em linha */
+  color: var(--color-text-muted);
+  font-size: 10px;
+  font-weight: 750;
+  line-height: 1;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  margin: 0 0 10px 0;
 }
 
 /* Container que alinha todos os sinônimos na horizontal */
@@ -181,16 +222,64 @@
   flex-direction: row;
   flex-wrap: wrap; /* Quebra de linha inteligente se a tela for pequena */
   align-items: center;
-  gap: 8px; /* Espaçamento idêntico entre os itens e as barras */
+  gap: 7px;
 }
 
 .synonym {
-  font-size: 0.9em;
+  padding: 5px 8px;
+  color: var(--color-text-secondary);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-small);
+  font-size: 11px;
+  line-height: 1.35;
 }
 
 /* Estilo sutil para as barras separadoras */
 .separator {
-  font-size: 0.9em;
-  opacity: 0.6; /* Deixa a barra levemente opaca para não brigar com o texto */
-  user-select: none; /* Impede o usuário de selecionar a barra ao copiar o texto */
+  display: none;
+}
+
+@media (max-width: 680px) {
+  .heroSection {
+    padding-block: 28px;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+  }
+
+  .coverContainer {
+    width: min(200px, 62vw);
+  }
+
+  .textsContainer {
+    width: 100%;
+  }
+
+  .texts {
+    text-align: center;
+  }
+
+  .title {
+    justify-content: center;
+  }
+
+  .title::before {
+    width: 24px;
+    height: 3px;
+  }
+
+  .description {
+    font-size: 0.9rem;
+  }
+
+  .synonymsContainer {
+    width: 100%;
+    align-items: center;
+    text-align: center;
+  }
+
+  .synonymsList {
+    justify-content: center;
+  }
 }

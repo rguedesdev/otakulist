@@ -1,0 +1,126 @@
+.container {
+  max-width: 1065px;
+  width: 100%;
+  margin: 0;
+}
+
+.sectionTitle {
+  margin: 0 0 12px;
+  color: var(--color-text-primary);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.cardsContainer {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.card {
+  width: 100%;
+  height: 100px;
+  min-width: 0;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 100px minmax(0, 1fr);
+  color: inherit;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-medium);
+  box-shadow: var(--shadow-card);
+  cursor: pointer;
+  transform: translateY(0);
+  transition:
+    transform 0.2s ease-in-out,
+    border-color 0.2s ease-in-out,
+    box-shadow 0.2s ease-in-out;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  border-color: var(--color-accent-border);
+  box-shadow: var(--shadow-card-hover);
+}
+
+.card:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+.cover {
+  width: 100px;
+  height: 100px;
+  min-width: 100px;
+  display: block;
+  object-fit: cover;
+}
+
+.texts {
+  min-width: 0;
+  height: 100%;
+  padding: 10px 12px 10px 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.texts h3 {
+  margin: 0 0 8px;
+  overflow: hidden;
+  color: var(--color-text-primary);
+  font-size: 13px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.infoGroup {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.infoLine {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.infoLine dt {
+  width: 18px;
+  height: 14px;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 18px;
+  color: var(--color-text-primary);
+}
+
+.infoLine dt svg {
+  display: block;
+}
+
+.infoLine dd {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  color: var(--color-text-secondary);
+  font-size: 11px;
+  line-height: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 1180px) {
+  .cardsContainer { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 760px) {
+  .cardsContainer { grid-template-columns: 1fr; }
+}

@@ -12,7 +12,7 @@ function MagazineBySlug() {
     cover: "/mangas/shounen-jump.jpg",
     title: "Weekly Shounen Jump",
     description:
-      "A Weekly Shounen Jump é a maior e mais famosa antologia semanal de mangás do Japão, publicada desde 1968 pela editora Shueisha. Focada no público jovem masculino (a partir de 12 anos), destaca-se por histórias focadas em ação, comédia e pelo lema 'amizade, esforço e vitória'.",
+      "A Weekly Shounen Jump é a maior e mais famosa antologia semanal de mangas do Japão, publicada desde 1968 pela editora Shueisha. Focada no público jovem masculino (a partir de 12 anos), destaca-se por histórias focadas em ação, comédia e pelo lema 'amizade, esforço e vitória'.",
     format: "magazine",
     foundation: "13 Jun 1990",
     publisher: "Shueisha",

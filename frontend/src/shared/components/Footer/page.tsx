@@ -40,6 +40,7 @@ function Footer() {
             </Link>
           </div>
         </div>
+        
         <hr className={styles.hrFaded} />
         <div className={styles.copyrightVersionContainer}>
           <h2 className={styles.copyright}>

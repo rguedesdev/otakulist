@@ -11,6 +11,9 @@ import { HiOutlineLink } from "react-icons/hi";
 import { FaXTwitter } from "react-icons/fa6";
 import { FaInstagram } from "react-icons/fa";
 import { FaYoutube } from "react-icons/fa";
+import { FaSpotify } from "react-icons/fa6";
+import { PiTidalLogoFill } from "react-icons/pi";
+import { SiDeezer } from "react-icons/si";
 
 import { GrAmazon } from "react-icons/gr";
 import { SiCrunchyroll } from "react-icons/si";
@@ -32,7 +35,57 @@ interface IFormatTranslations {
   studio: string;
 }
 
-function FormatSidebarInfo({ FormatInfo }) {
+type MusicPlatformLinksProps = {
+  spotify?: string;
+  tidal?: string;
+  deezer?: string;
+  amazonMusic?: string;
+};
+
+function MusicPlatformLinks({ spotify, tidal, deezer, amazonMusic }: MusicPlatformLinksProps) {
+  return (
+    <div className={styles.musicStreamingLinks}>
+      <h3 className={styles.musicStreamingLinksTitle}>Ouça em</h3>
+      {spotify && (
+        <Link className={styles.linkSpotify} href={spotify}>
+          <span className={styles.iconSpotifyContainer}>
+            <FaSpotify className={styles.iconSpotify} size={16} />
+          </span>
+          <span className={styles.linkText}>Spotify</span>
+        </Link>
+      )}
+
+      {tidal && (
+        <Link className={styles.linkTidal} href={tidal}>
+          <span className={styles.iconTidalContainer}>
+            <PiTidalLogoFill className={styles.iconTidal} size={16} />
+          </span>
+          <span className={styles.linkText}>Tidal</span>
+        </Link>
+      )}
+
+      {deezer && (
+        <Link className={styles.linkDeezer} href={deezer}>
+          <span className={styles.iconDeezerContainer}>
+            <SiDeezer className={styles.iconDeezer} size={14} />
+          </span>
+          <span className={styles.linkText}>Deezer</span>
+        </Link>
+      )}
+
+      {amazonMusic && (
+        <Link className={styles.linkAmazonMusic} href={amazonMusic}>
+          <span className={styles.iconAmazonMusicContainer}>
+            <GrAmazon className={styles.iconAmazonMusic} size={16} />
+          </span>
+          <span className={styles.linkText}>Amazon Music</span>
+        </Link>
+      )}
+    </div>
+  );
+}
+
+function FormatSidebarInfo({ FormatInfo, children }) {
   const formatTranslations: Record<string, string> = {
     anime: "Anime",
     manga: "Manga",
@@ -88,7 +141,8 @@ function FormatSidebarInfo({ FormatInfo }) {
 
           {FormatInfo.format == "mangaka" ||
           FormatInfo.format == "mangaka" ||
-          FormatInfo.format == "seiyuu" ? (
+          FormatInfo.format == "seiyuu" ||
+          FormatInfo.format == "artist" ? (
             <>
               <>
                 <dt className={styles.animeDescriptionTerm}>Nome em Kanji</dt>
@@ -121,6 +175,29 @@ function FormatSidebarInfo({ FormatInfo }) {
                     </dd>
                   </>
                 )}
+
+                {FormatInfo.format == "artist" && (
+                  <>
+                    <dt className={styles.animeDescriptionTerm}>
+                      Período de atividade
+                    </dt>
+                    <dd className={styles.animeDescriptionDetail}>
+                      {FormatInfo.activity_period}
+                    </dd>
+
+                    <dt className={styles.animeDescriptionTerm}>Gravadora</dt>
+                    <dd className={styles.animeDescriptionDetail}>
+                      {FormatInfo.record_label}
+                    </dd>
+
+                    <dt className={styles.animeDescriptionTerm}>
+                      Gêneros musicais
+                    </dt>
+                    <dd className={styles.animeDescriptionDetail}>
+                      {FormatInfo.musical_genres.join(", ")}
+                    </dd>
+                  </>
+                )}
               </>
             </>
           ) : (
@@ -149,11 +226,11 @@ function FormatSidebarInfo({ FormatInfo }) {
             <></>
           )}
 
-          {FormatInfo == "anime" &&
-          FormatInfo == "manga" &&
-          FormatInfo == "light_novel" ? (
+          {FormatInfo.format == "anime" ||
+          FormatInfo.format == "manga" ||
+          FormatInfo.format == "light_novel" ? (
             <>
-              <dt className={styles.animeDescriptionTerm}>Ínicio</dt>
+              <dt className={styles.animeDescriptionTerm}>Início</dt>
               <dd className={styles.animeDescriptionDetail}>
                 {FormatInfo.start}
               </dd>
@@ -322,7 +399,10 @@ function FormatSidebarInfo({ FormatInfo }) {
           </span>
           <span className={styles.linkText}>YouTube</span>
         </Link>
+
       </div>
+
+      {children}
 
       {FormatInfo.format == "anime" ? (
         <>
@@ -647,4 +727,4 @@ function FormatSidebarInfo({ FormatInfo }) {
   );
 }
 
-export { FormatSidebarInfo };
+export { FormatSidebarInfo, MusicPlatformLinks };

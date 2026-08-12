@@ -1,9 +1,5 @@
-// Style Sheet CSS
-import styles from "./seiyuuslug.module.css";
-
 // Components
-import { HeroSection } from "@/shared/components/HeroSection/page";
-import { FormatSidebarInfo } from "@/shared/components/FormatSidebarInfo/page";
+import { EntityDetailPage } from "@/shared/components/EntityDetailPage/page";
 import { CharacterBySeiyuu } from "./components/CharactersBySeiyuu/page";
 
 function StaffBySlug() {
@@ -20,17 +16,9 @@ function StaffBySlug() {
   };
 
   return (
-    <div className={styles.page}>
-      <HeroSection FormatInfo={SeiyuuInfo} />
-      <main className={styles.seiyuuSlugContainer}>
-        <div className={styles.contentContainer}>
-          <FormatSidebarInfo FormatInfo={SeiyuuInfo} />
-          <div className={styles.centralContainer}>
-            <CharacterBySeiyuu />
-          </div>
-        </div>
-      </main>
-    </div>
+    <EntityDetailPage formatInfo={SeiyuuInfo}>
+      <CharacterBySeiyuu />
+    </EntityDetailPage>
   );
 }
 

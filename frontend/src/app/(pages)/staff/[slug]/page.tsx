@@ -13,7 +13,7 @@ function StaffBySlug() {
     name_kanji: "北久保弘之",
     hometown: "Tokyo, Japão",
     description:
-      "Takahashi Rumiko (ou Rumiko Takahashi no ocidente) é uma das mulheres mais ricas do Japão. Os mangás que ela cria (e suas adaptações para anime) são muito populares nos Estados Unidos e na Europa, onde foram lançados em inglês em ambos os formatos. Suas obras são mundialmente conhecidas, e muitas de suas séries figuraram entre os primeiros mangás lançados em inglês na década de 1990. Takahashi também é a autora de quadrinhos mais vendida da história; mais de 100 milhões de exemplares de suas diversas obras já foram comercializados.",
+      "Takahashi Rumiko (ou Rumiko Takahashi no ocidente) é uma das mulheres mais ricas do Japão. Os mangas que ela cria (e suas adaptações para anime) são muito populares nos Estados Unidos e na Europa, onde foram lançados em inglês em ambos os formatos. Suas obras são mundialmente conhecidas, e muitas de suas séries figuraram entre os primeiros mangas lançados em inglês na década de 1990. Takahashi também é a autora de quadrinhos mais vendida da história; mais de 100 milhões de exemplares de suas diversas obras já foram comercializados.",
     format: "staff",
     date_of_birth: "15 Nov 1963",
   };

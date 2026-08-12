@@ -8,10 +8,10 @@
 
 /* --- Bloco Separado da Nota --- */
 .scoreCard {
-  background-color: #2f3236;
+  background-color: var(--color-surface-raised);
   border-radius: 5px;
   padding: 12px 14px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-card);
 
   display: flex;
   flex-direction: row;
@@ -32,7 +32,7 @@
 }
 
 .starIcon {
-  color: #ffd700;
+  color: var(--color-accent);
   flex-shrink: 0;
 }
 
@@ -44,10 +44,10 @@
 
 /* --- Bloco Separado de Informações --- */
 .infoCard {
-  background-color: #2f3236;
+  background-color: var(--color-surface-raised);
   border-radius: 5px;
   padding: 14px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-card);
   color: var(--text-color);
   min-height: 150px;
 }
@@ -97,13 +97,13 @@
 
 /* Link Website */
 .linkWebsite {
-  background-color: #2f3236;
+  background-color: var(--color-surface-raised);
   padding: 6px;
   border-radius: 4px;
   text-align: center;
   font-size: 12px;
   font-weight: 600;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-card);
 
   display: flex;
   flex-direction: row;
@@ -139,13 +139,13 @@
 
 /* Link X/Twitter */
 .linkXTwitter {
-  background-color: #2f3236;
+  background-color: var(--color-surface-raised);
   padding: 6px;
   border-radius: 4px;
   text-align: center;
   font-size: 12px;
   font-weight: 600;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-card);
 
   display: flex;
   flex-direction: row;
@@ -185,13 +185,13 @@
 
 /* Link Instagram */
 .linkInstagram {
-  background-color: #2f3236;
+  background-color: var(--color-surface-raised);
   padding: 6px;
   border-radius: 4px;
   text-align: center;
   font-size: 12px;
   font-weight: 600;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-card);
 
   display: flex;
   flex-direction: row;
@@ -238,13 +238,13 @@
 
 /* Link Pixiv */
 .linkPixiv {
-  background-color: #2f3236;
+  background-color: var(--color-surface-raised);
   padding: 6px;
   border-radius: 4px;
   text-align: center;
   font-size: 12px;
   font-weight: 600;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-card);
 
   display: flex;
   flex-direction: row;
@@ -284,13 +284,13 @@
 
 /* Link Youtube */
 .linkYoutube {
-  background-color: #2f3236;
+  background-color: var(--color-surface-raised);
   padding: 6px;
   border-radius: 4px;
   text-align: center;
   font-size: 12px;
   font-weight: 600;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-card);
 
   display: flex;
   flex-direction: row;
@@ -324,6 +324,73 @@
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
 }
 
+/* Links de plataformas musicais */
+.musicStreamingLinks {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.musicStreamingLinksTitle {
+  color: var(--color-text-primary);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.linkSpotify,
+.linkTidal,
+.linkDeezer,
+.linkAmazonMusic {
+  padding: 6px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  color: #ffffff;
+  background-color: var(--color-surface-raised);
+  border-radius: 4px;
+  box-shadow: var(--shadow-card);
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.iconSpotifyContainer,
+.iconTidalContainer,
+.iconDeezerContainer,
+.iconAmazonMusicContainer {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 4px;
+}
+
+.iconSpotifyContainer { color: #1ed760; background: #000000; }
+.iconTidalContainer { color: #ffffff; background: #000000; }
+.iconDeezerContainer { color: #a238ff; background: #000000; }
+.iconAmazonMusicContainer { color: #000000; background: #25cbd3; }
+
+.iconSpotify,
+.iconTidal,
+.iconDeezer,
+.iconAmazonMusic { display: block; }
+
+.linkSpotify:hover { background-color: #168b43; }
+.linkTidal:hover { background-color: #151515; }
+.linkDeezer:hover { background-color: #6d28d9; }
+.linkAmazonMusic:hover { background-color: #159da5; }
+
+.linkTidal:hover .iconTidalContainer {
+  box-shadow: 0 1px 4px rgba(246, 245, 245, 0.25);
+}
+
+.linkAmazonMusic:hover .iconAmazonMusicContainer {
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+}
+
 /* <---------------------------------------------------------------------> */
 /* Bloco 4: Streamings Links */
 .streamingsLinks {
@@ -340,13 +407,13 @@
 
 /* Link Prime Video */
 .linkPrimeVideo {
-  background-color: #2f3236;
+  background-color: var(--color-surface-raised);
   padding: 6px;
   border-radius: 4px;
   text-align: center;
   font-size: 12px;
   font-weight: 600;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-card);
 
   display: flex;
   flex-direction: row;
@@ -384,13 +451,13 @@
 
 /* Link BiliBili */
 .linkBiliBili {
-  background-color: #2f3236;
+  background-color: var(--color-surface-raised);
   padding: 6px;
   border-radius: 4px;
   text-align: center;
   font-size: 12px;
   font-weight: 600;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-card);
 
   display: flex;
   flex-direction: row;
@@ -428,13 +495,13 @@
 
 /* Link Crunchrol */
 .linkCrunchroll {
-  background-color: #2f3236;
+  background-color: var(--color-surface-raised);
   padding: 6px;
   border-radius: 4px;
   text-align: center;
   font-size: 12px;
   font-weight: 600;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-card);
 
   display: flex;
   flex-direction: row;
@@ -472,13 +539,13 @@
 
 /* Link Netflix */
 .linkNetflix {
-  background-color: #2f3236;
+  background-color: var(--color-surface-raised);
   padding: 6px;
   border-radius: 4px;
   text-align: center;
   font-size: 12px;
   font-weight: 600;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-card);
 
   display: flex;
   flex-direction: row;
@@ -516,13 +583,13 @@
 
 /* Link RetroCrush */
 .linkRetroCrush {
-  background-color: #2f3236;
+  background-color: var(--color-surface-raised);
   padding: 6px;
   border-radius: 4px;
   text-align: center;
   font-size: 12px;
   font-weight: 600;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-card);
 
   display: flex;
   flex-direction: row;
@@ -560,13 +627,13 @@
 
 /* Link Hulu */
 .linkHulu {
-  background-color: #2f3236;
+  background-color: var(--color-surface-raised);
   padding: 6px;
   border-radius: 4px;
   text-align: center;
   font-size: 12px;
   font-weight: 600;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-card);
 
   display: flex;
   flex-direction: row;
@@ -604,13 +671,13 @@
 
 /* Link HiDive */
 .linkHiDive {
-  background-color: #2f3236;
+  background-color: var(--color-surface-raised);
   padding: 6px;
   border-radius: 4px;
   text-align: center;
   font-size: 12px;
   font-weight: 600;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-card);
 
   display: flex;
   flex-direction: row;
@@ -648,13 +715,13 @@
 
 /* Link U-Next */
 .linkUNext {
-  background-color: #2f3236;
+  background-color: var(--color-surface-raised);
   padding: 6px;
   border-radius: 4px;
   text-align: center;
   font-size: 12px;
   font-weight: 600;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-card);
 
   display: flex;
   flex-direction: row;
@@ -692,13 +759,13 @@
 
 /* Link Abema TV */
 .linkAbemaTV {
-  background-color: #2f3236;
+  background-color: var(--color-surface-raised);
   padding: 6px;
   border-radius: 4px;
   text-align: center;
   font-size: 12px;
   font-weight: 600;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-card);
 
   display: flex;
   flex-direction: row;
@@ -736,13 +803,13 @@
 
 /* Link ADN */
 .linkADN {
-  background-color: #2f3236;
+  background-color: var(--color-surface-raised);
   padding: 6px;
   border-radius: 4px;
   text-align: center;
   font-size: 12px;
   font-weight: 600;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-card);
 
   display: flex;
   flex-direction: row;
@@ -780,13 +847,13 @@
 
 /* Link Muse Asia */
 .linkMuseAsia {
-  background-color: #2f3236;
+  background-color: var(--color-surface-raised);
   padding: 6px;
   border-radius: 4px;
   text-align: center;
   font-size: 12px;
   font-weight: 600;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-card);
 
   display: flex;
   flex-direction: row;
@@ -824,13 +891,13 @@
 
 /* Link Laftel TV */
 .linkLaftel {
-  background-color: #2f3236;
+  background-color: var(--color-surface-raised);
   padding: 6px;
   border-radius: 4px;
   text-align: center;
   font-size: 12px;
   font-weight: 600;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-card);
 
   display: flex;
   flex-direction: row;
@@ -868,13 +935,13 @@
 
 /* Link TVer */
 .linkTVer {
-  background-color: #2f3236;
+  background-color: var(--color-surface-raised);
   padding: 6px;
   border-radius: 4px;
   text-align: center;
   font-size: 12px;
   font-weight: 600;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-card);
 
   display: flex;
   flex-direction: row;
@@ -912,13 +979,13 @@
 
 /* Link iQIYI */
 .linkIQIYI {
-  background-color: #2f3236;
+  background-color: var(--color-surface-raised);
   padding: 6px;
   border-radius: 4px;
   text-align: center;
   font-size: 12px;
   font-weight: 600;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-card);
 
   display: flex;
   flex-direction: row;
@@ -956,13 +1023,13 @@
 
 /* Link Tubi */
 .linkTubi {
-  background-color: #2f3236;
+  background-color: var(--color-surface-raised);
   padding: 6px;
   border-radius: 4px;
   text-align: center;
   font-size: 12px;
   font-weight: 600;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-card);
 
   display: flex;
   flex-direction: row;
@@ -1000,13 +1067,13 @@
 
 /* Link d Anime Store */
 .linkDAnime {
-  background-color: #2f3236;
+  background-color: var(--color-surface-raised);
   padding: 6px;
   border-radius: 4px;
   text-align: center;
   font-size: 12px;
   font-weight: 600;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-card);
 
   display: flex;
   flex-direction: row;
@@ -1058,13 +1125,13 @@
 
 /* Amazon Store */
 .linkAmazonStore {
-  background-color: #2f3236;
+  background-color: var(--color-surface-raised);
   padding: 6px;
   border-radius: 4px;
   text-align: center;
   font-size: 12px;
   font-weight: 600;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-card);
 
   display: flex;
   flex-direction: row;
@@ -1102,13 +1169,13 @@
 
 /* CD Japan */
 .linkCDJapan {
-  background-color: #2f3236;
+  background-color: var(--color-surface-raised);
   padding: 6px;
   border-radius: 4px;
   text-align: center;
   font-size: 12px;
   font-weight: 600;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-card);
 
   display: flex;
   flex-direction: row;
@@ -1146,13 +1213,13 @@
 
 /* Mercado Livre */
 .linkMercadoLivre {
-  background-color: #2f3236;
+  background-color: var(--color-surface-raised);
   padding: 6px;
   border-radius: 4px;
   text-align: center;
   font-size: 12px;
   font-weight: 600;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-card);
 
   display: flex;
   flex-direction: row;
@@ -1190,13 +1257,13 @@
 
 /* Rakuten */
 .linkRakuten {
-  background-color: #2f3236;
+  background-color: var(--color-surface-raised);
   padding: 6px;
   border-radius: 4px;
   text-align: center;
   font-size: 12px;
   font-weight: 600;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-card);
 
   display: flex;
   flex-direction: row;
@@ -1234,13 +1301,13 @@
 
 /* Shopee */
 .linkShopee {
-  background-color: #2f3236;
+  background-color: var(--color-surface-raised);
   padding: 6px;
   border-radius: 4px;
   text-align: center;
   font-size: 12px;
   font-weight: 600;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-card);
 
   display: flex;
   flex-direction: row;
@@ -1278,13 +1345,13 @@
 
 /* Ebay */
 .linkEbay {
-  background-color: #2f3236;
+  background-color: var(--color-surface-raised);
   padding: 6px;
   border-radius: 4px;
   text-align: center;
   font-size: 12px;
   font-weight: 600;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-card);
 
   display: flex;
   flex-direction: row;
@@ -1322,13 +1389,13 @@
 
 /* Otakuya-san */
 .linkOtakuyasan {
-  background-color: #2f3236;
+  background-color: var(--color-surface-raised);
   padding: 6px;
   border-radius: 4px;
   text-align: center;
   font-size: 12px;
   font-weight: 600;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-card);
 
   display: flex;
   flex-direction: row;
@@ -1366,13 +1433,13 @@
 
 /* HMV & Books */
 .linkHMV {
-  background-color: #2f3236;
+  background-color: var(--color-surface-raised);
   padding: 6px;
   border-radius: 4px;
   text-align: center;
   font-size: 12px;
   font-weight: 600;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-card);
 
   display: flex;
   flex-direction: row;
@@ -1410,13 +1477,13 @@
 
 /* Honto */
 .linkHonto {
-  background-color: #2f3236;
+  background-color: var(--color-surface-raised);
   padding: 6px;
   border-radius: 4px;
   text-align: center;
   font-size: 12px;
   font-weight: 600;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-card);
 
   display: flex;
   flex-direction: row;
@@ -1454,13 +1521,13 @@
 
 /* Toranoana */
 .linkToranoana {
-  background-color: #2f3236;
+  background-color: var(--color-surface-raised);
   padding: 6px;
   border-radius: 4px;
   text-align: center;
   font-size: 12px;
   font-weight: 600;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-card);
 
   display: flex;
   flex-direction: row;
@@ -1498,13 +1565,13 @@
 
 /* Animate */
 .linkAnimate {
-  background-color: #2f3236;
+  background-color: var(--color-surface-raised);
   padding: 6px;
   border-radius: 4px;
   text-align: center;
   font-size: 12px;
   font-weight: 600;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-card);
 
   display: flex;
   flex-direction: row;
@@ -1556,13 +1623,13 @@
 
 /* Botão Review */
 .btnReview {
-  background-color: #2f3236;
+  background-color: var(--color-surface-raised);
   padding: 6px;
   border-radius: 4px;
   text-align: center;
   font-size: 12px;
   font-weight: 600;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-card);
 
   display: flex;
   flex-direction: row;
@@ -1600,13 +1667,13 @@
 
 /* Botão Editar */
 .btnEdit {
-  background-color: #2f3236;
+  background-color: var(--color-surface-raised);
   padding: 6px;
   border-radius: 4px;
   text-align: center;
   font-size: 12px;
   font-weight: 600;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-card);
 
   display: flex;
   flex-direction: row;
@@ -1640,4 +1707,111 @@
 
 .btnEdit:hover .iconbtnEditContainer {
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+}
+
+@media (max-width: 760px) {
+  .sidebarWrapper {
+    width: 100%;
+  }
+
+  .relatedLinks,
+  .musicStreamingLinks,
+  .streamingsLinks {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .relatedLinksTitle,
+  .musicStreamingLinksTitle,
+  .streamingsLinksTitle {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 430px) {
+  .relatedLinks,
+  .musicStreamingLinks,
+  .streamingsLinks {
+    grid-template-columns: 1fr;
+  }
+
+  .relatedLinksTitle,
+  .musicStreamingLinksTitle,
+  .streamingsLinksTitle {
+    grid-column: auto;
+  }
+}
+
+/* Camada visual compartilhada. As cores de marca dos hovers e ícones acima
+   continuam específicas para que cada serviço permaneça reconhecível. */
+.scoreCard,
+.infoCard {
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-medium);
+  box-shadow: var(--shadow-card);
+}
+
+.scoreCard {
+  border-left: 3px solid var(--color-accent);
+}
+
+.scoreTitle,
+.animeDescriptionTerm,
+.relatedLinksTitle,
+.musicStreamingLinksTitle,
+.streamingsLinksTitle,
+.storeLinksTitle,
+.reviewEditTitle {
+  color: var(--color-text-primary);
+}
+
+.animeDescriptionTerm {
+  color: var(--color-text-muted);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.animeDescriptionDetail {
+  color: var(--color-text-secondary);
+  line-height: 1.45;
+}
+
+.magazineLink,
+.publisherLink {
+  color: var(--color-accent);
+}
+
+.relatedLinks > a,
+.musicStreamingLinks > a,
+.streamingsLinks > a,
+.storeLinks > a,
+.reviewEdit > button {
+  min-height: 38px;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-small);
+  box-shadow: none;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.relatedLinks > a:hover,
+.musicStreamingLinks > a:hover,
+.streamingsLinks > a:hover,
+.storeLinks > a:hover,
+.reviewEdit > button:hover {
+  border-color: var(--color-border-strong);
+  transform: translateX(2px);
+}
+
+.relatedLinks > a > span:first-child,
+.musicStreamingLinks > a > span:first-child,
+.streamingsLinks > a > span:first-child,
+.storeLinks > a > span:first-child,
+.reviewEdit > button > span:first-child {
+  border-radius: var(--radius-small);
 }

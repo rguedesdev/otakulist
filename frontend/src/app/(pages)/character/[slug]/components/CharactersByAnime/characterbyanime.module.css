@@ -5,76 +5,70 @@
 }
 
 .characterBySeiyuuSectionTitle {
-  color: var(--title-color);
+  color: var(--color-text-primary);
   font-size: 16px;
-  font-weight: 600;
-  margin-bottom: 10px;
+  font-weight: 700;
+  margin-bottom: 12px;
 }
 
 .characterBySeiyuuCardsContainer {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
 }
 
 .characterBySeiyuuCard {
   display: grid;
-
-  /* --- A MÁGICA ESTÁ AQUI ---
-     Pegamos a altura do card (--card-height) e calculamos a largura exata da imagem (2/3).
-     Você MUDARÁ apenas o valor de --card-height abaixo! */
   --card-height: 80px;
 
-  grid-template-columns: calc(var(--card-height) * (2 / 3)) 1fr;
+  grid-template-columns: calc(var(--card-height) * (2 / 3)) minmax(0, 1fr);
   height: var(--card-height);
-
-  border-radius: 5px;
-  min-width: 331px;
+  min-width: 0;
   width: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-medium);
   overflow: hidden;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-card);
   cursor: pointer;
   transform: translateY(0);
   transition:
     transform 0.2s ease-in-out,
+    border-color 0.2s ease-in-out,
     box-shadow 0.2s ease-in-out;
 }
 
-/* Efeito ao passar o mouse */
 .characterBySeiyuuCard:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.25);
+  border-color: var(--color-accent-border);
+  box-shadow: var(--shadow-card-hover);
 }
 
-/* Container do lado direito que isola o fundo cinza */
 .characterBySeiyuuTextsContainer {
-  background-color: #2f3236;
+  background-color: var(--color-surface-raised);
   width: 100%;
   height: 100%;
   min-width: 0;
 }
 
-/* --- Imagem --- */
 .characterBySeiyuuCover {
   height: 100%;
   width: 100%;
-  object-fit: contain; /* Garante que a imagem inteira apareça sem cortes */
+  min-width: 0;
+  object-fit: contain;
   display: block;
 }
 
-/* --- Container dos Textos --- */
 .characterBySeiyuuTexts {
   min-width: 0;
   padding: 8px 12px 8px 10px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  /* --- A CORREÇÃO ESTÁ AQUI --- */
   height: 100%;
 }
 
-/* Título da Temporada */
 .characterBySeiyuuTitle {
+  color: var(--color-text-primary);
   font-size: 14px;
   font-weight: 600;
   margin: 0 0 10px 0;
@@ -83,7 +77,6 @@
   text-overflow: ellipsis;
 }
 
-/* --- Lista de Informações (dl) --- */
 .infoGroup {
   margin: 0;
   padding: 0;
@@ -92,15 +85,14 @@
   gap: 4px;
 }
 
-/* Linha interna (div que envelopa dt + dd) */
 .infoLine {
   display: flex;
   align-items: center;
   gap: 6px;
 }
 
-/* Caixa do Ícone Opcional (dt) */
 .infoIcon {
+  color: var(--color-accent);
   margin: 0;
   padding: 0;
   display: flex;
@@ -110,7 +102,6 @@
   flex-shrink: 0;
 }
 
-/* Caixa de texto (dd) */
 .infoLine dd {
   margin: 0;
   padding: 0;
@@ -118,10 +109,22 @@
   align-items: center;
 }
 
-/* Estilo do texto interno */
 .characterBySeiyuuInfo {
+  color: var(--color-text-secondary);
   font-size: 12px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+@media (max-width: 1180px) {
+  .characterBySeiyuuCardsContainer {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .characterBySeiyuuCardsContainer {
+    grid-template-columns: 1fr;
+  }
 }

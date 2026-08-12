@@ -5,7 +5,7 @@ import Image from "next/image";
 import styles from "./herosection.module.css";
 
 // Icons
-import { TbPlaylistAdd, TbPlaylistX } from "react-icons/tb";
+import { TbPlaylistAdd } from "react-icons/tb";
 import { MdOutlineFavoriteBorder } from "react-icons/md";
 
 function HeroSection({ FormatInfo }) {
@@ -40,7 +40,11 @@ function HeroSection({ FormatInfo }) {
               <span>Remover</span>
             </button> */}
 
-                <button className={styles.btnAddFavorite}>
+                <button
+                  className={styles.btnAddFavorite}
+                  aria-label="Adicionar aos favoritos"
+                  title="Adicionar aos favoritos"
+                >
                   <MdOutlineFavoriteBorder size={20} aria-hidden="true" />
                 </button>
               </div>
@@ -56,7 +60,8 @@ function HeroSection({ FormatInfo }) {
             <h1 className={styles.title}>
               {FormatInfo.format == "mangaka" ||
               FormatInfo.format == "staff" ||
-              FormatInfo.format == "seiyuu"
+              FormatInfo.format == "seiyuu" ||
+              FormatInfo.format == "artist"
                 ? FormatInfo.name_romaji
                 : FormatInfo.title}
             </h1>

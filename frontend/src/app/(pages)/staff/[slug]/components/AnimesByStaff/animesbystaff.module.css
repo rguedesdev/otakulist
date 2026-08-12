@@ -5,46 +5,49 @@
 }
 
 .animesByStaffSectionTitle {
-  color: var(--title-color);
+  color: var(--color-text-primary);
   font-size: 16px;
-  font-weight: 600;
-  margin-bottom: 10px;
+  font-weight: 700;
+  margin-bottom: 12px;
 }
 
 .animesByStaffCardsContainer {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
 }
 
 .animesByStaffCard {
   display: grid;
-  grid-template-columns: 90px 1fr;
+  grid-template-columns: 90px minmax(0, 1fr);
   /* background-color removido daqui para evitar o vazamento na imagem */
-  border-radius: 5px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-medium);
   height: 130px;
-  min-width: 331px;
+  min-width: 0;
   width: 100%;
   overflow: hidden;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-card);
   cursor: pointer;
 
   /* Movimento nativo e imediato por GPU */
   transform: translateY(0);
   transition:
     transform 0.2s ease-in-out,
+    border-color 0.2s ease-in-out,
     box-shadow 0.2s ease-in-out;
 }
 
 /* Efeito ao passar o mouse */
 .animesByStaffCard:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.25);
+  border-color: var(--color-accent-border);
+  box-shadow: var(--shadow-card-hover);
 }
 
 /* Container do lado direito que isola o fundo cinza */
 .animesByStaffTextsContainer {
-  background-color: #2f3236;
+  background-color: var(--color-surface-raised);
   width: 100%;
   height: 100%;
   min-width: 0;
@@ -69,6 +72,7 @@
 
 /* Título da Temporada */
 .animesByStaffTitle {
+  color: var(--color-text-primary);
   font-size: 14px;
   font-weight: 600;
   margin: 0 0 10px 0;
@@ -95,6 +99,7 @@
 
 /* Caixa do Ícone Opcional (dt) */
 .infoIcon {
+  color: var(--color-accent);
   margin: 0;
   padding: 0;
   display: flex;
@@ -114,8 +119,21 @@
 
 /* Estilo do texto interno */
 .animesByStaffInfo {
+  color: var(--color-text-secondary);
   font-size: 12px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+@media (max-width: 1180px) {
+  .animesByStaffCardsContainer {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .animesByStaffCardsContainer {
+    grid-template-columns: 1fr;
+  }
 }
