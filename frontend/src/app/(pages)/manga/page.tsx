@@ -13,13 +13,14 @@ import { GiEvilBook } from "react-icons/gi";
 import { RiFireLine, RiQuillPenLine, RiSparkling2Line } from "react-icons/ri";
 
 import styles from "./manga.module.css";
+import { mediumLabels } from "@/shared/types/entities";
 
 const publishingManga = [
   {
     title: "Dandadan",
     image: "/mangas/dandadan.jpg",
     href: "/manga/dandadan",
-    format: "Manga",
+    medium: "manga" as const,
     progress: "Capítulo 86",
     genres: ["Ação", "Comédia"],
     score: "8.7",
@@ -29,7 +30,7 @@ const publishingManga = [
     title: "MAO",
     image: "/mangas/mao.jpg",
     href: "/manga/mao",
-    format: "Manga",
+    medium: "manga" as const,
     progress: "Capítulo 61",
     genres: ["Mistério", "Sobrenatural"],
     score: "8.2",
@@ -39,7 +40,7 @@ const publishingManga = [
     title: "Centuria",
     image: "/mangas/centuria.jpg",
     href: "/manga/centuria",
-    format: "Manga",
+    medium: "manga" as const,
     progress: "Capítulo 34",
     genres: ["Ação", "Fantasia"],
     score: "8.4",
@@ -49,7 +50,7 @@ const publishingManga = [
     title: "Kyoukai no Rinne",
     image: "/mangas/rinne.jpg",
     href: "/manga/kyoukai-no-rinne",
-    format: "Manga",
+    medium: "manga" as const,
     progress: "40 volumes",
     genres: ["Comédia", "Fantasia"],
     score: "7.9",
@@ -59,7 +60,7 @@ const publishingManga = [
     title: "Namaikizakari.",
     image: "/mangas/namaiki.jpg",
     href: "/manga/namaikizakari",
-    format: "Manga",
+    medium: "manga" as const,
     progress: "23 volumes",
     genres: ["Romance", "Escolar"],
     score: "8.1",
@@ -179,7 +180,7 @@ function MangaPage() {
                 </div>
                 <div className={styles.mangaInfo}>
                   <h3>{manga.title}</h3>
-                  <p>{manga.format}<span>•</span>{manga.progress}</p>
+                  <p>{mediumLabels[manga.medium]}<span>•</span>{manga.progress}</p>
                   <div className={styles.cardGenres}>{manga.genres.map((genre) => <span key={genre}>{genre}</span>)}</div>
                   <small><RiQuillPenLine aria-hidden="true" />{manga.frequency}</small>
                 </div>

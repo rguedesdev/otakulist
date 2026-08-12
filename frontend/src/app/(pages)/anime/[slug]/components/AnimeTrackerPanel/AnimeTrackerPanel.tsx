@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type { CSSProperties } from "react";
 import {
   FiCheck,
   FiChevronDown,
@@ -11,7 +12,7 @@ import {
   FiPlus,
 } from "react-icons/fi";
 import { MdOutlineAutoAwesome } from "react-icons/md";
-import { TbPlaylist } from "react-icons/tb";
+import { LuListTree } from "react-icons/lu";
 
 import type { AnimeSeason } from "@/shared/components/SeasonSection/page";
 import styles from "../../animeslug.module.css";
@@ -28,6 +29,25 @@ const statusLabels: Record<string, string> = {
   completo: "Completo",
   abandonado: "Abandonado",
 };
+
+type ProgressStyle = CSSProperties & {
+  "--progress-light": string;
+  "--progress-dark": string;
+};
+
+function getProgressStyle(progress: number): ProgressStyle {
+  const normalizedProgress = Math.min(100, Math.max(0, progress));
+  const darkeningProgress = Math.max(
+    0,
+    ((normalizedProgress - 70) / 30) * 100,
+  );
+
+  return {
+    width: `${normalizedProgress}%`,
+    "--progress-light": `${100 - darkeningProgress}%`,
+    "--progress-dark": `${darkeningProgress}%`,
+  };
+}
 
 function AnimeTrackerPanel({
   seasons,
@@ -119,14 +139,41 @@ function AnimeTrackerPanel({
   const selectedProgress = selectedSeason
     ? Math.round((selectedWatchedEpisodes / selectedSeason.episodes) * 100)
     : 0;
+  const selectedSeasonIndex = selectedSeason
+    ? seasons.findIndex((season) => season.id === selectedSeason.id)
+    : -1;
+  const previousSeason = seasons[selectedSeasonIndex - 1];
+  const canDecreaseEpisodes =
+    selectedWatchedEpisodes > 0 ||
+    Boolean(previousSeason && (seasonProgress[previousSeason.id] ?? 0) > 0);
 
   const changeEpisodes = (amount: number) => {
     if (!selectedSeason) return;
     setSaved(false);
     setSeasonProgress((current) => {
+      const currentSeasonProgress = current[selectedSeason.id] ?? 0;
+
+      if (amount < 0 && currentSeasonProgress === 0) {
+        const currentSeasonIndex = seasons.findIndex(
+          (season) => season.id === selectedSeason.id,
+        );
+        const previousSeason = seasons[currentSeasonIndex - 1];
+        const previousSeasonProgress = previousSeason
+          ? current[previousSeason.id] ?? 0
+          : 0;
+
+        if (!previousSeason || previousSeasonProgress === 0) return current;
+
+        setSelectedSeasonId(previousSeason.id);
+        return {
+          ...current,
+          [previousSeason.id]: previousSeasonProgress - 1,
+        };
+      }
+
       const nextSeasonProgress = Math.min(
         selectedSeason.episodes,
-        Math.max(0, (current[selectedSeason.id] ?? 0) + amount),
+        Math.max(0, currentSeasonProgress + amount),
       );
       const nextProgress = { ...current, [selectedSeason.id]: nextSeasonProgress };
       const nextTotal = seasons.reduce(
@@ -167,7 +214,7 @@ function AnimeTrackerPanel({
       <div className={styles.trackerSummary}>
         <div className={styles.trackerIdentity}>
           <span className={styles.trackerIcon}>
-            <TbPlaylist aria-hidden="true" />
+            <LuListTree aria-hidden="true" />
           </span>
           <span>
             <small>Minha lista</small>
@@ -190,7 +237,10 @@ function AnimeTrackerPanel({
                 </strong>
               </div>
               <div className={styles.summaryProgressTrack} aria-hidden="true">
-                <span style={{ width: `${progress}%` }} />
+                <span
+                  className={watchedEpisodes === totalEpisodes ? styles.progressComplete : undefined}
+                  style={getProgressStyle(progress)}
+                />
               </div>
             </div>
           </>
@@ -265,7 +315,16 @@ function AnimeTrackerPanel({
                         {isComplete ? "Concluída" : isCurrent ? `${seasonWatched}/${season.episodes}` : "Bloqueada"}
                       </strong>
                       <span className={styles.seasonMiniTrack} aria-hidden="true">
-                        <span style={{ width: `${(seasonWatched / season.episodes) * 100}%` }} />
+                        <span
+                          className={
+                            isComplete
+                              ? styles.progressComplete
+                              : seasonWatched === 0
+                                ? styles.progressEmpty
+                                : undefined
+                          }
+                          style={getProgressStyle((seasonWatched / season.episodes) * 100)}
+                        />
                       </span>
                     </button>
                   );
@@ -291,14 +350,17 @@ function AnimeTrackerPanel({
                 aria-valuemax={selectedSeason?.episodes ?? 0}
                 aria-valuenow={selectedWatchedEpisodes}
               >
-                <span style={{ width: `${selectedProgress}%` }} />
+                <span
+                  className={selectedWatchedEpisodes === (selectedSeason?.episodes ?? 0) ? styles.progressComplete : undefined}
+                  style={getProgressStyle(selectedProgress)}
+                />
               </div>
               <div className={styles.episodeControls}>
                 <button
                   type="button"
                   onClick={() => changeEpisodes(-1)}
                   aria-label="Diminuir um episódio"
-                  disabled={selectedWatchedEpisodes === 0}
+                  disabled={!canDecreaseEpisodes}
                 >
                   <FiMinus aria-hidden="true" />
                 </button>

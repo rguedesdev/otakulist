@@ -4,11 +4,20 @@ import Image from "next/image";
 // Style Sheet CSS
 import styles from "./herosection.module.css";
 
+import type { EntityInfo } from "@/shared/types/entities";
+import { getEntityTitle, isWork } from "@/shared/types/entities";
+
 // Icons
 import { TbPlaylistAdd } from "react-icons/tb";
 import { MdOutlineFavoriteBorder } from "react-icons/md";
 
-function HeroSection({ FormatInfo }) {
+type HeroSectionProps = {
+  entity: EntityInfo;
+};
+
+function HeroSection({ entity }: HeroSectionProps) {
+  const entityIsWork = isWork(entity);
+
   return (
     <div className={styles.heroSectionContainer}>
       <section className={styles.heroSection}>
@@ -17,7 +26,7 @@ function HeroSection({ FormatInfo }) {
           <div className={styles.imageWrapper}>
             <Image
               className={styles.cover}
-              src={FormatInfo.cover}
+              src={entity.cover}
               alt="Mayonaka Heart Tune Cover"
               width={200} /* Largura base */
               height={300} /* Altura base (proporção máxima de 2/3) */
@@ -25,9 +34,7 @@ function HeroSection({ FormatInfo }) {
             />
           </div>
 
-          {FormatInfo.format == "anime" ||
-          FormatInfo.format == "manga" ||
-          FormatInfo.format == "light_novel" ? (
+          {entityIsWork ? (
             <>
               <div className={styles.buttons}>
                 <button className={styles.btnAddList}>
@@ -58,19 +65,12 @@ function HeroSection({ FormatInfo }) {
         <div className={styles.textsContainer}>
           <div className={styles.texts}>
             <h1 className={styles.title}>
-              {FormatInfo.format == "mangaka" ||
-              FormatInfo.format == "staff" ||
-              FormatInfo.format == "seiyuu" ||
-              FormatInfo.format == "artist"
-                ? FormatInfo.name_romaji
-                : FormatInfo.title}
+              {getEntityTitle(entity)}
             </h1>
-            <p className={styles.description}>{FormatInfo.description}</p>
+            <p className={styles.description}>{entity.description}</p>
           </div>
 
-          {FormatInfo.format == "anime" ||
-          FormatInfo.format == "manga" ||
-          FormatInfo.format == "light_novel" ? (
+          {entityIsWork ? (
             <>
               <hr className={styles.hrFaded} />
 

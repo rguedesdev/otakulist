@@ -20,11 +20,11 @@
 .seasonCard {
   padding: 0;
   display: grid;
-  grid-template-columns: 90px 1fr;
+  grid-template-columns: 83px 1fr;
   /* background-color removido daqui para evitar o vazamento na imagem */
   border: 1px solid var(--color-border);
   border-radius: var(--radius-medium);
-  height: 130px;
+  height: 120px;
   min-width: 0;
   width: 100%;
   overflow: hidden;
@@ -69,10 +69,10 @@
 
 /* --- Imagem --- */
 .seasonCover {
-  height: 130px;
-  width: 90px;
+  height: 120px;
+  width: 83px;
   object-fit: cover;
-  min-width: 90px;
+  min-width: 83px;
   display: block;
 }
 
@@ -297,6 +297,11 @@
 }
 
 .progressTrack > span {
+  --progress-tip-color: color-mix(
+    in srgb,
+    var(--color-accent-highlight) var(--progress-light),
+    var(--color-accent-deep) var(--progress-dark)
+  );
   position: relative;
   height: 100%;
   display: block;
@@ -304,8 +309,12 @@
     90deg,
     var(--color-accent-deep) 0%,
     var(--color-accent-deep) 76%,
-    var(--color-accent-hover) 92%,
-    var(--color-accent) 100%
+    color-mix(
+      in srgb,
+      var(--color-accent-hover) var(--progress-light),
+      var(--color-accent-deep) var(--progress-dark)
+    ) 92%,
+    var(--progress-tip-color) 100%
   );
   border-radius: inherit;
   transition: width 0.25s ease;
@@ -321,7 +330,7 @@
   background: linear-gradient(
     90deg,
     transparent,
-    color-mix(in srgb, var(--color-accent-highlight) 72%, transparent)
+    color-mix(in srgb, var(--progress-tip-color) 72%, transparent)
   );
   border-radius: inherit;
 }
@@ -333,12 +342,23 @@
   right: 0;
   width: 5px;
   height: 5px;
-  background: var(--color-accent-highlight);
+  background: var(--progress-tip-color);
   border-radius: 50%;
   box-shadow:
-    0 0 4px var(--color-accent-highlight),
+    0 0 4px var(--progress-tip-color),
     0 0 8px var(--color-accent);
   transform: translate(35%, -50%);
+}
+
+.progressTrack > .progressComplete {
+  background: var(--color-accent-deep);
+}
+
+.progressTrack > .progressComplete::before,
+.progressTrack > .progressComplete::after,
+.progressTrack > .progressEmpty::before,
+.progressTrack > .progressEmpty::after {
+  display: none;
 }
 
 .modalProgress small {

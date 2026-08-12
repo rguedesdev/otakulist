@@ -2,22 +2,23 @@ import type { ReactNode } from "react";
 
 import { FormatSidebarInfo } from "@/shared/components/FormatSidebarInfo/page";
 import { HeroSection } from "@/shared/components/HeroSection/page";
+import type { EntityInfo } from "@/shared/types/entities";
 
 import styles from "./entitydetailpage.module.css";
 
 type EntityDetailPageProps = {
-  formatInfo: Record<string, unknown>;
+  entity: EntityInfo;
   sidebarChildren?: ReactNode;
   children: ReactNode;
 };
 
-function EntityDetailPage({ formatInfo, sidebarChildren, children }: EntityDetailPageProps) {
+function EntityDetailPage({ entity, sidebarChildren, children }: EntityDetailPageProps) {
   return (
     <div className={styles.page}>
-      <HeroSection FormatInfo={formatInfo} />
+      <HeroSection entity={entity} />
       <main className={styles.container}>
         <div className={styles.contentContainer}>
-          <FormatSidebarInfo FormatInfo={formatInfo}>{sidebarChildren}</FormatSidebarInfo>
+          <FormatSidebarInfo entity={entity}>{sidebarChildren}</FormatSidebarInfo>
           <div className={styles.centralContainer}>{children}</div>
         </div>
       </main>

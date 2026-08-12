@@ -356,14 +356,17 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-large);
   box-shadow: var(--shadow-card);
+  backface-visibility: hidden;
+  transform: translate3d(0, 0, 0);
+  will-change: transform;
   transition:
-    transform 0.2s ease,
-    border-color 0.2s ease,
-    box-shadow 0.2s ease;
+    transform 0.2s ease-in-out,
+    border-color 0.2s ease-in-out,
+    box-shadow 0.2s ease-in-out;
 }
 
 .novelCard:hover {
-  transform: translateY(-4px);
+  transform: translate3d(0, -4px, 0);
   border-color: var(--color-accent-border);
   box-shadow: var(--shadow-card-hover);
 }
@@ -372,12 +375,22 @@
   position: relative;
   aspect-ratio: 0.72;
   overflow: hidden;
+  isolation: isolate;
   background: var(--color-surface-raised);
+  backface-visibility: hidden;
+  transform: translate3d(0, 0, 0);
 }
 
 .novelCover img,
 .novelArtwork img {
   object-fit: cover;
+}
+
+.novelCover img {
+  display: block;
+  backface-visibility: hidden;
+  transform: translate3d(0, 0, 0);
+  will-change: transform;
 }
 
 .novelArtwork {
@@ -489,11 +502,18 @@
   position: absolute;
   z-index: 1;
   top: 9px;
+  height: 20px;
   padding: 5px 7px;
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
   border-radius: var(--radius-small);
   font-size: 9px;
   font-weight: 750;
-  backdrop-filter: blur(10px);
+  line-height: 10px;
+  backface-visibility: hidden;
+  transform: translate3d(0, 0, 0);
+  will-change: transform;
 }
 
 .cardScore {
@@ -504,8 +524,6 @@
 
 .publishingBadge {
   left: 9px;
-  display: inline-flex;
-  align-items: center;
   gap: 5px;
   color: var(--color-text-primary);
   background: rgba(14, 14, 20, 0.76);

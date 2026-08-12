@@ -11,7 +11,7 @@
   margin: 22px auto 0;
   padding: 14px 18px;
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-large);
@@ -254,6 +254,11 @@
 }
 
 .summaryProgressTrack span {
+  --progress-tip-color: color-mix(
+    in srgb,
+    var(--color-accent-highlight) var(--progress-light),
+    var(--color-accent-deep) var(--progress-dark)
+  );
   position: relative;
   display: block;
   height: 100%;
@@ -261,8 +266,12 @@
     90deg,
     var(--color-accent-deep) 0%,
     var(--color-accent-deep) 76%,
-    var(--color-accent-hover) 92%,
-    var(--color-accent) 100%
+    color-mix(
+      in srgb,
+      var(--color-accent-hover) var(--progress-light),
+      var(--color-accent-deep) var(--progress-dark)
+    ) 92%,
+    var(--progress-tip-color) 100%
   );
   border-radius: inherit;
   transition: width 0.25s ease;
@@ -374,6 +383,11 @@
 }
 
 .progressTrack span {
+  --progress-tip-color: color-mix(
+    in srgb,
+    var(--color-accent-highlight) var(--progress-light),
+    var(--color-accent-deep) var(--progress-dark)
+  );
   position: relative;
   display: block;
   height: 100%;
@@ -381,8 +395,12 @@
     90deg,
     var(--color-accent-deep) 0%,
     var(--color-accent-deep) 76%,
-    var(--color-accent-hover) 92%,
-    var(--color-accent) 100%
+    color-mix(
+      in srgb,
+      var(--color-accent-hover) var(--progress-light),
+      var(--color-accent-deep) var(--progress-dark)
+    ) 92%,
+    var(--progress-tip-color) 100%
   );
   border-radius: inherit;
   box-shadow: none;
@@ -397,10 +415,10 @@
   right: 0;
   width: 4px;
   height: 4px;
-  background: var(--color-accent-highlight);
+  background: var(--progress-tip-color);
   border-radius: 50%;
   box-shadow:
-    0 0 4px var(--color-accent-highlight),
+    0 0 4px var(--progress-tip-color),
     0 0 8px var(--color-accent);
   transform: translate(35%, -50%);
 }
@@ -416,7 +434,7 @@
   background: linear-gradient(
     90deg,
     transparent,
-    color-mix(in srgb, var(--color-accent-highlight) 72%, transparent)
+    color-mix(in srgb, var(--progress-tip-color) 72%, transparent)
   );
   border-radius: inherit;
 }
@@ -424,6 +442,18 @@
 .progressTrack span::after {
   width: 5px;
   height: 5px;
+}
+
+.summaryProgressTrack .progressComplete,
+.progressTrack .progressComplete {
+  background: var(--color-accent-deep);
+}
+
+.summaryProgressTrack .progressComplete::before,
+.summaryProgressTrack .progressComplete::after,
+.progressTrack .progressComplete::before,
+.progressTrack .progressComplete::after {
+  display: none;
 }
 
 .episodeControls {
@@ -547,7 +577,8 @@
     row-gap: 18px;
   }
 
-  .factItem:nth-child(3) {
+  .factItem:nth-child(3),
+  .factItem:nth-child(5) {
     border-left: 0;
   }
 

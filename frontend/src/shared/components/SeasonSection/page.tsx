@@ -1,15 +1,18 @@
 "use client";
 
 import Image from "next/image";
+import type { CSSProperties } from "react";
 import { useEffect, useState } from "react";
 
-import { FiCalendar, FiClock, FiInfo, FiX } from "react-icons/fi";
+import { FiActivity, FiCalendar, FiClock, FiInfo, FiX } from "react-icons/fi";
 import { LiaCanadianMapleLeaf } from "react-icons/lia";
 import { MdOutlineVideoLibrary } from "react-icons/md";
 import { PiFilmSlate, PiTelevisionSimple } from "react-icons/pi";
 import { TbProgressCheck, TbWorld } from "react-icons/tb";
 
 import styles from "./season.module.css";
+import type { AnimeReleaseFormat } from "@/shared/types/entities";
+import { animeReleaseFormatLabels } from "@/shared/types/entities";
 
 type AnimeSeason = {
   id: number;
@@ -19,7 +22,7 @@ type AnimeSeason = {
   episodes: number;
   watchedEpisodes: number;
   status: string;
-  format: string;
+  releaseFormat: AnimeReleaseFormat;
   start: string;
   end: string;
   duration: string;
@@ -29,6 +32,25 @@ type AnimeSeason = {
   source: string;
   synopsis: string;
 };
+
+type ProgressStyle = CSSProperties & {
+  "--progress-light": string;
+  "--progress-dark": string;
+};
+
+function getProgressStyle(progress: number): ProgressStyle {
+  const normalizedProgress = Math.min(100, Math.max(0, progress));
+  const darkeningProgress = Math.max(
+    0,
+    ((normalizedProgress - 70) / 30) * 100,
+  );
+
+  return {
+    width: `${normalizedProgress}%`,
+    "--progress-light": `${100 - darkeningProgress}%`,
+    "--progress-dark": `${darkeningProgress}%`,
+  };
+}
 
 function SeasonSection({ seasons }: { seasons: AnimeSeason[] }) {
   const [selectedSeason, setSelectedSeason] = useState<AnimeSeason | null>(null);
@@ -43,6 +65,10 @@ function SeasonSection({ seasons }: { seasons: AnimeSeason[] }) {
     document.addEventListener("keydown", closeOnEscape);
     return () => document.removeEventListener("keydown", closeOnEscape);
   }, [selectedSeason]);
+
+  const selectedProgress = selectedSeason
+    ? (selectedSeason.watchedEpisodes / selectedSeason.episodes) * 100
+    : 0;
 
   return (
     <section className={styles.seasonsContainer}>
@@ -70,15 +96,15 @@ function SeasonSection({ seasons }: { seasons: AnimeSeason[] }) {
                 <strong className={styles.seasonTitle}>{season.title}</strong>
                 <span className={styles.infoGroup}>
                   <span className={styles.infoLine}>
-                    <span className={styles.infoIcon}><LiaCanadianMapleLeaf size={18} aria-hidden="true" /></span>
+                    <span className={styles.infoIcon}><LiaCanadianMapleLeaf size={17} aria-hidden="true" /></span>
                     <span className={styles.seasonInfo}>{season.label}</span>
                   </span>
                   <span className={styles.infoLine}>
-                    <span className={styles.infoIcon}><MdOutlineVideoLibrary size={16} aria-hidden="true" /></span>
+                    <span className={styles.infoIcon}><MdOutlineVideoLibrary size={15} aria-hidden="true" /></span>
                     <span className={styles.seasonInfo}>{season.episodes} Episódios</span>
                   </span>
                   <span className={styles.infoLine}>
-                    <span className={styles.infoIcon}><TbProgressCheck size={16} aria-hidden="true" /></span>
+                    <span className={styles.infoIcon}><TbProgressCheck size={15} aria-hidden="true" /></span>
                     <span className={styles.seasonInfo}>Progresso: {String(season.watchedEpisodes).padStart(2, "0")}/{season.episodes}</span>
                   </span>
                 </span>
@@ -116,16 +142,25 @@ function SeasonSection({ seasons }: { seasons: AnimeSeason[] }) {
                 <strong>{selectedSeason.watchedEpisodes}/{selectedSeason.episodes} episódios</strong>
               </div>
               <div className={styles.progressTrack} aria-hidden="true">
-                <span style={{ width: `${(selectedSeason.watchedEpisodes / selectedSeason.episodes) * 100}%` }} />
+                <span
+                  className={
+                    selectedSeason.watchedEpisodes === selectedSeason.episodes
+                      ? styles.progressComplete
+                      : selectedSeason.watchedEpisodes === 0
+                        ? styles.progressEmpty
+                        : undefined
+                  }
+                  style={getProgressStyle(selectedProgress)}
+                />
               </div>
               <small>Este progresso faz parte do total da obra principal.</small>
             </div>
 
             <dl className={styles.seasonDetails}>
-              <div><dt><PiTelevisionSimple aria-hidden="true" />Formato</dt><dd>{selectedSeason.format}</dd></div>
+              <div><dt><PiTelevisionSimple aria-hidden="true" />Formato</dt><dd>{animeReleaseFormatLabels[selectedSeason.releaseFormat]}</dd></div>
               <div><dt><MdOutlineVideoLibrary aria-hidden="true" />Episódios</dt><dd>{selectedSeason.episodes}</dd></div>
               <div><dt><FiClock aria-hidden="true" />Duração</dt><dd>{selectedSeason.duration}</dd></div>
-              <div><dt><TbProgressCheck aria-hidden="true" />Status</dt><dd>{selectedSeason.status}</dd></div>
+              <div><dt><FiActivity aria-hidden="true" />Status</dt><dd>{selectedSeason.status}</dd></div>
               <div><dt><FiCalendar aria-hidden="true" />Exibição</dt><dd>{selectedSeason.start} – {selectedSeason.end}</dd></div>
               <div><dt><LiaCanadianMapleLeaf aria-hidden="true" />Temporada</dt><dd>{selectedSeason.broadcastSeason}</dd></div>
               <div><dt><PiFilmSlate aria-hidden="true" />Estúdio</dt><dd>{selectedSeason.studio}</dd></div>

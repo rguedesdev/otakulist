@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type { CSSProperties } from "react";
 import {
   FiCheck,
   FiChevronDown,
@@ -10,7 +11,7 @@ import {
   FiPlus,
 } from "react-icons/fi";
 import { MdOutlineAutoAwesome } from "react-icons/md";
-import { TbPlaylist } from "react-icons/tb";
+import { LuListTree } from "react-icons/lu";
 
 import styles from "../../lightnovelslug.module.css";
 
@@ -26,6 +27,25 @@ const statusLabels: Record<string, string> = {
   completo: "Completo",
   abandonado: "Abandonado",
 };
+
+type ProgressStyle = CSSProperties & {
+  "--progress-light": string;
+  "--progress-dark": string;
+};
+
+function getProgressStyle(progress: number): ProgressStyle {
+  const normalizedProgress = Math.min(100, Math.max(0, progress));
+  const darkeningProgress = Math.max(
+    0,
+    ((normalizedProgress - 70) / 30) * 100,
+  );
+
+  return {
+    width: `${normalizedProgress}%`,
+    "--progress-light": `${100 - darkeningProgress}%`,
+    "--progress-dark": `${darkeningProgress}%`,
+  };
+}
 
 function LightNovelTrackerPanel({
   totalChapters,
@@ -94,7 +114,7 @@ function LightNovelTrackerPanel({
       <div className={styles.trackerSummary}>
         <div className={styles.trackerIdentity}>
           <span className={styles.trackerIcon}>
-            <TbPlaylist aria-hidden="true" />
+            <LuListTree aria-hidden="true" />
           </span>
           <span>
             <small>Minha lista</small>
@@ -117,7 +137,10 @@ function LightNovelTrackerPanel({
                 </strong>
               </div>
               <div className={styles.summaryProgressTrack} aria-hidden="true">
-                <span style={{ width: `${progress}%` }} />
+                <span
+                  className={readChapters === totalChapters ? styles.progressComplete : undefined}
+                  style={getProgressStyle(progress)}
+                />
               </div>
             </div>
           </>
@@ -177,7 +200,10 @@ function LightNovelTrackerPanel({
                 aria-valuemax={totalChapters}
                 aria-valuenow={readChapters}
               >
-                <span style={{ width: `${progress}%` }} />
+                <span
+                  className={readChapters === totalChapters ? styles.progressComplete : undefined}
+                  style={getProgressStyle(progress)}
+                />
               </div>
               <div className={styles.episodeControls}>
                 <button

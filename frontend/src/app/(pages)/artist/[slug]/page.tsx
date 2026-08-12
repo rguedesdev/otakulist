@@ -4,12 +4,14 @@ import { EntityDetailPage } from "@/shared/components/EntityDetailPage/page";
 import { DiscographySection } from "@/shared/components/DiscographySection/page";
 import type { DiscographyRelease } from "@/shared/components/DiscographySection/page";
 import { MusicPlatformLinks } from "@/shared/components/FormatSidebarInfo/page";
+import type { PersonEntity } from "@/shared/types/entities";
 
-const artistInfo = {
+const artistInfo: PersonEntity = {
   cover: "/singers/yui-horie.png",
   name_romaji: "Yui Horie",
   name_kanji: "堀江由衣",
-  format: "artist",
+  entityType: "person",
+  roles: ["artist", "seiyuu"],
   date_of_birth: "20 Set 1976",
   hometown: "Tóquio, Japão",
   activity_period: "1997–presente",
@@ -136,7 +138,7 @@ const discography: DiscographyRelease[] = [
 function ArtistBySlug() {
   return (
     <EntityDetailPage
-      formatInfo={artistInfo}
+      entity={artistInfo}
       sidebarChildren={(
         <MusicPlatformLinks spotify="/" tidal="/" deezer="/" amazonMusic="/" />
       )}

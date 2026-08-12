@@ -13,13 +13,14 @@ import {
 import { RiFireLine, RiSparkling2Line } from "react-icons/ri";
 
 import styles from "./anime.module.css";
+import { animeReleaseFormatLabels } from "@/shared/types/entities";
 
 const seasonAnime = [
   {
     title: "Gachiakuta",
     image: "/animes/gachiakuta.jpg",
     href: "/anime/gachiakuta",
-    format: "TV",
+    releaseFormat: "tv" as const,
     episodes: "8 / 24 episódios",
     genres: ["Ação", "Fantasia"],
     score: "8.6",
@@ -29,7 +30,7 @@ const seasonAnime = [
     title: "MAO",
     image: "/animes/mao2.jpg",
     href: "/anime/mao",
-    format: "TV",
+    releaseFormat: "tv" as const,
     episodes: "5 / 12 episódios",
     genres: ["Mistério", "Sobrenatural"],
     score: "8.2",
@@ -39,7 +40,7 @@ const seasonAnime = [
     title: "Mayonaka Heart Tune",
     image: "/animes/mayonaka.jpg",
     href: "/anime/mayonaka-heart-tune",
-    format: "TV",
+    releaseFormat: "tv" as const,
     episodes: "6 / 12 episódios",
     genres: ["Comédia", "Romance"],
     score: "8.0",
@@ -49,7 +50,7 @@ const seasonAnime = [
     title: "Kyoukai no Rinne",
     image: "/animes/rinne2.jpg",
     href: "/anime/kyoukai-no-rinne",
-    format: "TV",
+    releaseFormat: "tv" as const,
     episodes: "12 / 25 episódios",
     genres: ["Comédia", "Fantasia"],
     score: "7.7",
@@ -59,7 +60,7 @@ const seasonAnime = [
     title: "InuYasha",
     image: "/animes/inuyasha2.png",
     href: "/anime/inuyasha",
-    format: "TV",
+    releaseFormat: "tv" as const,
     episodes: "Completo",
     genres: ["Aventura", "Romance"],
     score: "8.4",
@@ -81,7 +82,7 @@ const upcomingAnime = [
     image: "/animes/baby.jpg",
     href: "/anime/baby-i-love-you-daze",
     date: "03 Out 2026",
-    format: "Especial",
+    releaseFormat: "special" as const,
     description: "Uma estreia curta com romance e cotidiano.",
   },
   {
@@ -89,7 +90,7 @@ const upcomingAnime = [
     image: "/animes/wolfs.jpg",
     href: "/anime/wolfs-rain",
     date: "11 Out 2026",
-    format: "TV",
+    releaseFormat: "tv" as const,
     description: "Fantasia, drama e uma jornada em busca do paraíso.",
   },
   {
@@ -97,7 +98,7 @@ const upcomingAnime = [
     image: "/animes/inuyasha2.png",
     href: "/anime/inuyasha",
     date: "19 Out 2026",
-    format: "TV",
+    releaseFormat: "tv" as const,
     description: "Aventura sobrenatural entre duas épocas.",
   },
 ];
@@ -192,7 +193,7 @@ function AnimePage() {
                 </div>
                 <div className={styles.animeInfo}>
                   <h3>{anime.title}</h3>
-                  <p>{anime.format}<span>•</span>{anime.episodes}</p>
+                  <p>{animeReleaseFormatLabels[anime.releaseFormat]}<span>•</span>{anime.episodes}</p>
                   <div className={styles.cardGenres}>{anime.genres.map((genre) => <span key={genre}>{genre}</span>)}</div>
                   <small><FiCalendar aria-hidden="true" />{anime.day}</small>
                 </div>
@@ -262,7 +263,7 @@ function AnimePage() {
                 <div>
                   <span className={styles.releaseDate}><FiCalendar aria-hidden="true" />{anime.date}</span>
                   <h3>{anime.title}</h3>
-                  <small>{anime.format}</small>
+                  <small>{animeReleaseFormatLabels[anime.releaseFormat]}</small>
                   <p>{anime.description}</p>
                 </div>
                 <FiArrowRight className={styles.cardArrow} aria-hidden="true" />

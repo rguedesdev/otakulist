@@ -9,6 +9,14 @@ import { RiMedalLine } from "react-icons/ri";
 import { FiTv } from "react-icons/fi";
 
 import styles from "./ranking.module.css";
+import type {
+  AnimeReleaseFormat,
+  WorkMedium,
+} from "@/shared/types/entities";
+import {
+  animeReleaseFormatLabels,
+  mediumLabels,
+} from "@/shared/types/entities";
 
 type RankingType = "anime" | "manga" | "light-novel";
 type CoverTheme = "violet" | "crimson" | "amber" | "indigo" | "emerald";
@@ -19,7 +27,8 @@ type RankingItem = {
   initials?: string;
   theme?: CoverTheme;
   href: string;
-  format: string;
+  medium: WorkMedium;
+  releaseFormat?: AnimeReleaseFormat;
   status: string;
   genres: string[];
   score: string;
@@ -28,43 +37,49 @@ type RankingItem = {
   change: string;
 };
 
+function getRankingFormat(item: RankingItem): string {
+  return item.medium === "anime" && item.releaseFormat
+    ? animeReleaseFormatLabels[item.releaseFormat]
+    : mediumLabels[item.medium];
+}
+
 const animeRanking: RankingItem[] = [
-  { title: "Gachiakuta", image: "/animes/gachiakuta.jpg", href: "/anime/gachiakuta", format: "TV", status: "Em exibição", genres: ["Ação", "Fantasia"], score: "8.86", ratings: "42 mil", members: "318 mil", change: "+2" },
-  { title: "InuYasha", image: "/animes/inuyasha2.png", href: "/anime/inuyasha", format: "TV", status: "Completo", genres: ["Aventura", "Romance"], score: "8.74", ratings: "186 mil", members: "921 mil", change: "—" },
-  { title: "MAO", image: "/animes/mao2.jpg", href: "/anime/mao", format: "TV", status: "Em exibição", genres: ["Mistério", "Sobrenatural"], score: "8.61", ratings: "31 mil", members: "204 mil", change: "+4" },
-  { title: "Wolf's Rain", image: "/animes/wolfs.jpg", href: "/anime/wolfs-rain", format: "TV", status: "Completo", genres: ["Drama", "Fantasia"], score: "8.52", ratings: "94 mil", members: "480 mil", change: "-1" },
-  { title: "Mayonaka Heart Tune", image: "/animes/mayonaka.jpg", href: "/anime/mayonaka-heart-tune", format: "TV", status: "Em exibição", genres: ["Comédia", "Romance"], score: "8.43", ratings: "27 mil", members: "179 mil", change: "+6" },
-  { title: "Kyoukai no Rinne", image: "/animes/rinne2.jpg", href: "/anime/kyoukai-no-rinne", format: "TV", status: "Completo", genres: ["Comédia", "Fantasia"], score: "8.31", ratings: "76 mil", members: "402 mil", change: "-2" },
-  { title: "Baby I Love You Daze", image: "/animes/baby.jpg", href: "/anime/baby-i-love-you-daze", format: "Especial", status: "Completo", genres: ["Romance", "Cotidiano"], score: "8.25", ratings: "18 mil", members: "121 mil", change: "+1" },
-  { title: "Ranma ½", image: "/ranma.jpg", href: "/anime/ranma", format: "TV", status: "Completo", genres: ["Comédia", "Romance"], score: "8.19", ratings: "112 mil", members: "615 mil", change: "—" },
-  { title: "InuYasha: Kanketsu-hen", image: "/animes/inuyasha2.png", href: "/anime/inuyasha-kanketsu-hen", format: "TV", status: "Completo", genres: ["Aventura", "Fantasia"], score: "8.12", ratings: "81 mil", members: "377 mil", change: "+3" },
-  { title: "MAO: Special", image: "/animes/mao2.jpg", href: "/anime/mao-special", format: "Especial", status: "Completo", genres: ["Mistério", "Drama"], score: "8.06", ratings: "12 mil", members: "89 mil", change: "-3" },
+  { title: "Gachiakuta", image: "/animes/gachiakuta.jpg", href: "/anime/gachiakuta", medium: "anime", releaseFormat: "tv", status: "Em exibição", genres: ["Ação", "Fantasia"], score: "8.86", ratings: "42 mil", members: "318 mil", change: "+2" },
+  { title: "InuYasha", image: "/animes/inuyasha2.png", href: "/anime/inuyasha", medium: "anime", releaseFormat: "tv", status: "Completo", genres: ["Aventura", "Romance"], score: "8.74", ratings: "186 mil", members: "921 mil", change: "—" },
+  { title: "MAO", image: "/animes/mao2.jpg", href: "/anime/mao", medium: "anime", releaseFormat: "tv", status: "Em exibição", genres: ["Mistério", "Sobrenatural"], score: "8.61", ratings: "31 mil", members: "204 mil", change: "+4" },
+  { title: "Wolf's Rain", image: "/animes/wolfs.jpg", href: "/anime/wolfs-rain", medium: "anime", releaseFormat: "tv", status: "Completo", genres: ["Drama", "Fantasia"], score: "8.52", ratings: "94 mil", members: "480 mil", change: "-1" },
+  { title: "Mayonaka Heart Tune", image: "/animes/mayonaka.jpg", href: "/anime/mayonaka-heart-tune", medium: "anime", releaseFormat: "tv", status: "Em exibição", genres: ["Comédia", "Romance"], score: "8.43", ratings: "27 mil", members: "179 mil", change: "+6" },
+  { title: "Kyoukai no Rinne", image: "/animes/rinne2.jpg", href: "/anime/kyoukai-no-rinne", medium: "anime", releaseFormat: "tv", status: "Completo", genres: ["Comédia", "Fantasia"], score: "8.31", ratings: "76 mil", members: "402 mil", change: "-2" },
+  { title: "Baby I Love You Daze", image: "/animes/baby.jpg", href: "/anime/baby-i-love-you-daze", medium: "anime", releaseFormat: "special", status: "Completo", genres: ["Romance", "Cotidiano"], score: "8.25", ratings: "18 mil", members: "121 mil", change: "+1" },
+  { title: "Ranma ½", image: "/ranma.jpg", href: "/anime/ranma", medium: "anime", releaseFormat: "tv", status: "Completo", genres: ["Comédia", "Romance"], score: "8.19", ratings: "112 mil", members: "615 mil", change: "—" },
+  { title: "InuYasha: Kanketsu-hen", image: "/animes/inuyasha2.png", href: "/anime/inuyasha-kanketsu-hen", medium: "anime", releaseFormat: "tv", status: "Completo", genres: ["Aventura", "Fantasia"], score: "8.12", ratings: "81 mil", members: "377 mil", change: "+3" },
+  { title: "MAO: Special", image: "/animes/mao2.jpg", href: "/anime/mao-special", medium: "anime", releaseFormat: "special", status: "Completo", genres: ["Mistério", "Drama"], score: "8.06", ratings: "12 mil", members: "89 mil", change: "-3" },
 ];
 
 const mangaRanking: RankingItem[] = [
-  { title: "Dandadan", image: "/mangas/dandadan.jpg", href: "/manga/dandadan", format: "Manga", status: "Publicando", genres: ["Ação", "Comédia"], score: "9.02", ratings: "96 mil", members: "514 mil", change: "+1" },
-  { title: "Ranma ½", image: "/mangas/ranma.jpg", href: "/manga/ranma", format: "Manga", status: "Completo", genres: ["Comédia", "Romance"], score: "8.91", ratings: "129 mil", members: "682 mil", change: "—" },
-  { title: "Centuria", image: "/mangas/centuria.jpg", href: "/manga/centuria", format: "Manga", status: "Publicando", genres: ["Ação", "Fantasia"], score: "8.84", ratings: "38 mil", members: "226 mil", change: "+5" },
-  { title: "MAO", image: "/mangas/mao.jpg", href: "/manga/mao", format: "Manga", status: "Publicando", genres: ["Mistério", "Sobrenatural"], score: "8.72", ratings: "44 mil", members: "251 mil", change: "+2" },
-  { title: "InuYasha", image: "/mangas/inuyasha.jpg", href: "/manga/inuyasha", format: "Manga", status: "Completo", genres: ["Aventura", "Romance"], score: "8.66", ratings: "151 mil", members: "793 mil", change: "-2" },
-  { title: "Maison Ikkoku", image: "/mangas/maison-ikkoku.png", href: "/manga/maison-ikkoku", format: "Manga", status: "Completo", genres: ["Comédia", "Romance"], score: "8.58", ratings: "57 mil", members: "304 mil", change: "—" },
-  { title: "Urusei Yatsura", image: "/mangas/urusei-yatsura.jpg", href: "/manga/urusei-yatsura", format: "Manga", status: "Completo", genres: ["Comédia", "Sci-fi"], score: "8.49", ratings: "71 mil", members: "349 mil", change: "+3" },
-  { title: "Kyoukai no Rinne", image: "/mangas/rinne.jpg", href: "/manga/kyoukai-no-rinne", format: "Manga", status: "Completo", genres: ["Comédia", "Fantasia"], score: "8.37", ratings: "48 mil", members: "273 mil", change: "-1" },
-  { title: "Namaikizakari.", image: "/mangas/namaiki.jpg", href: "/manga/namaikizakari", format: "Manga", status: "Completo", genres: ["Romance", "Escolar"], score: "8.28", ratings: "63 mil", members: "331 mil", change: "+2" },
-  { title: "Manga One", image: "/mangas/mangaone.jpg", href: "/manga/manga-one", format: "Manga", status: "Publicando", genres: ["Drama", "Cotidiano"], score: "8.17", ratings: "21 mil", members: "118 mil", change: "-4" },
+  { title: "Dandadan", image: "/mangas/dandadan.jpg", href: "/manga/dandadan", medium: "manga", status: "Publicando", genres: ["Ação", "Comédia"], score: "9.02", ratings: "96 mil", members: "514 mil", change: "+1" },
+  { title: "Ranma ½", image: "/mangas/ranma.jpg", href: "/manga/ranma", medium: "manga", status: "Completo", genres: ["Comédia", "Romance"], score: "8.91", ratings: "129 mil", members: "682 mil", change: "—" },
+  { title: "Centuria", image: "/mangas/centuria.jpg", href: "/manga/centuria", medium: "manga", status: "Publicando", genres: ["Ação", "Fantasia"], score: "8.84", ratings: "38 mil", members: "226 mil", change: "+5" },
+  { title: "MAO", image: "/mangas/mao.jpg", href: "/manga/mao", medium: "manga", status: "Publicando", genres: ["Mistério", "Sobrenatural"], score: "8.72", ratings: "44 mil", members: "251 mil", change: "+2" },
+  { title: "InuYasha", image: "/mangas/inuyasha.jpg", href: "/manga/inuyasha", medium: "manga", status: "Completo", genres: ["Aventura", "Romance"], score: "8.66", ratings: "151 mil", members: "793 mil", change: "-2" },
+  { title: "Maison Ikkoku", image: "/mangas/maison-ikkoku.png", href: "/manga/maison-ikkoku", medium: "manga", status: "Completo", genres: ["Comédia", "Romance"], score: "8.58", ratings: "57 mil", members: "304 mil", change: "—" },
+  { title: "Urusei Yatsura", image: "/mangas/urusei-yatsura.jpg", href: "/manga/urusei-yatsura", medium: "manga", status: "Completo", genres: ["Comédia", "Sci-fi"], score: "8.49", ratings: "71 mil", members: "349 mil", change: "+3" },
+  { title: "Kyoukai no Rinne", image: "/mangas/rinne.jpg", href: "/manga/kyoukai-no-rinne", medium: "manga", status: "Completo", genres: ["Comédia", "Fantasia"], score: "8.37", ratings: "48 mil", members: "273 mil", change: "-1" },
+  { title: "Namaikizakari.", image: "/mangas/namaiki.jpg", href: "/manga/namaikizakari", medium: "manga", status: "Completo", genres: ["Romance", "Escolar"], score: "8.28", ratings: "63 mil", members: "331 mil", change: "+2" },
+  { title: "Manga One", image: "/mangas/mangaone.jpg", href: "/manga/manga-one", medium: "manga", status: "Publicando", genres: ["Drama", "Cotidiano"], score: "8.17", ratings: "21 mil", members: "118 mil", change: "-4" },
 ];
 
 const novelRanking: RankingItem[] = [
-  { title: "Kusuriya no Hitorigoto", initials: "KH", theme: "emerald", href: "/light-novel/kusuriya-no-hitorigoto", format: "Light novel", status: "Publicando", genres: ["Mistério", "Drama"], score: "9.08", ratings: "84 mil", members: "429 mil", change: "+1" },
-  { title: "86: Eighty-Six", initials: "86", theme: "crimson", href: "/light-novel/86-eighty-six", format: "Light novel", status: "Publicando", genres: ["Drama", "Sci-fi"], score: "8.96", ratings: "76 mil", members: "386 mil", change: "—" },
-  { title: "Make Heroine ga Oosugiru!", image: "/light-novels/make-heroine.jpg", initials: "MH", theme: "violet", href: "/light-novel/make-heroine-ga-oosugiru", format: "Light novel", status: "Publicando", genres: ["Comédia", "Romance"], score: "8.88", ratings: "45 mil", members: "267 mil", change: "+4" },
-  { title: "Re:Zero kara Hajimeru Isekai Seikatsu", initials: "RZ", theme: "indigo", href: "/light-novel/rezero", format: "Light novel", status: "Publicando", genres: ["Fantasia", "Drama"], score: "8.79", ratings: "109 mil", members: "612 mil", change: "-1" },
-  { title: "Ookami to Koushinryou", initials: "OK", theme: "amber", href: "/light-novel/ookami-to-koushinryou", format: "Light novel", status: "Publicando", genres: ["Aventura", "Romance"], score: "8.71", ratings: "68 mil", members: "352 mil", change: "+2" },
-  { title: "Mahouka Koukou no Rettousei", initials: "MK", theme: "violet", href: "/light-novel/mahouka", format: "Light novel", status: "Completo", genres: ["Ação", "Fantasia"], score: "8.62", ratings: "61 mil", members: "337 mil", change: "—" },
-  { title: "Youjo Senki", initials: "YS", theme: "crimson", href: "/light-novel/youjo-senki", format: "Light novel", status: "Publicando", genres: ["Ação", "Fantasia"], score: "8.53", ratings: "57 mil", members: "298 mil", change: "+3" },
-  { title: "Honzuki no Gekokujou", initials: "HG", theme: "emerald", href: "/light-novel/honzuki-no-gekokujou", format: "Light novel", status: "Completo", genres: ["Fantasia", "Cotidiano"], score: "8.45", ratings: "49 mil", members: "281 mil", change: "+1" },
-  { title: "Baccano!", initials: "BC", theme: "amber", href: "/light-novel/baccano", format: "Light novel", status: "Publicando", genres: ["Ação", "Mistério"], score: "8.37", ratings: "32 mil", members: "194 mil", change: "-2" },
-  { title: "Violet Evergarden", initials: "VE", theme: "indigo", href: "/light-novel/violet-evergarden", format: "Light novel", status: "Completo", genres: ["Drama", "Fantasia"], score: "8.29", ratings: "41 mil", members: "244 mil", change: "-3" },
+  { title: "Kusuriya no Hitorigoto", initials: "KH", theme: "emerald", href: "/light-novel/kusuriya-no-hitorigoto", medium: "light_novel", status: "Publicando", genres: ["Mistério", "Drama"], score: "9.08", ratings: "84 mil", members: "429 mil", change: "+1" },
+  { title: "86: Eighty-Six", initials: "86", theme: "crimson", href: "/light-novel/86-eighty-six", medium: "light_novel", status: "Publicando", genres: ["Drama", "Sci-fi"], score: "8.96", ratings: "76 mil", members: "386 mil", change: "—" },
+  { title: "Make Heroine ga Oosugiru!", image: "/light-novels/make-heroine.jpg", initials: "MH", theme: "violet", href: "/light-novel/make-heroine-ga-oosugiru", medium: "light_novel", status: "Publicando", genres: ["Comédia", "Romance"], score: "8.88", ratings: "45 mil", members: "267 mil", change: "+4" },
+  { title: "Re:Zero kara Hajimeru Isekai Seikatsu", initials: "RZ", theme: "indigo", href: "/light-novel/rezero", medium: "light_novel", status: "Publicando", genres: ["Fantasia", "Drama"], score: "8.79", ratings: "109 mil", members: "612 mil", change: "-1" },
+  { title: "Ookami to Koushinryou", initials: "OK", theme: "amber", href: "/light-novel/ookami-to-koushinryou", medium: "light_novel", status: "Publicando", genres: ["Aventura", "Romance"], score: "8.71", ratings: "68 mil", members: "352 mil", change: "+2" },
+  { title: "Mahouka Koukou no Rettousei", initials: "MK", theme: "violet", href: "/light-novel/mahouka", medium: "light_novel", status: "Completo", genres: ["Ação", "Fantasia"], score: "8.62", ratings: "61 mil", members: "337 mil", change: "—" },
+  { title: "Youjo Senki", initials: "YS", theme: "crimson", href: "/light-novel/youjo-senki", medium: "light_novel", status: "Publicando", genres: ["Ação", "Fantasia"], score: "8.53", ratings: "57 mil", members: "298 mil", change: "+3" },
+  { title: "Honzuki no Gekokujou", initials: "HG", theme: "emerald", href: "/light-novel/honzuki-no-gekokujou", medium: "light_novel", status: "Completo", genres: ["Fantasia", "Cotidiano"], score: "8.45", ratings: "49 mil", members: "281 mil", change: "+1" },
+  { title: "Baccano!", initials: "BC", theme: "amber", href: "/light-novel/baccano", medium: "light_novel", status: "Publicando", genres: ["Ação", "Mistério"], score: "8.37", ratings: "32 mil", members: "194 mil", change: "-2" },
+  { title: "Violet Evergarden", initials: "VE", theme: "indigo", href: "/light-novel/violet-evergarden", medium: "light_novel", status: "Completo", genres: ["Drama", "Fantasia"], score: "8.29", ratings: "41 mil", members: "244 mil", change: "-3" },
 ];
 
 const rankingConfig = {
@@ -131,7 +146,7 @@ async function RankingByTypePage({ params }: { params: Promise<{ type: string }>
               <Link className={`${styles.podiumCard} ${podiumPositions[index] === 1 ? styles.podiumFirst : ""}`} href={item.href} key={item.title}>
                 <span className={styles.podiumPosition}>{podiumPositions[index]}</span>
                 <Artwork item={item} className={styles.podiumCover} />
-                <span className={styles.podiumCopy}><strong>{item.title}</strong><small>{item.format} • {item.status}</small></span>
+                <span className={styles.podiumCopy}><strong>{item.title}</strong><small>{getRankingFormat(item)} • {item.status}</small></span>
                 <span className={styles.podiumScore}>★ {item.score}</span>
               </Link>
             ))}
@@ -172,7 +187,7 @@ async function RankingByTypePage({ params }: { params: Promise<{ type: string }>
                     <Artwork item={item} className={styles.listCover} />
                     <span><strong>{item.title}</strong><small>{item.genres.join(" • ")}</small></span>
                   </span>
-                  <span className={styles.formatBlock}><strong>{item.format}</strong><small>{item.status}</small></span>
+                  <span className={styles.formatBlock}><strong>{getRankingFormat(item)}</strong><small>{item.status}</small></span>
                   <span className={styles.scoreBlock}><strong>★ {item.score}</strong><small>{item.ratings} avaliações</small></span>
                   <span className={styles.membersBlock}><strong>{item.members}</strong><small>membros</small></span>
                 </Link>

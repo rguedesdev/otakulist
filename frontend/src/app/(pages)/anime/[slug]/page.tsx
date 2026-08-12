@@ -11,12 +11,17 @@ import { StaffSection } from "@/shared/components/StaffSection/page";
 import { AnisongSection } from "@/shared/components/AnisongSection/page";
 import { RelatedSection } from "@/shared/components/RelatedSection/page";
 import { AnimeTrackerPanel } from "./components/AnimeTrackerPanel/AnimeTrackerPanel";
+import type { AnimeEntity } from "@/shared/types/entities";
+import {
+  formatAnimeReleaseFormats,
+  getUniqueAnimeReleaseFormats,
+} from "@/shared/types/entities";
 
 // Icones
 import { FiActivity, FiClock } from "react-icons/fi";
 import { MdOutlineVideoLibrary } from "react-icons/md";
 import { PiTelevisionSimple } from "react-icons/pi";
-import { TbWorld } from "react-icons/tb";
+import { FaStar } from "react-icons/fa";
 
 function AnimeBySlug() {
   const animeSeasons: AnimeSeason[] = [
@@ -28,7 +33,7 @@ function AnimeBySlug() {
       episodes: 24,
       watchedEpisodes: 24,
       status: "Concluído",
-      format: "Anime • TV",
+      releaseFormat: "tv",
       start: "06 Jan 2005",
       end: "07 Jul 2005",
       duration: "24 min por episódio",
@@ -47,7 +52,7 @@ function AnimeBySlug() {
       episodes: 22,
       watchedEpisodes: 22,
       status: "Concluído",
-      format: "Anime • OVA",
+      releaseFormat: "ova",
       start: "06 Abr 2006",
       end: "14 Set 2006",
       duration: "24 min por episódio",
@@ -66,7 +71,7 @@ function AnimeBySlug() {
       episodes: 12,
       watchedEpisodes: 6,
       status: "Em andamento",
-      format: "Anime • ONA",
+      releaseFormat: "tv",
       start: "08 Jan 2007",
       end: "26 Mar 2007",
       duration: "24 min por episódio",
@@ -79,12 +84,13 @@ function AnimeBySlug() {
     },
   ];
 
-  const AnimeInfo = {
+  const AnimeInfo: AnimeEntity = {
     cover: "/animes/mayonaka.jpg",
     title: "Mayonaka Heart Tune",
     description:
       "Yamabuki Arisu busca por 'Apollo', uma misteriosa locutora de rádio que confortou suas noites solitárias antes de desaparecer. No clube de rádio do ensino médio, ele encontra quatro garotas com grandes ambições vocais e tenta descobrir qual delas é seu antigo amor.",
-    format: "anime",
+    entityType: "work",
+    medium: "anime",
     episodes: animeSeasons.reduce(
       (total, season) => total + season.episodes,
       0,
@@ -99,20 +105,25 @@ function AnimeBySlug() {
     demography: "Shounen",
     genders: ["Drama", "Comédia", "Ação"],
     duration: "24 min por episódio",
+    score: 6.64,
     rating: "PG-13",
     country: "Japão",
   };
 
+  const animeReleaseFormats = getUniqueAnimeReleaseFormats(
+    animeSeasons.map((season) => season.releaseFormat),
+  );
+
   return (
     <div className={styles.page}>
-      <HeroSection FormatInfo={AnimeInfo} />
+      <HeroSection entity={AnimeInfo} />
 
       <div className={styles.factsBar} aria-label="Resumo do anime">
         <div className={styles.factItem}>
           <PiTelevisionSimple aria-hidden="true" />
           <span>
             <small>Formato</small>
-            Anime • TV
+            {formatAnimeReleaseFormats(animeReleaseFormats)}
           </span>
         </div>
         <div className={styles.factItem}>
@@ -137,10 +148,10 @@ function AnimeBySlug() {
           </span>
         </div>
         <div className={styles.factItem}>
-          <TbWorld aria-hidden="true" />
+          <FaStar aria-hidden="true" />
           <span>
-            <small>Origem</small>
-            {AnimeInfo.country} · {AnimeInfo.rating}
+            <small>Score</small>
+            {AnimeInfo.score.toFixed(2)}
           </span>
         </div>
       </div>
@@ -157,7 +168,7 @@ function AnimeBySlug() {
 
         <div className={styles.contentContainer}>
           <div className={styles.sidebarColumn}>
-            <FormatSidebarInfo FormatInfo={AnimeInfo} />
+            <FormatSidebarInfo entity={AnimeInfo} />
           </div>
           <div className={styles.centralContainer}>
             <section id="acompanhar" className={styles.trackerSection}>

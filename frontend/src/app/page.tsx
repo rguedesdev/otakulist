@@ -7,13 +7,14 @@ import { LuBookHeart } from "react-icons/lu";
 import { RiBookmark3Line, RiSparkling2Line } from "react-icons/ri";
 
 import styles from "./home.module.css";
+import { animeReleaseFormatLabels } from "@/shared/types/entities";
 
 const trendingTitles = [
   {
     title: "Gachiakuta",
     image: "/animes/gachiakuta.jpg",
     href: "/anime/gachiakuta",
-    format: "TV",
+    releaseFormat: "tv" as const,
     detail: "Em lançamento",
     score: "8.6",
   },
@@ -21,7 +22,7 @@ const trendingTitles = [
     title: "MAO",
     image: "/animes/mao2.jpg",
     href: "/anime/mao",
-    format: "TV",
+    releaseFormat: "tv" as const,
     detail: "12 episódios",
     score: "8.2",
   },
@@ -29,7 +30,7 @@ const trendingTitles = [
     title: "Mayonaka Heart Tune",
     image: "/animes/mayonaka.jpg",
     href: "/anime/mayonaka-heart-tune",
-    format: "TV",
+    releaseFormat: "tv" as const,
     detail: "Em lançamento",
     score: "8.0",
   },
@@ -37,7 +38,7 @@ const trendingTitles = [
     title: "Kyoukai no Rinne",
     image: "/animes/rinne2.jpg",
     href: "/anime/kyoukai-no-rinne",
-    format: "TV",
+    releaseFormat: "tv" as const,
     detail: "Completo",
     score: "7.7",
   },
@@ -45,7 +46,7 @@ const trendingTitles = [
     title: "InuYasha",
     image: "/animes/inuyasha2.png",
     href: "/anime/inuyasha",
-    format: "TV",
+    releaseFormat: "tv" as const,
     detail: "Completo",
     score: "8.4",
   },
@@ -180,7 +181,7 @@ function HomePage() {
                 </div>
                 <div className={styles.mediaInfo}>
                   <h3>{item.title}</h3>
-                  <p>{item.format}<span aria-hidden="true">•</span>{item.detail}</p>
+                  <p>{animeReleaseFormatLabels[item.releaseFormat]}<span aria-hidden="true">•</span>{item.detail}</p>
                 </div>
               </Link>
             ))}

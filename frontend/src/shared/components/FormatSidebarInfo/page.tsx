@@ -1,12 +1,20 @@
 // Imports Principais
 import Link from "next/link";
 import Image from "next/image";
+import type { ReactNode } from "react";
 
 // Style Sheet CSS
 import styles from "./formatsidebar.module.css";
 
-// Ícone de Estrela para a Nota
-import { FaStar } from "react-icons/fa";
+import type { EntityInfo } from "@/shared/types/entities";
+import {
+  hasPersonRole,
+  hasVisiblePersonalDetails,
+  isAnime,
+  isWork,
+  mediumLabels,
+} from "@/shared/types/entities";
+
 import { HiOutlineLink } from "react-icons/hi";
 import { FaXTwitter } from "react-icons/fa6";
 import { FaInstagram } from "react-icons/fa";
@@ -25,15 +33,6 @@ import { RiBilibiliLine } from "react-icons/ri";
 
 import { SiRakuten } from "react-icons/si";
 import { SiShopee } from "react-icons/si";
-
-interface IFormatTranslations {
-  anime: string;
-  manga: string;
-  magazine: string;
-  publisher: string;
-  light_novel: string;
-  studio: string;
-}
 
 type MusicPlatformLinksProps = {
   spotify?: string;
@@ -85,116 +84,95 @@ function MusicPlatformLinks({ spotify, tidal, deezer, amazonMusic }: MusicPlatfo
   );
 }
 
-function FormatSidebarInfo({ FormatInfo, children }) {
-  const formatTranslations: Record<string, string> = {
-    anime: "Anime",
-    manga: "Manga",
-    magazine: "Magazine",
-    publisher: "Editora",
-    light_novel: "Light Novel",
-    studio: "Estúdio",
-  };
+type FormatSidebarInfoProps = {
+  entity: EntityInfo;
+  children?: ReactNode;
+};
+
+function FormatSidebarInfo({
+  entity,
+  children,
+}: FormatSidebarInfoProps) {
 
   return (
     <aside className={styles.sidebarWrapper}>
-      {/* Bloco 1: Card de Nota Isolado */}
-      {FormatInfo.format == "anime" ||
-      FormatInfo.format == "manga" ||
-      FormatInfo.format == "light_novel" ? (
-        <>
-          <div className={styles.scoreCard}>
-            <span className={styles.scoreTitle}>Score</span>
-            <div className={styles.scoreValueContainer}>
-              <FaStar
-                className={styles.starIcon}
-                size={16}
-                aria-hidden="true"
-              />
-              <span className={styles.scoreValue}>6.64</span>
-            </div>
-          </div>
-        </>
-      ) : (
-        <></>
-      )}
-
       {/* Bloco 2: Card de Informações Tradicional */}
       <div className={styles.infoCard}>
         <dl className={styles.animeDescriptionList}>
-          {FormatInfo.format == "anime" ||
-          FormatInfo.format == "manga" ||
-          FormatInfo.format == "light_novel" ||
-          FormatInfo.format == "magazine" ? (
+          {isWork(entity) ? (
             <>
-              <dt className={styles.animeDescriptionTerm}>Formato</dt>
+              <dt className={styles.animeDescriptionTerm}>Mídia</dt>
               <dd className={styles.animeDescriptionDetail}>
-                {
-                  formatTranslations[
-                    FormatInfo.format as keyof IFormatTranslations
-                  ]
-                }
+                {mediumLabels[entity.medium]}
               </dd>
+
             </>
           ) : (
             <></>
           )}
 
-          {FormatInfo.format == "mangaka" ||
-          FormatInfo.format == "mangaka" ||
-          FormatInfo.format == "seiyuu" ||
-          FormatInfo.format == "artist" ? (
+          {entity.entityType === "publication" ? (
+            <>
+              <dt className={styles.animeDescriptionTerm}>Tipo</dt>
+              <dd className={styles.animeDescriptionDetail}>Magazine</dd>
+            </>
+          ) : (
+            <></>
+          )}
+
+          {hasVisiblePersonalDetails(entity) ? (
             <>
               <>
                 <dt className={styles.animeDescriptionTerm}>Nome em Kanji</dt>
                 <dd className={styles.animeDescriptionDetail}>
-                  {FormatInfo.name_kanji}
+                  {entity.name_kanji}
                 </dd>
 
                 <dt className={styles.animeDescriptionTerm}>Nome em Romaji</dt>
                 <dd className={styles.animeDescriptionDetail}>
-                  {FormatInfo.name_romaji}
+                  {entity.name_romaji}
                 </dd>
 
                 <dt className={styles.animeDescriptionTerm}>
                   Data de Nascimento
                 </dt>
                 <dd className={styles.animeDescriptionDetail}>
-                  {FormatInfo.date_of_birth}
+                  {entity.date_of_birth}
                 </dd>
 
                 <dt className={styles.animeDescriptionTerm}>Cidade Natal</dt>
                 <dd className={styles.animeDescriptionDetail}>
-                  {FormatInfo.hometown}
+                  {entity.hometown}
                 </dd>
 
-                {FormatInfo.format == "seiyuu" && (
+                {hasPersonRole(entity, "seiyuu") && "agency" in entity && (
                   <>
                     <dt className={styles.animeDescriptionTerm}>Agência</dt>
                     <dd className={styles.animeDescriptionDetail}>
-                      {FormatInfo.agency}
+                      {entity.agency}
                     </dd>
                   </>
                 )}
 
-                {FormatInfo.format == "artist" && (
+                {hasPersonRole(entity, "artist") && "activity_period" in entity && (
                   <>
                     <dt className={styles.animeDescriptionTerm}>
                       Período de atividade
                     </dt>
                     <dd className={styles.animeDescriptionDetail}>
-                      {FormatInfo.activity_period}
+                      {entity.activity_period}
                     </dd>
 
                     <dt className={styles.animeDescriptionTerm}>Gravadora</dt>
                     <dd className={styles.animeDescriptionDetail}>
-                      {FormatInfo.record_label}
+                      {entity.record_label}
                     </dd>
 
                     <dt className={styles.animeDescriptionTerm}>
                       Gêneros musicais
                     </dt>
                     <dd className={styles.animeDescriptionDetail}>
-                      {FormatInfo.musical_genres.join(", ")}
+                      {entity.musical_genres?.join(", ")}
                     </dd>
                   </>
                 )}
@@ -204,51 +182,38 @@ function FormatSidebarInfo({ FormatInfo, children }) {
             <></>
           )}
 
-          {FormatInfo.episodes ? (
-            <>
-              <dt className={styles.animeDescriptionTerm}>Episódios</dt>
-              <dd className={styles.animeDescriptionDetail}>
-                {FormatInfo.episodes}
-              </dd>
-            </>
-          ) : (
-            <></>
-          )}
-
-          {FormatInfo.status ? (
+          {isWork(entity) && entity.medium !== "anime" && entity.status ? (
             <>
               <dt className={styles.animeDescriptionTerm}>Status</dt>
               <dd className={styles.animeDescriptionDetail}>
-                {FormatInfo.status}
+                {entity.status}
               </dd>
             </>
           ) : (
             <></>
           )}
 
-          {FormatInfo.format == "anime" ||
-          FormatInfo.format == "manga" ||
-          FormatInfo.format == "light_novel" ? (
+          {isWork(entity) ? (
             <>
               <dt className={styles.animeDescriptionTerm}>Início</dt>
               <dd className={styles.animeDescriptionDetail}>
-                {FormatInfo.start}
+                {entity.start}
               </dd>
               <dt className={styles.animeDescriptionTerm}>Término</dt>
               <dd className={styles.animeDescriptionDetail}>
-                {FormatInfo.end}
+                {entity.end}
               </dd>
             </>
           ) : (
             <></>
           )}
 
-          {FormatInfo.publisher ? (
+          {"publisher" in entity && entity.publisher ? (
             <>
               <dt className={styles.animeDescriptionTerm}>Editora</dt>
               <dd className={styles.animeDescriptionDetail}>
                 <Link className={styles.publisherLink} href={`/`}>
-                  {FormatInfo.publisher}
+                  {entity.publisher}
                 </Link>
               </dd>
             </>
@@ -256,52 +221,52 @@ function FormatSidebarInfo({ FormatInfo, children }) {
             <></>
           )}
 
-          {FormatInfo.format == "magazine" ||
-          FormatInfo.format == "publisher" ? (
+          {entity.entityType === "publication" ||
+          entity.entityType === "organization" ? (
             <>
               <dt className={styles.animeDescriptionTerm}>Fundado em</dt>
               <dd className={styles.animeDescriptionDetail}>
-                {FormatInfo.foundation}
+                {entity.foundation}
               </dd>
             </>
           ) : (
             <></>
           )}
 
-          {FormatInfo.season ? (
+          {isAnime(entity) && entity.season ? (
             <>
               <dt className={styles.animeDescriptionTerm}>Temporada</dt>
               <dd className={styles.animeDescriptionDetail}>
-                {FormatInfo.season}
+                {entity.season}
               </dd>
             </>
           ) : (
             <></>
           )}
 
-          {FormatInfo.studio ? (
+          {isAnime(entity) && entity.studio ? (
             <>
               <dt className={styles.animeDescriptionTerm}>Estúdio</dt>
               <dd className={styles.animeDescriptionDetail}>
-                {FormatInfo.studio}
+                {entity.studio}
               </dd>
             </>
           ) : (
             <></>
           )}
 
-          {FormatInfo.producers ? (
+          {isAnime(entity) && entity.producers ? (
             <>
               <dt className={styles.animeDescriptionTerm}>Produtores</dt>
               <dd className={styles.animeDescriptionDetail}>
-                {FormatInfo.producers.join(", ")}
+                {entity.producers.join(", ")}
               </dd>
             </>
           ) : (
             <></>
           )}
 
-          {FormatInfo.magazine ? (
+          {isWork(entity) && entity.medium === "manga" && entity.magazine ? (
             <>
               <dt className={styles.animeDescriptionTerm}>Magazine</dt>
               <dd className={styles.animeDescriptionDetail}>
@@ -309,7 +274,7 @@ function FormatSidebarInfo({ FormatInfo, children }) {
                   className={styles.magazineLink}
                   href={`/magazine/shounen-jump`}
                 >
-                  {FormatInfo.magazine}
+                  {entity.magazine}
                 </Link>
               </dd>
             </>
@@ -317,38 +282,60 @@ function FormatSidebarInfo({ FormatInfo, children }) {
             <></>
           )}
 
-          {FormatInfo.source ? (
+          {isWork(entity) && entity.source ? (
             <>
               <dt className={styles.animeDescriptionTerm}>Origem</dt>
               <dd className={styles.animeDescriptionDetail}>
-                {FormatInfo.source}
+                {entity.source}
               </dd>
             </>
           ) : (
             <></>
           )}
 
-          {FormatInfo.format == "magazine" ? (
+          {entity.entityType === "publication" ? (
             <>
               <dt className={styles.animeDescriptionTerm}>Demografia</dt>
               <dd className={styles.animeDescriptionDetail}>
-                {FormatInfo.demography}
+                {entity.demography}
               </dd>
 
               <dt className={styles.animeDescriptionTerm}>Periodicidade</dt>
               <dd className={styles.animeDescriptionDetail}>
-                {FormatInfo.frequency}
+                {entity.frequency}
               </dd>
             </>
           ) : (
             <></>
           )}
 
-          {FormatInfo.genders ? (
+          {isWork(entity) && entity.genders ? (
             <>
               <dt className={styles.animeDescriptionTerm}>Gênero</dt>
               <dd className={styles.animeDescriptionDetail}>
-                {FormatInfo.genders.join(", ")}
+                {entity.genders.join(", ")}
+              </dd>
+            </>
+          ) : (
+            <></>
+          )}
+
+          {isWork(entity) && entity.medium === "manga" ? (
+            <>
+              <dt className={styles.animeDescriptionTerm}>Demografia</dt>
+              <dd className={styles.animeDescriptionDetail}>
+                {entity.demography}
+              </dd>
+            </>
+          ) : (
+            <></>
+          )}
+
+          {isAnime(entity) ? (
+            <>
+              <dt className={styles.animeDescriptionTerm}>Classificação</dt>
+              <dd className={styles.animeDescriptionDetail}>
+                {entity.rating}
               </dd>
             </>
           ) : (
@@ -404,7 +391,7 @@ function FormatSidebarInfo({ FormatInfo, children }) {
 
       {children}
 
-      {FormatInfo.format == "anime" ? (
+      {isAnime(entity) ? (
         <>
           {/* Bloco 4: Streamings Links */}
           <div className={styles.streamingsLinks}>
@@ -595,9 +582,8 @@ function FormatSidebarInfo({ FormatInfo, children }) {
       )}
 
       {/* Bloco 5: Store Links */}
-      {FormatInfo.format == "manga" ||
-      FormatInfo.format == "light_novel" ||
-      FormatInfo.format == "magazine" ? (
+      {(isWork(entity) && entity.medium !== "anime") ||
+      entity.entityType === "publication" ? (
         <div className={styles.storeLinks}>
           <h3 className={styles.storeLinksTitle}>Compre em</h3>
           <Link className={styles.linkAmazonStore} href={`/`}>

@@ -5,22 +5,24 @@ import styles from "./publisherslug.module.css";
 import { HeroSection } from "@/shared/components/HeroSection/page";
 import { FormatSidebarInfo } from "@/shared/components/FormatSidebarInfo/page";
 import { MagazinesByPublisher } from "./components/MagazinesByPublisher/page";
+import type { OrganizationEntity } from "@/shared/types/entities";
 
 function MagazineBySlug() {
-  const PublisherInfo = {
+  const PublisherInfo: OrganizationEntity = {
     cover: "/mangas/shueisha.png",
     title: "Shueisha",
     description: "A Shueisha é a maior e mais importante editora japonesa.",
-    format: "publisher",
+    entityType: "organization",
+    organizationType: "publisher",
     foundation: "13 Jun 1990",
   };
 
   return (
     <div className={styles.page}>
-      <HeroSection FormatInfo={PublisherInfo} />
+      <HeroSection entity={PublisherInfo} />
       <main className={styles.publisherSlugContainer}>
         <div className={styles.contentContainer}>
-          <FormatSidebarInfo FormatInfo={PublisherInfo} />
+          <FormatSidebarInfo entity={PublisherInfo} />
           <div className={styles.centralContainer}>
             <MagazinesByPublisher />
           </div>
