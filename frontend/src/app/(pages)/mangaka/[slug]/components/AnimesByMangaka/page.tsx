@@ -1,159 +1,35 @@
-// Imports Principais
 import Image from "next/image";
+import Link from "next/link";
+import { FaRegCheckCircle } from "react-icons/fa";
+import { RiRestartLine } from "react-icons/ri";
 
-// Style Sheet CSS
+import type { StaffAnimeCredit } from "@/app/(pages)/staff/[slug]/components/AnimesByStaff/page";
+import { assetUrl } from "@/shared/auth/api";
+import { normalizeStaffCredit } from "@/shared/catalog/staff-roles";
+import { StaffRoleIcon } from "@/shared/components/StaffSection/page";
 import styles from "./animesbymangaka.module.css";
 
-// Icones
-import { RiRestartLine } from "react-icons/ri";
-import { RiQuillPenLine } from "react-icons/ri";
-import { FaRegCheckCircle } from "react-icons/fa";
+const date = (value: string | null) => value ? new Intl.DateTimeFormat("pt-BR", { dateStyle: "medium", timeZone: "UTC" }).format(new Date(`${value}T00:00:00Z`)) : "—";
 
-function AnimesByMangaka() {
-  return (
-    <section className={styles.animesByMangakaContainer}>
-      <h2 className={styles.animesByMangakaSectionTitle}>Animes</h2>
-      <div className={styles.animesByMangakaCardsContainer}>
-        {/* Card 1 */}
-        <article className={styles.animesByMangakaCard}>
-          <Image
-            className={styles.animesByMangakaCover}
-            src="/animes/mao2.jpg"
-            alt="Manga Cover"
-            width={90}
-            height={130}
-            unoptimized
-            priority
-          />
-          <div className={styles.animesByMangakaTextsContainer}>
-            <div className={styles.animesByMangakaTexts}>
-              <h3 className={styles.animesByMangakaTitle}>MAO</h3>
-              <dl className={styles.infoGroup}>
-                <div className={styles.infoLine}>
-                  <dt className={styles.infoIcon}>
-                    <RiQuillPenLine size={16} aria-hidden="true" />
-                  </dt>
-                  <dd className={styles.animesByMangakaInfo}>
-                    Criador Original
-                  </dd>
-                </div>
-
-                <div className={styles.infoLine}>
-                  <dt className={styles.infoIcon}>
-                    <RiRestartLine size={14} aria-hidden="true" />
-                  </dt>
-                  <dd className={styles.animesByMangakaInfo}>
-                    Ínicio: 13 Jun 1990
-                  </dd>
-                </div>
-
-                <div className={styles.infoLine}>
-                  <dt className={styles.infoIcon}>
-                    <FaRegCheckCircle size={13} aria-hidden="true" />
-                  </dt>
-                  <dd className={styles.animesByMangakaInfo}>
-                    Término: 20 Abril 2004
-                  </dd>
-                </div>
-              </dl>
-            </div>
-          </div>
-        </article>
-
-        {/* Card 2 */}
-        <article className={styles.animesByMangakaCard}>
-          <Image
-            className={styles.animesByMangakaCover}
-            src="/animes/rinne2.jpg"
-            alt="Manga Cover"
-            width={90}
-            height={130}
-            unoptimized
-            priority
-          />
-          <div className={styles.animesByMangakaTextsContainer}>
-            <div className={styles.animesByMangakaTexts}>
-              <h3 className={styles.animesByMangakaTitle}>Kyoukai no Rinne</h3>
-              <dl className={styles.infoGroup}>
-                <div className={styles.infoLine}>
-                  <dt className={styles.infoIcon}>
-                    <RiQuillPenLine size={16} aria-hidden="true" />
-                  </dt>
-                  <dd className={styles.animesByMangakaInfo}>
-                    Criador Original
-                  </dd>
-                </div>
-
-                <div className={styles.infoLine}>
-                  <dt className={styles.infoIcon}>
-                    <RiRestartLine size={14} aria-hidden="true" />
-                  </dt>
-                  <dd className={styles.animesByMangakaInfo}>
-                    Ínicio: 13 Jun 1990
-                  </dd>
-                </div>
-
-                <div className={styles.infoLine}>
-                  <dt className={styles.infoIcon}>
-                    <FaRegCheckCircle size={13} aria-hidden="true" />
-                  </dt>
-                  <dd className={styles.animesByMangakaInfo}>
-                    Término: 20 Abril 2004
-                  </dd>
-                </div>
-              </dl>
-            </div>
-          </div>
-        </article>
-
-        {/* Card 3 */}
-        <article className={styles.animesByMangakaCard}>
-          <Image
-            className={styles.animesByMangakaCover}
-            src="/animes/inuyasha2.png"
-            alt="Manga Cover"
-            width={90}
-            height={130}
-            unoptimized
-            priority
-          />
-          <div className={styles.animesByMangakaTextsContainer}>
-            <div className={styles.animesByMangakaTexts}>
-              <h3 className={styles.animesByMangakaTitle}>InuYasha</h3>
-              <dl className={styles.infoGroup}>
-                <div className={styles.infoLine}>
-                  <dt className={styles.infoIcon}>
-                    <RiQuillPenLine size={16} aria-hidden="true" />
-                  </dt>
-                  <dd className={styles.animesByMangakaInfo}>
-                    Criador Original
-                  </dd>
-                </div>
-
-                <div className={styles.infoLine}>
-                  <dt className={styles.infoIcon}>
-                    <RiRestartLine size={14} aria-hidden="true" />
-                  </dt>
-                  <dd className={styles.animesByMangakaInfo}>
-                    Ínicio: 13 Jun 1990
-                  </dd>
-                </div>
-
-                <div className={styles.infoLine}>
-                  <dt className={styles.infoIcon}>
-                    <FaRegCheckCircle size={13} aria-hidden="true" />
-                  </dt>
-                  <dd className={styles.animesByMangakaInfo}>
-                    Término: 20 Abril 2004
-                  </dd>
-                </div>
-              </dl>
-            </div>
-          </div>
-        </article>
-      </div>
-    </section>
-  );
+function AnimesByMangaka({ credits }: { credits: StaffAnimeCredit[] }) {
+  if (credits.length === 0) return null;
+  return <section className={styles.animesByMangakaContainer}>
+    <h2 className={styles.animesByMangakaSectionTitle}>Animes</h2>
+    <div className={styles.animesByMangakaCardsContainer}>{credits.map(({ anime, role, contribution }) => {
+      const normalizedCredit = normalizeStaffCredit({ role, contribution });
+      return <Link href={`/anime/${anime.slug}`} key={`${anime.slug}-${role}`}>
+      <article className={styles.animesByMangakaCard}>
+        <Image className={styles.animesByMangakaCover} src={assetUrl(anime.coverUrl) ?? anime.coverUrl} alt={anime.title} width={90} height={130} unoptimized />
+        <div className={styles.animesByMangakaTextsContainer}><div className={styles.animesByMangakaTexts}><h3 className={styles.animesByMangakaTitle}>{anime.title}</h3><dl className={styles.infoGroup}>
+          <div className={styles.infoLine}><dt className={styles.infoIcon}><StaffRoleIcon role={normalizedCredit.role} size={16} /></dt><dd className={styles.animesByMangakaInfo}>{normalizedCredit.role}{normalizedCredit.contribution ? ` • ${normalizedCredit.contribution}` : ""}</dd></div>
+          <div className={styles.infoLine}><dt className={styles.infoIcon}><RiRestartLine size={14} /></dt><dd className={styles.animesByMangakaInfo}>Início: {date(anime.startDate)}</dd></div>
+          <div className={styles.infoLine}><dt className={styles.infoIcon}><FaRegCheckCircle size={13} /></dt><dd className={styles.animesByMangakaInfo}>Término: {date(anime.endDate)}</dd></div>
+        </dl></div></div>
+      </article>
+    </Link>;
+    })}</div>
+  </section>;
 }
 
 export { AnimesByMangaka };
+export default AnimesByMangaka;

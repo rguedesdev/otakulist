@@ -1,142 +1,37 @@
-// Imports Principais
 import Image from "next/image";
+import Link from "next/link";
+import { LuCalendarRange } from "react-icons/lu";
+import { PiTargetFill } from "react-icons/pi";
 
-// Style Sheet CSS
+import { assetUrl } from "@/shared/auth/api";
 import styles from "./magazinesbypublisher.module.css";
 
-// Icones
-import { RiRestartLine } from "react-icons/ri";
-import { RiQuillPenLine } from "react-icons/ri";
+export type PublisherMagazine = {
+  id: string;
+  title: string;
+  slug: string;
+  imageUrl: string;
+  demography: string | null;
+  frequency: string | null;
+};
 
-import { PiTargetFill } from "react-icons/pi";
-import { LuCalendarRange } from "react-icons/lu";
-
-function MagazinesByPublisher() {
-  return (
-    <section className={styles.magazinesByPublisherContainer}>
-      <h2 className={styles.magazinesByPublisherSectionTitle}>
-        Magazines publicadas
-      </h2>
-      <div className={styles.magazinesByPublisherCardsContainer}>
-        {/* Card 1 */}
+export function MagazinesByPublisher({ magazines }: { magazines: PublisherMagazine[] }) {
+  if (magazines.length === 0) return null;
+  return <section className={styles.magazinesByPublisherContainer}>
+    <h2 className={styles.magazinesByPublisherSectionTitle}>Magazines publicadas</h2>
+    <div className={styles.magazinesByPublisherCardsContainer}>
+      {magazines.map((magazine) => <Link href={`/magazine/${magazine.slug}`} key={magazine.id}>
         <article className={styles.magazinesByPublisherCard}>
-          <Image
-            className={styles.magazinesByPublisherCover}
-            src="/mangas/shounen-jump.jpg"
-            alt="Magazine Cover"
-            width={90}
-            height={130}
-            unoptimized
-            priority
-          />
-          <div className={styles.magazinesByPublisherTextsContainer}>
-            <div className={styles.magazinesByPublisherTexts}>
-              <h3 className={styles.magazinesByPublisherTitle}>
-                Weekly Shounen Jump
-              </h3>
-              <dl className={styles.infoGroup}>
-                <div className={styles.infoLine}>
-                  <dt className={styles.infoIcon}>
-                    <PiTargetFill size={16} aria-hidden="true" />
-                  </dt>
-                  <dd className={styles.magazinesByPublisherInfo}>
-                    Demografia: Shounen
-                  </dd>
-                </div>
-
-                <div className={styles.infoLine}>
-                  <dt className={styles.infoIcon}>
-                    <LuCalendarRange size={14} aria-hidden="true" />
-                  </dt>
-                  <dd className={styles.magazinesByPublisherInfo}>
-                    Periodicidade: Semanal
-                  </dd>
-                </div>
-              </dl>
-            </div>
-          </div>
+          <Image className={styles.magazinesByPublisherCover} src={assetUrl(magazine.imageUrl) ?? magazine.imageUrl} alt={`Capa de ${magazine.title}`} width={90} height={130} unoptimized />
+          <div className={styles.magazinesByPublisherTextsContainer}><div className={styles.magazinesByPublisherTexts}>
+            <h3 className={styles.magazinesByPublisherTitle}>{magazine.title}</h3>
+            <dl className={styles.infoGroup}>
+              <div className={styles.infoLine}><dt className={styles.infoIcon}><PiTargetFill size={16} aria-hidden="true" /></dt><dd className={styles.magazinesByPublisherInfo}>Demografia: {magazine.demography ?? "—"}</dd></div>
+              <div className={styles.infoLine}><dt className={styles.infoIcon}><LuCalendarRange size={14} aria-hidden="true" /></dt><dd className={styles.magazinesByPublisherInfo}>Periodicidade: {magazine.frequency ?? "—"}</dd></div>
+            </dl>
+          </div></div>
         </article>
-
-        {/* Card 2 (Título Longo) */}
-        <article className={styles.magazinesByPublisherCard}>
-          <Image
-            className={styles.magazinesByPublisherCover}
-            src="/mangas/young-jump.jpg"
-            alt="Magazine Cover"
-            width={90}
-            height={130}
-            unoptimized
-            priority
-          />
-          <div className={styles.magazinesByPublisherTextsContainer}>
-            <div className={styles.magazinesByPublisherTexts}>
-              <h3 className={styles.magazinesByPublisherTitle}>
-                Weekly Young Jump
-              </h3>
-              <dl className={styles.infoGroup}>
-                <div className={styles.infoLine}>
-                  <dt className={styles.infoIcon}>
-                    <PiTargetFill size={16} aria-hidden="true" />
-                  </dt>
-                  <dd className={styles.magazinesByPublisherInfo}>
-                    Demografia: Seinen
-                  </dd>
-                </div>
-
-                <div className={styles.infoLine}>
-                  <dt className={styles.infoIcon}>
-                    <LuCalendarRange size={14} aria-hidden="true" />
-                  </dt>
-                  <dd className={styles.magazinesByPublisherInfo}>
-                    Periodicidade: Semanal
-                  </dd>
-                </div>
-              </dl>
-            </div>
-          </div>
-        </article>
-
-        {/* Card 3 (Com Ícone da Bilibili) */}
-        <article className={styles.magazinesByPublisherCard}>
-          <Image
-            className={styles.magazinesByPublisherCover}
-            src="/mangas/betsuma.jpg"
-            alt="Magazine Cover"
-            width={90}
-            height={130}
-            unoptimized
-            priority
-          />
-          <div className={styles.magazinesByPublisherTextsContainer}>
-            <div className={styles.magazinesByPublisherTexts}>
-              <h3 className={styles.magazinesByPublisherTitle}>
-                Bessatsu Margaret
-              </h3>
-              <dl className={styles.infoGroup}>
-                <div className={styles.infoLine}>
-                  <dt className={styles.infoIcon}>
-                    <PiTargetFill size={16} aria-hidden="true" />
-                  </dt>
-                  <dd className={styles.magazinesByPublisherInfo}>
-                    Demografia: Shoujo
-                  </dd>
-                </div>
-
-                <div className={styles.infoLine}>
-                  <dt className={styles.infoIcon}>
-                    <LuCalendarRange size={14} aria-hidden="true" />
-                  </dt>
-                  <dd className={styles.magazinesByPublisherInfo}>
-                    Periodicidade: Semanal
-                  </dd>
-                </div>
-              </dl>
-            </div>
-          </div>
-        </article>
-      </div>
-    </section>
-  );
+      </Link>)}
+    </div>
+  </section>;
 }
-
-export { MagazinesByPublisher };

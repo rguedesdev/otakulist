@@ -1,0 +1,67 @@
+.page {
+  min-height: 100vh;
+  padding: 36px 20px 72px;
+  color: var(--color-text-primary);
+  background: radial-gradient(circle at 82% 7%, var(--color-accent-soft), transparent 30rem), var(--color-bg-base);
+}
+
+.container { width: min(100%, 920px); margin-inline: auto; }
+.heading { margin-bottom: 20px; display: flex; align-items: center; gap: 13px; }
+.headingIcon { width: 43px; height: 43px; display: grid; place-items: center; flex: 0 0 auto; color: var(--color-accent-highlight); background: var(--color-accent-soft); border: 1px solid var(--color-accent-border); border-radius: var(--radius-medium); font-size: 22px; }
+.heading h1 { font-size: clamp(25px, 4vw, 32px); }
+.heading p, .sectionHeading p, .avatarCopy p { margin-top: 5px; color: var(--color-text-muted); font-size: 12px; line-height: 1.5; }
+.form { display: grid; gap: 16px; }
+.avatarCard, .infoCard { padding: 22px; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-large); box-shadow: var(--shadow-card); }
+.avatarCard { display: grid; grid-template-columns: 104px minmax(0, 1fr) auto; align-items: center; gap: 18px; }
+.avatar { width: 104px; height: 104px; display: grid; place-items: center; color: var(--color-accent-highlight); background-color: var(--color-surface-raised); background-position: center; background-size: cover; border: 3px solid var(--color-accent-border); border-radius: var(--radius-large); font-size: 34px; font-weight: 800; }
+.avatarCopy h2, .sectionHeading h2 { font-size: 17px; }
+.fileInput { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); }
+.avatarActions { display: flex; flex-direction: column; align-items: stretch; gap: 8px; }
+.uploadButton, .cancelImage, .backButton, .saveButton { min-height: 40px; padding: 9px 13px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border-radius: var(--radius-small); font-size: 12px; font-weight: 750; cursor: pointer; transition: color .2s ease, background-color .2s ease, border-color .2s ease, transform .2s ease; }
+.uploadButton { color: var(--color-text-primary); background: var(--color-accent-soft); border: 1px solid var(--color-accent-border); }
+.uploadButton:hover { color: var(--color-accent-highlight); background: var(--color-surface-hover); }
+.cancelImage { min-height: auto; padding: 4px; color: var(--color-text-muted); background: transparent; border: 0; }
+.cancelImage:hover { color: var(--color-text-primary); }
+.sectionHeading { padding-bottom: 18px; display: flex; align-items: flex-start; gap: 11px; border-bottom: 1px solid var(--color-border); }
+.sectionHeading > svg { margin-top: 2px; flex: 0 0 auto; color: var(--color-accent); font-size: 19px; }
+.fields { margin-top: 20px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.field { display: grid; gap: 7px; }
+.fullField { grid-column: 1 / -1; }
+.field label { color: var(--color-text-secondary); font-size: 12px; font-weight: 700; }
+.field input, .field textarea { width: 100%; min-height: 44px; padding: 10px 12px; color: var(--color-text-primary); background: var(--color-bg-subtle); border: 1px solid var(--color-border-strong); border-radius: var(--radius-small); outline: none; transition: border-color .2s ease, box-shadow .2s ease; }
+.field textarea { resize: vertical; line-height: 1.55; }
+.field input:focus, .field textarea:focus { border-color: var(--color-accent); box-shadow: 0 0 0 3px var(--color-accent-soft); }
+.usernameInput { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; background: var(--color-bg-subtle); border: 1px solid var(--color-border-strong); border-radius: var(--radius-small); transition: border-color .2s ease, box-shadow .2s ease; }
+.usernameInput:focus-within { border-color: var(--color-accent); box-shadow: 0 0 0 3px var(--color-accent-soft); }
+.usernameInput span { padding-left: 12px; color: var(--color-text-muted); font-size: 13px; }
+.usernameInput input, .usernameInput input:focus { border: 0; box-shadow: none; }
+.fieldError, .formError { color: var(--color-danger); font-size: 12px; line-height: 1.45; }
+.formError, .success { padding: 11px 13px; border-radius: var(--radius-small); }
+.formError { background: color-mix(in srgb, var(--color-danger) 10%, transparent); border: 1px solid color-mix(in srgb, var(--color-danger) 25%, transparent); }
+.success { display: flex; align-items: center; gap: 8px; color: var(--color-accent-highlight); background: var(--color-accent-soft); border: 1px solid var(--color-accent-border); font-size: 12px; font-weight: 700; }
+.footerActions { display: flex; justify-content: flex-end; gap: 10px; }
+.backButton { color: var(--color-text-secondary); background: var(--color-surface); border: 1px solid var(--color-border-strong); }
+.backButton:hover { color: var(--color-text-primary); background: var(--color-surface-hover); }
+.saveButton { min-width: 150px; color: #fff; background: linear-gradient(135deg, var(--color-accent-hover), var(--color-accent-deep)); border: 1px solid var(--color-accent); }
+.saveButton:hover { filter: brightness(1.08); }
+.saveButton:disabled { cursor: wait; opacity: .65; }
+.backButton:active, .saveButton:active, .uploadButton:active { transform: scale(.98); }
+.loading { width: 42px; height: 42px; margin: 25vh auto 0; background: conic-gradient(from 20deg, transparent 0 18%, var(--color-accent) 45%, var(--color-accent-highlight) 78%, transparent 100%); border-radius: 50%; animation: spin .72s linear infinite; -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 0); mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 0); }
+@keyframes spin { to { transform: rotate(1turn); } }
+
+@media (max-width: 680px) {
+  .page { padding: 24px 12px 52px; }
+  .avatarCard { grid-template-columns: 82px minmax(0, 1fr); padding: 18px; }
+  .avatar { width: 82px; height: 82px; }
+  .avatarActions { grid-column: 1 / -1; flex-direction: row; }
+  .uploadButton { flex: 1; }
+  .fields { grid-template-columns: 1fr; }
+  .fullField { grid-column: auto; }
+  .footerActions { flex-direction: column-reverse; }
+  .backButton, .saveButton { width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .uploadButton, .backButton, .saveButton { transition: none; }
+  .loading { animation-duration: 1.5s; }
+}

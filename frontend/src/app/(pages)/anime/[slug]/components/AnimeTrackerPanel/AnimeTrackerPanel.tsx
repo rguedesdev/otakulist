@@ -6,7 +6,6 @@ import {
   FiCheck,
   FiChevronDown,
   FiEdit3,
-  FiLogIn,
   FiLock,
   FiMinus,
   FiPlus,
@@ -15,11 +14,14 @@ import { MdOutlineAutoAwesome } from "react-icons/md";
 import { LuListTree } from "react-icons/lu";
 
 import type { AnimeSeason } from "@/shared/components/SeasonSection/page";
+import { CustomSelect } from "@/shared/components/CustomSelect/page";
+import { useAuth } from "@/shared/auth/auth-provider";
+import { entryToLocalTracker, saveAnimeListEntry } from "@/shared/tracking/anime-list-api";
 import styles from "../../animeslug.module.css";
 
 interface AnimeTrackerPanelProps {
   seasons: AnimeSeason[];
-  isAuthenticated?: boolean;
+  workKey: string;
 }
 
 const statusLabels: Record<string, string> = {
@@ -27,7 +29,7 @@ const statusLabels: Record<string, string> = {
   assistindo: "Assistindo",
   pausado: "Pausado",
   completo: "Completo",
-  abandonado: "Abandonado",
+  abandonado: "Dropado",
 };
 
 type ProgressStyle = CSSProperties & {
@@ -49,10 +51,9 @@ function getProgressStyle(progress: number): ProgressStyle {
   };
 }
 
-function AnimeTrackerPanel({
-  seasons,
-  isAuthenticated = false,
-}: AnimeTrackerPanelProps) {
+function AnimeTrackerPanel({ seasons, workKey }: AnimeTrackerPanelProps) {
+  const { user, accessToken } = useAuth();
+  const isAuthenticated = Boolean(user);
   const [seasonProgress, setSeasonProgress] = useState<Record<number, number>>(
     () => Object.fromEntries(seasons.map((season) => [season.id, season.watchedEpisodes])),
   );
@@ -60,16 +61,27 @@ function AnimeTrackerPanel({
     seasons.find((season) => season.watchedEpisodes < season.episodes)?.id ??
       seasons[seasons.length - 1]?.id,
   );
-  const [status, setStatus] = useState("assistindo");
-  const [score, setScore] = useState("8");
+  const [status, setStatus] = useState("planejado");
+  const [isAdded, setIsAdded] = useState(false);
   const [saved, setSaved] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [savingProgress, setSavingProgress] = useState(false);
 
   useEffect(() => {
     const hydrateTracker = () => {
-      const storedTracker = window.localStorage.getItem(
-        "otakulist:anime-tracker",
+      const emptyProgress = Object.fromEntries(
+        seasons.map((season) => [season.id, 0]),
       );
+      setSeasonProgress(emptyProgress);
+      setSelectedSeasonId(seasons[0]?.id);
+      setStatus("planejado");
+      setIsAdded(false);
+      setSaved(false);
+
+      if (!user) return;
+
+      const storageKey = `otakulist:anime-tracker:${user.id}:${workKey}`;
+      const storedTracker = window.localStorage.getItem(storageKey);
 
       if (!storedTracker) return;
 
@@ -78,8 +90,10 @@ function AnimeTrackerPanel({
           seasonProgress?: Record<number, number>;
           watchedEpisodes?: number;
           status?: string;
-          score?: string;
+          isAdded?: boolean;
         };
+
+        if (parsedTracker.isAdded === false) return;
 
         if (parsedTracker.seasonProgress) {
           const hydratedProgress = Object.fromEntries(
@@ -111,18 +125,29 @@ function AnimeTrackerPanel({
               seasons[seasons.length - 1]?.id,
           );
         }
-        setStatus(parsedTracker.status ?? "assistindo");
-        setScore(parsedTracker.score ?? "8");
+        setStatus(parsedTracker.status ?? "planejado");
+        setIsAdded(true);
         setSaved(true);
       } catch {
-        window.localStorage.removeItem("otakulist:anime-tracker");
+        window.localStorage.removeItem(storageKey);
       }
     };
 
     const animationFrame = window.requestAnimationFrame(hydrateTracker);
+    const handleTrackerUpdate = (event: Event) => {
+      if (!user) return;
+      const storageKey = `otakulist:anime-tracker:${user.id}:${workKey}`;
+      if (event instanceof CustomEvent && event.detail === storageKey) {
+        hydrateTracker();
+      }
+    };
+    window.addEventListener("otakulist:anime-tracker-updated", handleTrackerUpdate);
 
-    return () => window.cancelAnimationFrame(animationFrame);
-  }, [seasons]);
+    return () => {
+      window.cancelAnimationFrame(animationFrame);
+      window.removeEventListener("otakulist:anime-tracker-updated", handleTrackerUpdate);
+    };
+  }, [seasons, user, workKey]);
 
   const totalEpisodes = seasons.reduce((total, season) => total + season.episodes, 0);
   const watchedEpisodes = seasons.reduce(
@@ -200,17 +225,26 @@ function AnimeTrackerPanel({
     if (status === "completo" && amount < 0) setStatus("assistindo");
   };
 
-  const saveTracker = () => {
-    window.localStorage.setItem(
-      "otakulist:anime-tracker",
-      JSON.stringify({ seasonProgress, watchedEpisodes, status, score }),
-    );
-    setSaved(true);
-    setIsExpanded(false);
+  const saveTracker = async () => {
+    if (!user || !accessToken || savingProgress) return;
+    setSavingProgress(true);
+    const storageKey = `otakulist:anime-tracker:${user.id}:${workKey}`;
+    try {
+      const entry = await saveAnimeListEntry(workKey, accessToken, { seasonProgress, status });
+      window.localStorage.setItem(storageKey, JSON.stringify(entryToLocalTracker(entry)));
+      window.dispatchEvent(new CustomEvent("otakulist:anime-tracker-updated", { detail: storageKey }));
+      setIsAdded(true);
+      setSaved(true);
+    } finally {
+      setSavingProgress(false);
+    }
   };
 
+  if (!isAuthenticated || !isAdded) return null;
+
   return (
-    <div className={styles.trackerWrapper}>
+    <section id="acompanhar" className={`${styles.trackerSection} ${isExpanded ? styles.trackerSectionExpanded : ""}`}>
+      <div className={styles.trackerWrapper}>
       <div className={styles.trackerSummary}>
         <div className={styles.trackerIdentity}>
           <span className={styles.trackerIcon}>
@@ -222,62 +256,43 @@ function AnimeTrackerPanel({
           </span>
         </div>
 
-        {isAuthenticated ? (
-          <>
-            <div className={styles.trackerStatus}>
-              <small>Status</small>
-              <strong>{statusLabels[status]}</strong>
-            </div>
+        <div className={styles.trackerStatus}>
+          <small>Status</small>
+          <strong>{statusLabels[status]}</strong>
+        </div>
 
-            <div className={styles.summaryProgress}>
-              <div>
-                <span>{progress}% concluído</span>
-                <strong>
-                  {watchedEpisodes}/{totalEpisodes} episódios
-                </strong>
-              </div>
-              <div className={styles.summaryProgressTrack} aria-hidden="true">
-                <span
-                  className={watchedEpisodes === totalEpisodes ? styles.progressComplete : undefined}
-                  style={getProgressStyle(progress)}
-                />
-              </div>
-            </div>
-          </>
-        ) : (
-          <p className={styles.loginMessage}>
-            Entre para salvar episódios, status e sua nota.
-          </p>
-        )}
+        <div className={styles.summaryProgress}>
+          <div>
+            <span>{progress}% concluído</span>
+            <strong>
+              {watchedEpisodes}/{totalEpisodes} episódios
+            </strong>
+          </div>
+          <div className={styles.summaryProgressTrack} aria-hidden="true">
+            <span
+              className={watchedEpisodes === totalEpisodes ? styles.progressComplete : undefined}
+              style={getProgressStyle(progress)}
+            />
+          </div>
+        </div>
 
         <button
           type="button"
           className={styles.expandButton}
-          onClick={() => {
-            if (isAuthenticated) setIsExpanded((current) => !current);
-          }}
-          aria-expanded={isAuthenticated ? isExpanded : undefined}
-          aria-controls={isAuthenticated ? "anime-tracker-editor" : undefined}
+          onClick={() => setIsExpanded((current) => !current)}
+          aria-expanded={isExpanded}
+          aria-controls="anime-tracker-editor"
         >
-          {isAuthenticated ? (
-            <>
-              <FiEdit3 aria-hidden="true" />
-              <span>{isExpanded ? "Fechar edição" : "Editar progresso"}</span>
-              <FiChevronDown
-                className={isExpanded ? styles.chevronExpanded : undefined}
-                aria-hidden="true"
-              />
-            </>
-          ) : (
-            <>
-              <FiLogIn aria-hidden="true" />
-              <span>Entrar para acompanhar</span>
-            </>
-          )}
+          <FiEdit3 aria-hidden="true" />
+          <span>{isExpanded ? "Fechar edição" : "Editar progresso"}</span>
+          <FiChevronDown
+            className={isExpanded ? styles.chevronExpanded : undefined}
+            aria-hidden="true"
+          />
         </button>
       </div>
 
-      {isAuthenticated && isExpanded && (
+      {isExpanded && (
         <div id="anime-tracker-editor" className={styles.trackerEditor}>
           <div className={styles.trackerPanel}>
             <div className={styles.seasonProgressSelector}>
@@ -378,11 +393,11 @@ function AnimeTrackerPanel({
 
             <div className={styles.trackerField}>
               <label htmlFor="anime-status">Status</label>
-              <select
+              <CustomSelect
                 id="anime-status"
+                compact
                 value={status}
-                onChange={(event) => {
-                  const nextStatus = event.target.value;
+                onChange={(nextStatus) => {
                   if (nextStatus === "completo" && selectedSeason) {
                     const completedSeasonProgress = {
                       ...seasonProgress,
@@ -412,34 +427,8 @@ function AnimeTrackerPanel({
                   }
                   setSaved(false);
                 }}
-              >
-                <option value="planejado">Planejo assistir</option>
-                <option value="assistindo">Assistindo</option>
-                <option value="pausado">Pausado</option>
-                <option value="completo">Completo</option>
-                <option value="abandonado">Abandonado</option>
-              </select>
-            </div>
-
-            <div className={styles.trackerField}>
-              <label htmlFor="anime-score">Minha nota</label>
-              <select
-                id="anime-score"
-                value={score}
-                onChange={(event) => {
-                  setScore(event.target.value);
-                  setSaved(false);
-                }}
-              >
-                <option value="">Sem nota</option>
-                {Array.from({ length: 10 }, (_, index) => index + 1).map(
-                  (value) => (
-                    <option value={value} key={value}>
-                      {value} / 10
-                    </option>
-                  ),
-                )}
-              </select>
+                options={[{ value: "planejado", label: "Planejo assistir" }, { value: "assistindo", label: "Assistindo" }, { value: "pausado", label: "Pausado" }, { value: "completo", label: "Completo" }, { value: "abandonado", label: "Dropado" }]}
+              />
             </div>
 
             <div className={styles.saveField}>
@@ -447,10 +436,11 @@ function AnimeTrackerPanel({
               <button
                 type="button"
                 className={styles.saveButton}
-                onClick={saveTracker}
+                onClick={() => void saveTracker()}
+                disabled={savingProgress}
               >
                 <FiCheck aria-hidden="true" />
-                {saved ? "Progresso salvo" : "Salvar progresso"}
+                {savingProgress ? "Salvando…" : saved ? "Progresso salvo" : "Salvar progresso"}
               </button>
             </div>
 
@@ -463,7 +453,8 @@ function AnimeTrackerPanel({
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </section>
   );
 }
 

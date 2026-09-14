@@ -20,6 +20,8 @@ export const metadata: Metadata = {
 // Componentes
 import { Navbar } from "@/shared/components/Navbar/page";
 import { Footer } from "@/shared/components/Footer/page";
+import { AuthProvider } from "@/shared/auth/auth-provider";
+import { RouteTransition } from "@/shared/components/RouteTransition/page";
 
 function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
@@ -27,9 +29,11 @@ function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
       lang="pt-BR"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
-        <Navbar />
-        {children}
+      <body>
+        <AuthProvider>
+          <Navbar />
+          <div className="site-content"><RouteTransition>{children}</RouteTransition></div>
+        </AuthProvider>
         <Footer />
       </body>
     </html>

@@ -104,13 +104,13 @@ const upcomingVolumes = [
 ];
 
 const releaseDays = [
+  { day: "Dom", count: "11 capítulos" },
   { day: "Seg", count: "12 capítulos" },
   { day: "Ter", count: "8 capítulos" },
   { day: "Qua", count: "15 capítulos" },
   { day: "Qui", count: "9 capítulos" },
   { day: "Sex", count: "17 capítulos" },
   { day: "Sáb", count: "6 capítulos" },
-  { day: "Dom", count: "11 capítulos" },
 ];
 
 function MangaPage() {
@@ -217,8 +217,8 @@ function MangaPage() {
               <FiCalendar aria-hidden="true" />
             </div>
             <div className={styles.releaseDays}>
-              {releaseDays.map((item, index) => (
-                <button className={index === 4 ? styles.releaseDayActive : undefined} type="button" key={item.day}>
+              {releaseDays.map((item) => (
+                <button className={item.day === "Sex" ? styles.releaseDayActive : undefined} type="button" key={item.day}>
                   <strong>{item.day}</strong><span>{item.count}</span>
                 </button>
               ))}

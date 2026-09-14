@@ -1,152 +1,96 @@
-import { AnimeSongSection } from "@/shared/components/AnimeSongSection/page";
-import type { AnimeSong } from "@/shared/components/AnimeSongSection/page";
-import { EntityDetailPage } from "@/shared/components/EntityDetailPage/page";
-import { DiscographySection } from "@/shared/components/DiscographySection/page";
-import type { DiscographyRelease } from "@/shared/components/DiscographySection/page";
-import { MusicPlatformLinks } from "@/shared/components/FormatSidebarInfo/page";
-import type { PersonEntity } from "@/shared/types/entities";
+import { notFound } from "next/navigation";
 
-const artistInfo: PersonEntity = {
-  cover: "/singers/yui-horie.png",
-  name_romaji: "Yui Horie",
-  name_kanji: "堀江由衣",
-  entityType: "person",
-  roles: ["artist", "seiyuu"],
-  date_of_birth: "20 Set 1976",
-  hometown: "Tóquio, Japão",
-  activity_period: "1997–presente",
-  record_label: "King Records",
-  musical_genres: ["J-Pop", "Anisong"],
-  description:
-    "Cantora e seiyuu japonesa conhecida por uma extensa carreira musical ligada a animes. Além de seus lançamentos próprios, interpretou temas de abertura e encerramento que marcaram diferentes temporadas.",
+import { assetUrl } from "@/shared/auth/api";
+import { AnimeSongSection, type AnimeSong } from "@/shared/components/AnimeSongSection/page";
+import { DiscographySection } from "@/shared/components/DiscographySection/page";
+import { EntityDetailPage } from "@/shared/components/EntityDetailPage/page";
+import { MusicPlatformLinks } from "@/shared/components/FormatSidebarInfo/page";
+import type { MusicArtistEntity } from "@/shared/types/entities";
+
+export const dynamic = "force-dynamic";
+
+type MusicArtistData = {
+  displayName: string;
+  kind: "SOLO" | "BAND";
+  nameKanji: string | null;
+  imageUrl: string;
+  description: string | null;
+  origin: string | null;
+  dateOfBirth: string | null;
+  activityPeriod: string | null;
+  recordLabel: string | null;
+  genres: string[];
+  platformLinks: { spotify?: string; tidal?: string; deezer?: string; amazonMusic?: string };
+  animeSongs: Array<{
+    anime: { title: string; slug: string; coverUrl: string };
+    songTitle: string;
+    type: "OPENING" | "ENDING" | "INSERT";
+    sequence: number | null;
+    episodeRange: string | null;
+  }>;
 };
 
-const animeSongs: AnimeSong[] = [
-  {
-    title: "School Rumble",
-    href: "/anime/school-rumble",
-    image: "/animes/mayonaka.jpg",
-    imageAlt: "Imagem de anime usada na demonstração",
-    details: [
-      { icon: "song", text: "Scramble" },
-      { icon: "usage", text: "Opening 1 · Episódios 1–24 · 2004" },
-    ],
-  },
-  {
-    title: "Toradora!",
-    href: "/anime/toradora",
-    image: "/animes/mao2.jpg",
-    imageAlt: "Imagem de anime usada na demonstração",
-    details: [
-      { icon: "song", text: "Vanilla Salt" },
-      { icon: "usage", text: "Ending 1 · Episódios 1–16 · 2008" },
-    ],
-  },
-  {
-    title: "Toradora!",
-    href: "/anime/toradora",
-    image: "/animes/inuyasha2.png",
-    imageAlt: "Imagem de anime usada na demonstração",
-    details: [
-      { icon: "song", text: "silky heart" },
-      { icon: "usage", text: "Opening 2 · Episódios 17–24 · 2009" },
-    ],
-  },
-  {
-    title: "Golden Time",
-    href: "/anime/golden-time",
-    image: "/animes/rinne2.jpg",
-    imageAlt: "Imagem de anime usada na demonstração",
-    details: [
-      { icon: "song", text: "Golden Time" },
-      { icon: "usage", text: "Opening 1 · Episódios 1–12 · 2013" },
-    ],
-  },
-  {
-    title: "Golden Time",
-    href: "/anime/golden-time",
-    image: "/animes/gachiakuta.jpg",
-    imageAlt: "Imagem de anime usada na demonstração",
-    details: [
-      { icon: "song", text: "The♡World's♡End" },
-      { icon: "usage", text: "Opening 2 · Episódios 13–24 · 2014" },
-    ],
-  },
-  {
-    title: "Dog Days",
-    href: "/anime/dog-days",
-    image: "/animes/wolfs.jpg",
-    imageAlt: "Imagem de anime usada na demonstração",
-    details: [
-      { icon: "song", text: "PRESENTER" },
-      { icon: "usage", text: "Ending · Episódios 1–13 · 2011" },
-    ],
-  },
-];
+const query = `query MusicArtist($slug: String!) {
+  musicArtist(slug: $slug) {
+    displayName kind nameKanji imageUrl description origin dateOfBirth activityPeriod recordLabel genres
+    platformLinks { spotify tidal deezer amazonMusic }
+    animeSongs { anime { title slug coverUrl } songTitle type sequence episodeRange }
+  }
+}`;
 
-const discography: DiscographyRelease[] = [
-  {
-    title: "5am",
-    releaseType: "Álbum",
-    year: "2009",
-    tracks: 13,
-    cover: "/singers/milet_5am.jpg",
-    href: "/artist/yui-horie/discography/honey-jet",
-  },
-  {
-    title: "Eyes",
-    releaseType: "Álbum",
-    year: "2015",
-    tracks: 13,
-    cover: "/singers/milet_eyes.jpg",
-    href: "/artist/yui-horie/discography/world-end-no-niwa",
-  },
-  {
-    title: "Visions",
-    releaseType: "Álbum",
-    year: "2022",
-    tracks: 11,
-    cover: "/singers/milet_visions.jpg",
-    href: "/artist/yui-horie/discography/bungaku-shoujo-no-kashuu",
-  },
-  {
-    title: "5am",
-    releaseType: "Single",
-    year: "2008",
-    tracks: 4,
-    cover: "/singers/milet_5am.jpg",
-    href: "/artist/yui-horie/discography/vanilla-salt",
-  },
-  {
-    title: "Eyes",
-    releaseType: "Single",
-    year: "2011",
-    tracks: 4,
-    cover: "/singers/milet_eyes.jpg",
-    href: "/artist/yui-horie/discography/presenter",
-  },
-  {
-    title: "Visions",
-    releaseType: "Single",
-    year: "2013",
-    tracks: 4,
-    cover: "/singers/milet_visions.jpg",
-    href: "/artist/yui-horie/discography/golden-time",
-  },
-];
+const songTypeLabels = { OPENING: "Opening", ENDING: "Ending", INSERT: "Insert song" } as const;
 
-function ArtistBySlug() {
+function songUsage(type: keyof typeof songTypeLabels, sequence: number | null, episodeRange: string | null) {
+  const numberedType = `${songTypeLabels[type]}${sequence ? ` ${sequence}` : ""}`;
+  const normalizedRange = episodeRange?.replace(/^(?:eps?\.?|episódios?)\s*/i, "").trim();
+  return normalizedRange ? `${numberedType} • Episódios ${normalizedRange}` : numberedType;
+}
+
+async function getMusicArtist(slug: string) {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000"}/graphql`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ query, variables: { slug } }),
+    cache: "no-store",
+  });
+  if (!response.ok) throw new Error("Não foi possível carregar o artista");
+  const body = await response.json() as { data?: { musicArtist: MusicArtistData | null } };
+  return body.data?.musicArtist ?? null;
+}
+
+export default async function ArtistBySlug({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const artist = await getMusicArtist(slug);
+  if (!artist) notFound();
+
+  const entity: MusicArtistEntity = {
+    cover: assetUrl(artist.imageUrl) ?? artist.imageUrl,
+    title: artist.displayName,
+    entityType: "music_artist",
+    artist_kind: artist.kind === "BAND" ? "band" : "solo",
+    name_kanji: artist.nameKanji ?? undefined,
+    description: artist.description ?? "",
+    origin: artist.origin ?? undefined,
+    date_of_birth: artist.dateOfBirth ?? undefined,
+    activity_period: artist.activityPeriod ?? undefined,
+    record_label: artist.recordLabel ?? undefined,
+    musical_genres: artist.genres,
+  };
+  const animeSongs: AnimeSong[] = artist.animeSongs.map((song) => ({
+    title: song.anime.title,
+    href: `/anime/${song.anime.slug}`,
+    image: assetUrl(song.anime.coverUrl) ?? song.anime.coverUrl,
+    imageAlt: song.anime.title,
+    details: [
+      { icon: "song", text: song.songTitle },
+      { icon: "usage", text: songUsage(song.type, song.sequence, song.episodeRange) },
+    ],
+  }));
+
   return (
-    <EntityDetailPage
-      entity={artistInfo}
-      sidebarChildren={(
-        <MusicPlatformLinks spotify="/" tidal="/" deezer="/" amazonMusic="/" />
-      )}
-    >
+    <EntityDetailPage entity={entity} sidebarChildren={<MusicPlatformLinks {...artist.platformLinks} />}>
       <AnimeSongSection title="Canções em animes" songs={animeSongs} />
-      <DiscographySection releases={discography} />
+      <DiscographySection releases={[]} />
     </EntityDetailPage>
   );
 }
-
-export default ArtistBySlug;

@@ -1,118 +1,89 @@
-// Style Sheet CSS
-import styles from "./lightnovelslug.module.css";
-
-// Components
-import { HeroSection } from "@/shared/components/HeroSection/page";
-import { FormatSidebarInfo } from "@/shared/components/FormatSidebarInfo/page";
-import { CharacterSection } from "@/shared/components/CharacterSection/page";
-import { StaffSection } from "@/shared/components/StaffSection/page";
-import { RelatedSection } from "@/shared/components/RelatedSection/page";
-import { LightNovelTrackerPanel } from "./components/LightNovelTrackerPanel/LightNovelTrackerPanel";
-import type { LightNovelEntity } from "@/shared/types/entities";
-
-// Icones
-import { FaStar } from "react-icons/fa";
+import { notFound } from "next/navigation";
 import { BiHash } from "react-icons/bi";
+import { FaStar } from "react-icons/fa";
 import { LuBookHeart, LuCalendarRange } from "react-icons/lu";
 import { VscLibrary } from "react-icons/vsc";
 
-function LightNovelBySlug() {
-  const LightNovelInfo: LightNovelEntity = {
-    cover: "/light-novels/make-heroine.jpg",
-    title: "Make Heroine ga Oosugiru!",
-    description:
-      "Kazuhiko Nukumizu é um estudante comum, sem graça e totalmente sem amigos que, de repente, presencia uma cena inacreditável: Anna Yanami, a garota mais popular da escola, acaba de ser colocada na friendzone pelo seu amigo de infância — que também era o seu grande crush! Para completar, parece que todas as garotas populares ao seu redor estão sendo rejeitadas da mesma forma pelos garotos de quem gostam. Sem perceber, Kazuhiko acaba envolvido de cabeça em um tremendo drama de relacionamento, onde todas as principais 'heroínas' estão levando a pior no amor! Será que ele vai conseguir levantar o astral dessas garotas e ajudá-las a encontrar a felicidade?",
-    entityType: "work",
-    medium: "light_novel",
-    score: 6.64,
-    status: "Concluído",
-    start: "14 Fev 1994",
-    end: "21 Nov 2020",
-    publisher: "Kadokawa",
-    source: "Light Novel",
-    genders: ["Comédia", "Romance"],
-    chapters: 42,
-    volumes: 7,
-    publication: "Publicação por volume",
-    country: "Japão",
-  };
+import styles from "./lightnovelslug.module.css";
+import { LightNovelTrackerPanel } from "./components/LightNovelTrackerPanel/LightNovelTrackerPanel";
+import { FormatSidebarInfo } from "@/shared/components/FormatSidebarInfo/page";
+import { HeroSection } from "@/shared/components/HeroSection/page";
+import { PublicationCharacterSection, type PublicationCharacter } from "@/shared/components/PublicationCharacterSection/page";
+import { RelatedSection } from "@/shared/components/RelatedSection/page";
+import { ReviewCommentsSection, type PublicWorkReview } from "@/shared/components/ReviewCommentsSection/page";
+import { StaffSection } from "@/shared/components/StaffSection/page";
+import { WorkSectionTabs } from "@/shared/components/WorkSectionTabs/page";
+import type { LightNovelEntity } from "@/shared/types/entities";
 
-  return (
-    <div className={styles.page}>
-      <HeroSection entity={LightNovelInfo} />
+export const dynamic = "force-dynamic";
 
-      <div className={styles.factsBar} aria-label="Resumo da light novel">
-        <div className={styles.factItem}>
-          <LuBookHeart aria-hidden="true" />
-          <span>
-            <small>Formato</small>
-            Light Novel
-          </span>
-        </div>
-        <div className={styles.factItem}>
-          <BiHash aria-hidden="true" />
-          <span>
-            <small>Capítulos</small>
-            {LightNovelInfo.chapters} capítulos
-          </span>
-        </div>
-        <div className={styles.factItem}>
-          <VscLibrary aria-hidden="true" />
-          <span>
-            <small>Volumes</small>
-            {LightNovelInfo.volumes} publicados
-          </span>
-        </div>
-        <div className={styles.factItem}>
-          <LuCalendarRange aria-hidden="true" />
-          <span>
-            <small>Publicação</small>
-            {LightNovelInfo.publication}
-          </span>
-        </div>
-        <div className={styles.factItem}>
-          <FaStar aria-hidden="true" />
-          <span>
-            <small>Score</small>
-            {LightNovelInfo.score.toFixed(2)}
-          </span>
-        </div>
-      </div>
+type NovelData = {
+  title: string; synopsis: string; coverUrl: string; alternativeTitles: LightNovelEntity["alternativeTitles"];
+  status: string; startDate: string | null; endDate: string | null; publisher: string | null; publisherEntity: { displayName: string; slug: string } | null; source: string | null;
+  genres: string[]; chapters: number; volumes: number;
+  externalLinks: NonNullable<LightNovelEntity["externalLinks"]>; storeLinks: NonNullable<LightNovelEntity["storeLinks"]>;
+  reviewSummary: { average: number; count: number }; characters: PublicationCharacter[];
+  staffCredits: Array<{ role: string; contribution: string | null; person: { id: string; displayName: string; slug: string; imageUrl: string | null; roles: string[] } }>;
+  relatedWorks: Array<{ id: string; title: string; href: string; coverUrl: string | null; medium: string; status: string | null }>;
+};
 
-      <main className={styles.lightNovelSlugContainer}>
-        <nav className={styles.sectionNav} aria-label="Seções da página">
-          <a href="#acompanhar">Acompanhar</a>
-          <a href="#personagens">Personagens</a>
-          <a href="#staff">Staff</a>
-          <a href="#relacionados">Relacionados</a>
-        </nav>
+const query = `query LightNovel($slug: String!) {
+  lightNovel(slug: $slug) {
+    title synopsis coverUrl alternativeTitles { type title } status startDate endDate publisher publisherEntity { displayName slug } source genres chapters volumes
+    externalLinks { website x instagram pixiv youtube }
+    storeLinks { amazon cdJapan mercadoLivre rakuten shopee ebay otakuyasan hmv honto toranoana animate }
+    reviewSummary { average count }
+    characters { id nameRomaji slug imageUrl }
+    staffCredits { role contribution person { id displayName slug imageUrl roles } }
+    relatedWorks { id title href coverUrl medium status }
+  }
+  workReviewComments(medium: LIGHT_NOVEL, slug: $slug) { id score comment updatedAt author { username displayName avatarUrl } }
+}`;
+const statuses: Record<string, string> = { ANNOUNCED: "Anunciada", PUBLISHING: "Em publicação", HIATUS: "Em hiato", FINISHED: "Finalizada", CANCELLED: "Cancelada" };
 
-        <div className={styles.contentContainer}>
-          <div className={styles.sidebarColumn}>
-            <FormatSidebarInfo entity={LightNovelInfo} />
-          </div>
-          <div className={styles.centralContainer}>
-            <section id="acompanhar" className={styles.trackerSection}>
-              <LightNovelTrackerPanel
-                totalChapters={LightNovelInfo.chapters}
-                isAuthenticated
-              />
-            </section>
-
-            <div id="personagens" className={styles.contentSection}>
-              <CharacterSection />
-            </div>
-            <div id="staff" className={styles.contentSection}>
-              <StaffSection />
-            </div>
-            <div id="relacionados" className={styles.contentSection}>
-              <RelatedSection />
-            </div>
-          </div>
-        </div>
-      </main>
-    </div>
-  );
+function displayDate(value: string | null) {
+  return value ? new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "short", year: "numeric", timeZone: "UTC" }).format(new Date(`${value}T00:00:00Z`)) : "—";
 }
 
-export default LightNovelBySlug;
+export default async function LightNovelBySlug({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000"}/graphql`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ query, variables: { slug } }), cache: "no-store" });
+  if (!response.ok) throw new Error("Não foi possível carregar a light novel");
+  const body = await response.json() as { data?: { lightNovel: NovelData | null; workReviewComments: PublicWorkReview[] } };
+  const novel = body.data?.lightNovel;
+  if (!novel) notFound();
+  const publicationEnd = novel.endDate
+    ? displayDate(novel.endDate)
+    : novel.status === "PUBLISHING"
+      ? "Presente"
+      : "—";
+  const entity: LightNovelEntity = {
+    cover: novel.coverUrl, title: novel.title, description: novel.synopsis, alternativeTitles: novel.alternativeTitles,
+    entityType: "work", medium: "light_novel", score: novel.reviewSummary.average, status: statuses[novel.status] ?? novel.status,
+    start: displayDate(novel.startDate),
+    end: displayDate(novel.endDate),
+    publisher: novel.publisherEntity?.displayName ?? novel.publisher ?? undefined,
+    publisherLink: novel.publisherEntity ?? undefined,
+    source: novel.source ?? undefined, genders: novel.genres, chapters: novel.chapters, volumes: novel.volumes,
+    publicationPeriod: `${displayDate(novel.startDate)} – ${publicationEnd}`,
+    externalLinks: novel.externalLinks, storeLinks: novel.storeLinks,
+  };
+  return <div className={styles.page}>
+    <HeroSection entity={entity} publicationTracker={{ medium: "LIGHT_NOVEL", workKey: slug }} />
+    <div className={styles.factsBar} aria-label="Resumo da light novel">
+      <div className={styles.factItem}><LuBookHeart /><span><small>Formato</small>Light Novel</span></div>
+      <div className={styles.factItem}><BiHash /><span><small>Capítulos</small>{entity.chapters} capítulos</span></div>
+      <div className={styles.factItem}><VscLibrary /><span><small>Volumes</small>{entity.volumes} publicados</span></div>
+      <div className={styles.factItem}><LuCalendarRange /><span><small>Publicação</small>{entity.publicationPeriod}</span></div>
+      <div className={styles.factItem}><FaStar /><span><small>Score</small>{entity.score.toFixed(2)}</span></div>
+    </div>
+    <main className={styles.lightNovelSlugContainer}>
+      <WorkSectionTabs classes={styles} sidebar={<FormatSidebarInfo entity={entity} reviewTarget={{ medium: "LIGHT_NOVEL", slug, title: novel.title }} />} tracker={<LightNovelTrackerPanel totalChapters={entity.chapters} workKey={slug} />} sections={[
+        ...(novel.characters.length ? [{ id: "personagens", label: "Personagens", content: <PublicationCharacterSection characters={novel.characters} /> }] : []),
+        ...(novel.staffCredits.length ? [{ id: "staff", label: "Staff", content: <StaffSection credits={novel.staffCredits} /> }] : []),
+        ...(novel.relatedWorks.length ? [{ id: "relacionados", label: "Relacionados", content: <RelatedSection works={novel.relatedWorks} /> }] : []),
+        { id: "comentarios", label: "Reviews", content: <ReviewCommentsSection comments={body.data?.workReviewComments ?? []} /> },
+      ]} />
+    </main>
+  </div>;
+}

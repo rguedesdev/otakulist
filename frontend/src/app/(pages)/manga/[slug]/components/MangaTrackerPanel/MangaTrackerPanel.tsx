@@ -6,18 +6,20 @@ import {
   FiCheck,
   FiChevronDown,
   FiEdit3,
-  FiLogIn,
   FiMinus,
   FiPlus,
 } from "react-icons/fi";
 import { MdOutlineAutoAwesome } from "react-icons/md";
 import { LuListTree } from "react-icons/lu";
+import { useAuth } from "@/shared/auth/auth-provider";
+import { CustomSelect } from "@/shared/components/CustomSelect/page";
+import { getPublicationListEntry, publicationEntryToLocalTracker, savePublicationListEntry } from "@/shared/tracking/publication-list-api";
 
 import styles from "../../mangaslug.module.css";
 
 interface MangaTrackerPanelProps {
   totalChapters: number;
-  isAuthenticated?: boolean;
+  workKey: string;
 }
 
 const statusLabels: Record<string, string> = {
@@ -25,7 +27,7 @@ const statusLabels: Record<string, string> = {
   lendo: "Lendo",
   pausado: "Pausado",
   completo: "Completo",
-  abandonado: "Abandonado",
+  abandonado: "Dropado",
 };
 
 type ProgressStyle = CSSProperties & {
@@ -47,69 +49,80 @@ function getProgressStyle(progress: number): ProgressStyle {
   };
 }
 
-function MangaTrackerPanel({
-  totalChapters,
-  isAuthenticated = false,
-}: MangaTrackerPanelProps) {
-  const [readChapters, setReadChapters] = useState(42);
-  const [status, setStatus] = useState("lendo");
-  const [score, setScore] = useState("8");
+function MangaTrackerPanel({ totalChapters, workKey }: MangaTrackerPanelProps) {
+  const { user, accessToken } = useAuth();
+  const isAuthenticated = Boolean(user);
+  const [readChapters, setReadChapters] = useState(0);
+  const [status, setStatus] = useState("planejado");
+  const [isAdded, setIsAdded] = useState(false);
   const [saved, setSaved] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [savingProgress, setSavingProgress] = useState(false);
 
   useEffect(() => {
     const hydrateTracker = () => {
-      const storedTracker = window.localStorage.getItem(
-        "otakulist:manga-tracker",
-      );
-
-      if (!storedTracker) return;
-
-      try {
-        const parsedTracker = JSON.parse(storedTracker) as {
-          readChapters?: number;
-          status?: string;
-          score?: string;
-        };
-
-        setReadChapters(
-          Math.min(
-            totalChapters,
-            Math.max(0, parsedTracker.readChapters ?? 42),
-          ),
-        );
-        setStatus(parsedTracker.status ?? "lendo");
-        setScore(parsedTracker.score ?? "8");
+      setReadChapters(0);
+      setStatus("planejado");
+      setIsAdded(false);
+      setSaved(false);
+      if (!user || !accessToken) return;
+      const storageKey = `otakulist:publication-tracker:${user.id}:MANGA:${workKey}`;
+      void getPublicationListEntry("MANGA", workKey, accessToken).then((entry) => {
+        if (!entry) return;
+        const tracker = publicationEntryToLocalTracker(entry);
+        setReadChapters(Math.min(totalChapters, tracker.readChapters));
+        setStatus(tracker.status);
+        setIsAdded(true);
         setSaved(true);
-      } catch {
-        window.localStorage.removeItem("otakulist:manga-tracker");
-      }
+        window.localStorage.setItem(storageKey, JSON.stringify(tracker));
+      }).catch(() => undefined);
     };
 
     const animationFrame = window.requestAnimationFrame(hydrateTracker);
+    const handleTrackerUpdate = (event: Event) => {
+      if (!user) return;
+      const storageKey = `otakulist:publication-tracker:${user.id}:MANGA:${workKey}`;
+      if (event instanceof CustomEvent && event.detail === storageKey) hydrateTracker();
+    };
+    window.addEventListener("otakulist:publication-tracker-updated", handleTrackerUpdate);
 
-    return () => window.cancelAnimationFrame(animationFrame);
-  }, [totalChapters]);
+    return () => {
+      window.cancelAnimationFrame(animationFrame);
+      window.removeEventListener("otakulist:publication-tracker-updated", handleTrackerUpdate);
+    };
+  }, [accessToken, totalChapters, user, workKey]);
 
-  const progress = Math.round((readChapters / totalChapters) * 100);
+  const progress = totalChapters > 0 ? Math.round((readChapters / totalChapters) * 100) : 0;
 
   const changeChapters = (amount: number) => {
     setSaved(false);
-    setReadChapters((current) =>
-      Math.min(totalChapters, Math.max(0, current + amount)),
-    );
+    setReadChapters((current) => {
+      const next = Math.min(totalChapters, Math.max(0, current + amount));
+      if (totalChapters > 0 && next === totalChapters) setStatus("completo");
+      else if (status === "completo") setStatus("lendo");
+      return next;
+    });
   };
 
-  const saveTracker = () => {
-    window.localStorage.setItem(
-      "otakulist:manga-tracker",
-      JSON.stringify({ readChapters, status, score }),
-    );
-    setSaved(true);
-    setIsExpanded(false);
+  const saveTracker = async () => {
+    if (!user || !accessToken || savingProgress) return;
+    setSavingProgress(true);
+    const storageKey = `otakulist:publication-tracker:${user.id}:MANGA:${workKey}`;
+    try {
+      const entry = await savePublicationListEntry("MANGA", workKey, accessToken, { readChapters, status });
+      window.localStorage.setItem(storageKey, JSON.stringify(publicationEntryToLocalTracker(entry)));
+      setIsAdded(true);
+      setSaved(true);
+      window.dispatchEvent(new CustomEvent("otakulist:publication-tracker-updated", { detail: storageKey }));
+    } finally {
+      setSavingProgress(false);
+    }
   };
+
+  if (!isAuthenticated || !isAdded) return null;
 
   return (
+    <section id="acompanhar" className={`${styles.trackerSection} ${isExpanded ? styles.trackerSectionExpanded : ""}`}>
     <div className={styles.trackerWrapper}>
       <div className={styles.trackerSummary}>
         <div className={styles.trackerIdentity}>
@@ -122,7 +135,6 @@ function MangaTrackerPanel({
           </span>
         </div>
 
-        {isAuthenticated ? (
           <>
             <div className={styles.trackerStatus}>
               <small>Status</small>
@@ -144,22 +156,16 @@ function MangaTrackerPanel({
               </div>
             </div>
           </>
-        ) : (
-          <p className={styles.loginMessage}>
-            Entre para salvar capítulos, status e sua nota.
-          </p>
-        )}
 
         <button
           type="button"
           className={styles.expandButton}
           onClick={() => {
-            if (isAuthenticated) setIsExpanded((current) => !current);
+            setIsExpanded((current) => !current);
           }}
           aria-expanded={isAuthenticated ? isExpanded : undefined}
           aria-controls={isAuthenticated ? "manga-tracker-editor" : undefined}
         >
-          {isAuthenticated ? (
             <>
               <FiEdit3 aria-hidden="true" />
               <span>{isExpanded ? "Fechar edição" : "Editar progresso"}</span>
@@ -168,16 +174,10 @@ function MangaTrackerPanel({
                 aria-hidden="true"
               />
             </>
-          ) : (
-            <>
-              <FiLogIn aria-hidden="true" />
-              <span>Entrar para acompanhar</span>
-            </>
-          )}
         </button>
       </div>
 
-      {isAuthenticated && isExpanded && (
+      {isExpanded && (
         <div id="manga-tracker-editor" className={styles.trackerEditor}>
           <div className={styles.trackerPanel}>
             <div className={styles.progressArea}>
@@ -226,51 +226,26 @@ function MangaTrackerPanel({
 
             <div className={styles.trackerField}>
               <label htmlFor="manga-status">Status</label>
-              <select
+              <CustomSelect
                 id="manga-status"
+                compact
                 value={status}
-                onChange={(event) => {
-                  setStatus(event.target.value);
+                onChange={(nextStatus) => {
+                  if (nextStatus === "completo") setReadChapters(totalChapters);
+                  setStatus(nextStatus);
                   setSaved(false);
                 }}
-              >
-                <option value="planejado">Planejo ler</option>
-                <option value="lendo">Lendo</option>
-                <option value="pausado">Pausado</option>
-                <option value="completo">Completo</option>
-                <option value="abandonado">Abandonado</option>
-              </select>
+                options={[{ value: "planejado", label: "Planejo ler" }, { value: "lendo", label: "Lendo" }, { value: "pausado", label: "Pausado" }, { value: "completo", label: "Completo" }, { value: "abandonado", label: "Dropado" }]}
+              />
             </div>
 
-            <div className={styles.trackerField}>
-              <label htmlFor="manga-score">Minha nota</label>
-              <select
-                id="manga-score"
-                value={score}
-                onChange={(event) => {
-                  setScore(event.target.value);
-                  setSaved(false);
-                }}
-              >
-                <option value="">Sem nota</option>
-                {Array.from({ length: 10 }, (_, index) => index + 1).map(
-                  (value) => (
-                    <option value={value} key={value}>
-                      {value} / 10
-                    </option>
-                  ),
-                )}
-              </select>
+            <div className={styles.saveField}>
+              <span aria-hidden="true">Ação</span>
+              <button type="button" className={styles.saveButton} onClick={saveTracker} disabled={savingProgress}>
+                <FiCheck aria-hidden="true" />
+                {savingProgress ? "Salvando…" : saved ? "Progresso salvo" : "Salvar progresso"}
+              </button>
             </div>
-
-            <button
-              type="button"
-              className={styles.saveButton}
-              onClick={saveTracker}
-            >
-              <FiCheck aria-hidden="true" />
-              {saved ? "Progresso salvo" : "Salvar progresso"}
-            </button>
 
             <div className={styles.trackerHint}>
               <MdOutlineAutoAwesome aria-hidden="true" />
@@ -282,6 +257,7 @@ function MangaTrackerPanel({
         </div>
       )}
     </div>
+    </section>
   );
 }
 

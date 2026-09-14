@@ -170,6 +170,7 @@
 
 .podiumCard {
   position: relative;
+  translate: 0 0;
   min-width: 0;
   min-height: 180px;
   padding: 14px;
@@ -180,19 +181,16 @@
   background: var(--color-surface-raised);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-large);
-  backface-visibility: hidden;
-  transform: translate3d(0, 0, 0);
-  will-change: transform;
   transition:
+    translate 0.18s ease-out,
     background-color 0.2s ease-in-out,
-    border-color 0.2s ease-in-out,
-    transform 0.2s ease-in-out;
+    border-color 0.2s ease-in-out;
 }
 
 .podiumCard:hover {
   background: var(--color-surface-hover);
   border-color: var(--color-accent-border);
-  transform: translate3d(0, -3px, 0);
+  translate: 0 -3px;
 }
 
 .podiumFirst {
@@ -210,9 +208,6 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  backface-visibility: hidden;
-  transform: translate3d(0, 0, 0);
-  will-change: transform;
   color: var(--color-accent-highlight);
   background: color-mix(in srgb, var(--color-accent-deep) 78%, transparent);
   border: 1px solid var(--color-accent-border);
@@ -232,9 +227,6 @@
   width: 64px;
   height: 92px;
   display: block;
-  backface-visibility: hidden;
-  transform: translate3d(0, 0, 0);
-  will-change: transform;
 }
 
 .podiumCopy {
@@ -265,9 +257,6 @@
   color: var(--color-accent-highlight);
   font-size: 11px;
   font-weight: 800;
-  backface-visibility: hidden;
-  transform: translate3d(0, 0, 0);
-  will-change: transform;
 }
 
 .placeholderCover {

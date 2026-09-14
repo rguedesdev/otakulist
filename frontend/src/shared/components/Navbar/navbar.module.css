@@ -7,6 +7,7 @@
 }
 
 .navbar {
+  position: relative;
   max-width: 1280px;
   min-height: 76px;
   margin-inline: auto;
@@ -24,6 +25,11 @@
   flex: 0 0 auto;
 }
 
+.logoLink {
+  display: flex;
+  align-items: center;
+}
+
 .badgeVersion {
   padding: 4px 7px;
   display: inline-flex;
@@ -38,13 +44,7 @@
   line-height: 1;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  cursor: pointer;
-  transition: 0.2s ease;
-}
-
-.badgeVersion:hover {
-  color: var(--color-text-primary);
-  background: var(--color-accent);
+  cursor: default;
 }
 
 .navList {
@@ -96,31 +96,154 @@
 }
 
 .profileDropdownWrapper {
-  position: relative;
-  display: inline-block;
+  position: static;
+  display: inline-flex;
+}
+
+.profileDropdownTrigger {
+  min-height: 44px;
+  padding: 2px 8px 2px 2px;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--color-text-primary);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  cursor: pointer;
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.profileDropdownTrigger:hover,
+.profileDropdownTrigger[aria-expanded="true"] {
+  color: var(--color-accent);
+  background: var(--color-surface-hover);
+  border-color: var(--color-border-strong);
 }
 
 .avatar {
   width: 40px;
   height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-accent-highlight);
+  background-color: var(--color-accent-soft);
+  background-position: center;
+  background-size: cover;
   border: 2px solid var(--color-accent-border);
   border-radius: 50%;
   object-fit: cover;
-  cursor: pointer;
+  flex: 0 0 auto;
+}
+
+.profileUsername {
+  max-width: 140px;
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dropdownArrow,
+.dropdownArrowOpen {
+  flex: 0 0 auto;
+  font-size: 20px;
+  transition: transform 0.2s ease;
+}
+
+.dropdownArrowOpen {
+  transform: rotate(180deg);
 }
 
 .menuDropdown {
   position: absolute;
-  top: 56px;
-  right: 0;
-  width: 160px;
-  padding: 10px;
+  top: calc(100% + 8px);
+  right: 16px;
+  z-index: 2;
+  width: 250px;
+  padding: 8px;
   color: var(--color-text-secondary);
-  background: var(--color-surface-raised);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-medium);
-  box-shadow: var(--shadow-card-hover);
+  background:
+    linear-gradient(145deg, color-mix(in srgb, var(--color-surface-raised) 96%, var(--color-accent) 4%), var(--color-surface));
+  border: 1px solid var(--color-border-strong);
+  border-radius: 14px;
+  box-shadow: 0 22px 48px rgba(0, 0, 0, 0.38);
   list-style: none;
+}
+
+.menuDropdown::before {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 100%;
+  width: 100%;
+  height: 24px;
+}
+
+.menuDropdown::after {
+  content: "";
+  position: absolute;
+  top: -6px;
+  right: 22px;
+  width: 10px;
+  height: 10px;
+  background: color-mix(in srgb, var(--color-surface-raised) 96%, var(--color-accent) 4%);
+  border-top: 1px solid var(--color-border-strong);
+  border-left: 1px solid var(--color-border-strong);
+  transform: rotate(45deg);
+}
+
+.menuDropdown li + li {
+  margin-top: 2px;
+}
+
+.menuDropdown a,
+.menuDropdown button {
+  width: 100%;
+  min-height: 40px;
+  padding: 9px 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 650;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.menuDropdown a svg,
+.menuDropdown button svg {
+  flex: 0 0 auto;
+  font-size: 17px;
+}
+
+.menuDropdown a:hover,
+.menuDropdown button:hover {
+  color: var(--color-accent);
+  background: var(--color-accent-soft);
+}
+
+.logoutItem {
+  margin-top: 7px !important;
+  padding-top: 7px;
+  border-top: 1px solid var(--color-border);
+}
+
+.logoutItem button:hover {
+  color: #ff8585;
+  background: rgba(255, 92, 92, 0.09);
 }
 
 .navButtons {

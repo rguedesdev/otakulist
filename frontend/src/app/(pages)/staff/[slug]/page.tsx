@@ -1,38 +1,31 @@
-// Style Sheet CSS
+import { notFound } from "next/navigation";
+
+import { assetUrl } from "@/shared/auth/api";
+import { FormatSidebarInfo } from "@/shared/components/FormatSidebarInfo/page";
+import { HeroSection } from "@/shared/components/HeroSection/page";
+import type { PersonEntity, PersonRole } from "@/shared/types/entities";
+import { AnimesByStaff, type StaffAnimeCredit } from "./components/AnimesByStaff/page";
 import styles from "./staffslug.module.css";
 
-// Components
-import { HeroSection } from "@/shared/components/HeroSection/page";
-import { FormatSidebarInfo } from "@/shared/components/FormatSidebarInfo/page";
-import { AnimesByStaff } from "./components/AnimesByStaff/page";
-import type { PersonEntity } from "@/shared/types/entities";
+export const dynamic = "force-dynamic";
+const query = `query Staff($slug: String!) { staff(slug: $slug) {
+  displayName nameKanji imageUrl description roles dateOfBirth hometown activityPeriod occupations
+  animeCredits { role contribution anime { title slug coverUrl startDate endDate } }
+} }`;
+type StoredPerson = { displayName: string; nameKanji: string | null; imageUrl: string | null; description: string | null; roles: string[]; dateOfBirth: string | null; hometown: string | null; activityPeriod: string | null; occupations: string[]; animeCredits: StaffAnimeCredit[] };
 
-function StaffBySlug() {
-  const StaffInfo: PersonEntity = {
-    cover: "/hiroyuki.png",
-    name_romaji: "Kitakubo Hiroyuki",
-    name_kanji: "北久保弘之",
-    hometown: "Tokyo, Japão",
-    description:
-      "Takahashi Rumiko (ou Rumiko Takahashi no ocidente) é uma das mulheres mais ricas do Japão. Os mangas que ela cria (e suas adaptações para anime) são muito populares nos Estados Unidos e na Europa, onde foram lançados em inglês em ambos os formatos. Suas obras são mundialmente conhecidas, e muitas de suas séries figuraram entre os primeiros mangas lançados em inglês na década de 1990. Takahashi também é a autora de quadrinhos mais vendida da história; mais de 100 milhões de exemplares de suas diversas obras já foram comercializados.",
-    entityType: "person",
-    roles: ["staff"],
-    date_of_birth: "15 Nov 1963",
-  };
+async function StaffBySlug({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  let staff: StoredPerson | null = null;
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000"}/graphql`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ query, variables: { slug } }), cache: "no-store" });
+    const body = await response.json() as { data?: { staff: StoredPerson | null } };
+    staff = body.data?.staff ?? null;
+  } catch { /* página inexistente quando a API estiver indisponível */ }
+  if (!staff?.imageUrl) notFound();
 
-  return (
-    <div className={styles.page}>
-      <HeroSection entity={StaffInfo} />
-      <main className={styles.staffSlugContainer}>
-        <div className={styles.contentContainer}>
-          <FormatSidebarInfo entity={StaffInfo} />
-          <div className={styles.centralContainer}>
-            <AnimesByStaff />
-          </div>
-        </div>
-      </main>
-    </div>
-  );
+  const entity: PersonEntity = { cover: assetUrl(staff.imageUrl) ?? staff.imageUrl, description: staff.description ?? "", entityType: "person", roles: staff.roles.map((role) => role.toLowerCase() as PersonRole), name_romaji: staff.displayName, name_kanji: staff.nameKanji ?? "", hometown: staff.hometown ?? "", date_of_birth: staff.dateOfBirth ?? "", activity_period: staff.activityPeriod ?? undefined, occupations: staff.occupations };
+  return <div className={styles.page}><HeroSection entity={entity} /><main className={styles.staffSlugContainer}><div className={styles.contentContainer}><FormatSidebarInfo entity={entity} /><div className={styles.centralContainer}><AnimesByStaff credits={staff.animeCredits} /></div></div></main></div>;
 }
 
 export default StaffBySlug;

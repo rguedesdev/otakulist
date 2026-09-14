@@ -29,7 +29,7 @@
 }
 
 .coverContainer {
-  width: 200px;
+  width: 220px;
   height: auto;
   display: flex;
   flex-direction: column;
@@ -39,21 +39,30 @@
 
 .imageWrapper {
   width: 100%;
-  max-height: 300px; /* Limite máximo estrito (proporção 2:3 para largura de 200px) */
-  border: 1px solid var(--color-border-strong);
   box-shadow: var(--shadow-card-hover);
   border-radius: var(--radius-medium);
   overflow: hidden;
 
-  /* Garante que o wrapper colapse e se ajuste à altura da imagem interna */
   display: flex;
 }
 
 .cover {
   width: 100% !important;
-  height: auto !important; /* Faz o Next.js respeitar a proporção REAL da imagem que carregou */
-  max-height: 300px; /* Garante que a imagem não passe do limite de 2:3 */
-  object-fit: cover; /* Se a imagem for mais alta que 2:3, ela será cortada elegantemente */
+  height: auto !important;
+}
+
+.flexibleImageContainer {
+  width: 220px;
+  flex: 0 0 220px;
+  align-self: flex-start;
+}
+
+.flexibleImageContainer > .flexibleImage {
+  width: 220px;
+  height: auto;
+  display: block;
+  border-radius: var(--radius-medium);
+  clip-path: inset(0 round var(--radius-medium));
 }
 
 .buttons {
@@ -101,6 +110,18 @@
   white-space: nowrap; /* Impede o texto de tentar quebrar linha na animação */
 }
 
+.listAddedState,
+.listRemoveState {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+
+.listRemoveState {
+  display: none;
+}
+
 /* --- Botão Adicionar --- */
 .btnAddList {
   background: linear-gradient(135deg, var(--color-accent-hover), var(--color-accent-deep));
@@ -108,9 +129,43 @@
   box-shadow: none;
 }
 
-.btnAddList:hover {
+.btnAddList:hover:not(:disabled) {
   filter: brightness(1.08);
   box-shadow: none;
+}
+
+.btnInList {
+  color: var(--color-accent);
+  background: var(--color-accent-soft);
+  border-color: var(--color-accent-border);
+}
+
+.btnInList:hover:not(:disabled) {
+  color: var(--color-danger);
+  background: color-mix(in srgb, var(--color-danger) 10%, var(--color-surface-raised));
+  border-color: color-mix(in srgb, var(--color-danger) 42%, transparent);
+  filter: none;
+}
+
+.btnInList:hover:not(:disabled) .listAddedState {
+  display: none;
+}
+
+.btnInList:hover:not(:disabled) .listRemoveState {
+  display: inline-flex;
+}
+
+.btnRemoving .listAddedState {
+  display: none;
+}
+
+.btnRemoving .listRemoveState {
+  display: inline-flex;
+}
+
+.btnAddList:disabled {
+  cursor: default;
+  opacity: 0.72;
 }
 
 .btnAddList:focus-visible,
@@ -249,7 +304,17 @@
   }
 
   .coverContainer {
-    width: min(200px, 62vw);
+    width: min(220px, 86vw);
+  }
+
+  .flexibleImageContainer {
+    width: min(220px, 86vw);
+    flex-basis: min(220px, 86vw);
+  }
+
+  .flexibleImageContainer > .flexibleImage {
+    width: 100%;
+    height: auto;
   }
 
   .textsContainer {

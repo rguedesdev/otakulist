@@ -1,36 +1,66 @@
-// Style Sheet CSS
+import { notFound } from "next/navigation";
+
+import { assetUrl } from "@/shared/auth/api";
+import { FormatSidebarInfo } from "@/shared/components/FormatSidebarInfo/page";
+import { HeroSection } from "@/shared/components/HeroSection/page";
+import type { OrganizationEntity } from "@/shared/types/entities";
+import { AnimesByStudio, type StudioAnimeCredit } from "./components/AnimesByStudio/page";
 import styles from "./studioslug.module.css";
 
-// Components
-import { HeroSection } from "@/shared/components/HeroSection/page";
-import { FormatSidebarInfo } from "@/shared/components/FormatSidebarInfo/page";
-import { AnimesByStudio } from "./components/AnimesByStudio/page";
-import type { OrganizationEntity } from "@/shared/types/entities";
+export const dynamic = "force-dynamic";
 
-function StudioBySlug() {
-  const StudioInfo: OrganizationEntity = {
-    cover: "/studios/bones.jpg",
-    title: "Bones",
-    description:
-      "Bones (Bones Inc.) is a Japanese animation studio based in Suginami, Tokyo. The studio was founded by previous Sunrise producer Masahiko Minami and animators Hiroshi Ousaka and Toshihiro Kawamoto in 1998. Following Sunrise's production model, Bones' founders divided the company into five smaller studios, Studio A-E.",
-    entityType: "organization",
-    organizationType: "studio",
-    foundation: "13 Jun 1990",
-  };
+type StudioData = {
+  displayName: string;
+  nameKanji: string | null;
+  imageUrl: string;
+  description: string | null;
+  foundation: string | null;
+  headquarters: string | null;
+  website: string | null;
+  animeCredits: StudioAnimeCredit[];
+};
 
-  return (
-    <div className={styles.page}>
-      <HeroSection entity={StudioInfo} />
-      <main className={styles.studioSlugContainer}>
-        <div className={styles.contentContainer}>
-          <FormatSidebarInfo entity={StudioInfo} />
-          <div className={styles.centralContainer}>
-            <AnimesByStudio />
-          </div>
-        </div>
-      </main>
-    </div>
-  );
+const query = `query Studio($slug: String!) { studio(slug: $slug) {
+  displayName nameKanji imageUrl description foundation headquarters website
+  animeCredits { anime { id title slug coverUrl startDate endDate broadcastSeason } }
+} }`;
+
+async function getStudio(slug: string) {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000"}/graphql`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ query, variables: { slug } }),
+    cache: "no-store",
+  });
+  if (!response.ok) throw new Error("Não foi possível carregar o estúdio");
+  const body = await response.json() as { data?: { studio: StudioData | null } };
+  return body.data?.studio ?? null;
 }
 
-export default StudioBySlug;
+export default async function StudioBySlug({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const studio = await getStudio(slug);
+  if (!studio) notFound();
+
+  const entity: OrganizationEntity = {
+    cover: assetUrl(studio.imageUrl) ?? studio.imageUrl,
+    title: studio.displayName,
+    description: studio.description ?? "",
+    entityType: "organization",
+    organizationType: "studio",
+    foundation: studio.foundation ?? "Não informado",
+    name_kanji: studio.nameKanji ?? undefined,
+    headquarters: studio.headquarters ?? undefined,
+    externalLinks: studio.website ? { website: studio.website } : undefined,
+  };
+
+  return <div className={styles.page}>
+    <HeroSection entity={entity} />
+    <main className={styles.studioSlugContainer}>
+      <div className={styles.contentContainer}>
+        <FormatSidebarInfo entity={entity} />
+        <div className={styles.centralContainer}><AnimesByStudio credits={studio.animeCredits} /></div>
+      </div>
+    </main>
+  </div>;
+}

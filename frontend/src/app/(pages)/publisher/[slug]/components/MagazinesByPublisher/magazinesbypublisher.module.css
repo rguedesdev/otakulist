@@ -30,16 +30,17 @@
   box-shadow: var(--shadow-card);
   cursor: pointer;
 
-  /* Movimento nativo e imediato por GPU */
-  transform: translateY(0);
+  /* Movimento aplicado ao card inteiro. */
+  position: relative;
+  translate: 0 0;
   transition:
-    transform 0.2s ease-in-out,
+    translate 0.18s ease-out,
     box-shadow 0.2s ease-in-out;
 }
 
 /* Efeito ao passar o mouse */
 .magazinesByPublisherCard:hover {
-  transform: translateY(-4px);
+  translate: 0 -4px;
   border-color: var(--color-accent-border);
   box-shadow: var(--shadow-card-hover);
 }

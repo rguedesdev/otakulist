@@ -294,6 +294,8 @@
 }
 
 .mediaCard {
+  position: relative;
+  translate: 0 0;
   min-width: 0;
   overflow: hidden;
   background: var(--color-surface);
@@ -301,14 +303,14 @@
   border-radius: var(--radius-large);
   box-shadow: var(--shadow-card);
   transition:
+    translate 0.18s ease-out,
     border-color 0.2s ease,
-    transform 0.2s ease,
     box-shadow 0.2s ease;
 }
 
 .mediaCard:hover {
   border-color: var(--color-accent-border);
-  transform: translateY(-4px);
+  translate: 0 -4px;
   box-shadow: var(--shadow-card-hover);
 }
 
@@ -383,19 +385,20 @@
 
 .discoveryCard {
   position: relative;
+  translate: 0 0;
   min-height: 330px;
   overflow: hidden;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-large);
   box-shadow: var(--shadow-card);
   transition:
-    border-color 0.2s ease,
-    transform 0.2s ease;
+    translate 0.18s ease-out,
+    border-color 0.2s ease;
 }
 
 .discoveryCard:hover {
   border-color: var(--color-accent-border);
-  transform: translateY(-4px);
+  translate: 0 -4px;
 }
 
 .discoveryCard img {

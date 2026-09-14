@@ -31,15 +31,16 @@
   cursor: pointer;
 
   /* Seu efeito original preservado */
-  transform: translateY(0);
+  position: relative;
+  translate: 0 0;
   transition:
-    transform 0.2s ease-in-out,
+    translate 0.18s ease-out,
     box-shadow 0.2s ease-in-out;
 }
 
 /* Efeito ao passar o mouse */
 .staffCard:hover {
-  transform: translateY(-4px);
+  translate: 0 -4px;
   box-shadow: var(--shadow-card-hover);
   border-color: var(--color-accent-border);
 }
@@ -59,6 +60,16 @@
   object-fit: cover;
   min-width: 60px;
   display: block;
+}
+
+.staffCoverFallback {
+  width: 60px;
+  height: 80px;
+  display: grid;
+  place-items: center;
+  color: var(--color-text-muted);
+  background: var(--color-surface-hover);
+  font-size: 22px;
 }
 
 /* --- Container dos Textos --- */

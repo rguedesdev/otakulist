@@ -1,0 +1,90 @@
+.select {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+
+.trigger {
+  width: 100%;
+  min-height: 43px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--color-text-primary);
+  background: var(--color-bg-subtle);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-small);
+  cursor: pointer;
+  text-align: left;
+}
+
+.compact .trigger {
+  min-height: 40px;
+  height: 40px;
+  padding: 0 11px;
+}
+
+.trigger svg {
+  flex: 0 0 auto;
+  color: var(--color-text-muted);
+  transition: transform .18s ease;
+}
+
+.trigger[aria-expanded="true"] {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px var(--color-accent-soft);
+}
+
+.trigger[aria-expanded="true"] svg { transform: rotate(180deg); }
+.placeholder { color: var(--color-text-muted); }
+
+.menu {
+  position: absolute;
+  z-index: 50;
+  top: calc(100% + 7px);
+  left: 0;
+  width: 100%;
+  max-height: 260px;
+  padding: 6px;
+  overflow-y: auto;
+  display: grid;
+  gap: 3px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-accent-border);
+  border-radius: var(--radius-medium);
+  box-shadow: 0 18px 42px rgba(0, 0, 0, .42);
+}
+
+.menu button {
+  width: 100%;
+  min-height: 38px;
+  padding: 8px 10px;
+  color: var(--color-text-secondary);
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-small);
+  cursor: pointer;
+  text-align: left;
+}
+
+.menu button:hover {
+  color: var(--color-text-primary);
+  background: var(--color-surface-hover);
+}
+
+.menu .selected {
+  color: var(--color-accent-highlight);
+  background: var(--color-accent-soft);
+}
+
+.required {
+  position: absolute;
+  width: 1px !important;
+  min-height: 1px !important;
+  height: 1px;
+  padding: 0 !important;
+  opacity: 0;
+  pointer-events: none;
+}

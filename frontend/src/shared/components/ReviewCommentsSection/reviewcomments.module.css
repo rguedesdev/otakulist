@@ -1,0 +1,126 @@
+.heading {
+  margin-bottom: 16px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.heading h2 {
+  color: var(--title-color);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.heading span,
+.empty {
+  color: var(--color-text-muted);
+  font-size: 12px;
+}
+
+.empty {
+  padding: 24px;
+  background: var(--color-surface-raised);
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-medium);
+  text-align: center;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.comment {
+  padding: 16px;
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 12px;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-medium);
+}
+
+.avatar {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  color: white;
+  background-color: var(--color-accent-deep);
+  background-position: center;
+  background-size: cover;
+  border: 1px solid var(--color-accent-border);
+  border-radius: 50%;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.body,
+.body header,
+.body header > div:first-child {
+  min-width: 0;
+}
+
+.body header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.body header > div:first-child {
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 0;
+}
+
+.body header a {
+  overflow: hidden;
+  color: var(--color-text-primary);
+  font-size: 13px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.body header span,
+.body time {
+  color: var(--color-text-muted);
+  font-size: 10px;
+}
+
+.score {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--color-accent-highlight);
+  font-size: 12px;
+}
+
+.body header .score span {
+  font-size: 12px;
+}
+
+.body p {
+  margin: 10px 0 8px;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.body time {
+  display: block;
+}
+
+@media (max-width: 480px) {
+  .comment { grid-template-columns: 34px minmax(0, 1fr); padding: 13px; }
+  .avatar { width: 34px; height: 34px; }
+  .body header { align-items: flex-start; }
+  .body header > div:first-child { align-items: flex-start; flex-direction: column; gap: 2px; }
+}

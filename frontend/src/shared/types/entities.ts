@@ -21,6 +21,13 @@ export type PublicationType = "magazine";
 type BaseEntity = {
   cover: string;
   description: string;
+  externalLinks?: {
+    website?: string;
+    x?: string;
+    instagram?: string;
+    pixiv?: string;
+    youtube?: string;
+  };
 };
 
 type BaseWork = BaseEntity & {
@@ -32,8 +39,16 @@ type BaseWork = BaseEntity & {
   end: string;
   source?: string;
   genders: string[];
-  country: string;
   publisher?: string;
+  publisherLink?: { displayName: string; slug: string };
+  alternativeTitles?: Array<{
+    type: "JAPANESE" | "ROMAJI" | "ENGLISH" | "PORTUGUESE" | "LITERAL" | "OTHER";
+    title: string;
+  }>;
+  storeLinks?: {
+    amazon?: string; cdJapan?: string; mercadoLivre?: string; rakuten?: string; shopee?: string;
+    ebay?: string; otakuyasan?: string; hmv?: string; honto?: string; toranoana?: string; animate?: string;
+  };
 };
 
 export type AnimeEntity = BaseWork & {
@@ -42,14 +57,34 @@ export type AnimeEntity = BaseWork & {
   episodes: number;
   season: string;
   studio: string;
+  studioLinks?: Array<{ displayName: string; slug?: string }>;
   producers: string[];
   demography?: string;
   duration: string;
+  streamingLinks?: {
+    crunchyroll?: string;
+    netflix?: string;
+    primeVideo?: string;
+    bilibili?: string;
+    retrocrush?: string;
+    hulu?: string;
+    hidive?: string;
+    uNext?: string;
+    abemaTv?: string;
+    adn?: string;
+    museAsia?: string;
+    laftel?: string;
+    tver?: string;
+    iqiyi?: string;
+    tubi?: string;
+    dAnimeStore?: string;
+  };
 };
 
 export type MangaEntity = BaseWork & {
   medium: "manga";
   magazine: string;
+  magazineLink?: { title: string; slug: string };
   demography: string;
   chapters: number;
   volumes: number;
@@ -60,7 +95,7 @@ export type LightNovelEntity = BaseWork & {
   medium: "light_novel";
   chapters: number;
   volumes: number;
-  publication: string;
+  publicationPeriod: string;
 };
 
 export type WorkEntity = AnimeEntity | MangaEntity | LightNovelEntity;
@@ -74,6 +109,7 @@ export type PersonEntity = BaseEntity & {
   date_of_birth: string;
   agency?: string;
   activity_period?: string;
+  occupations?: string[];
   record_label?: string;
   musical_genres?: string[];
 };
@@ -86,11 +122,25 @@ export type CharacterEntity = BaseEntity & {
   date_of_birth: string;
 };
 
+export type MusicArtistEntity = BaseEntity & {
+  entityType: "music_artist";
+  title: string;
+  artist_kind: "solo" | "band";
+  name_kanji?: string;
+  origin?: string;
+  date_of_birth?: string;
+  activity_period?: string;
+  record_label?: string;
+  musical_genres?: string[];
+};
+
 export type OrganizationEntity = BaseEntity & {
   entityType: "organization";
   organizationType: OrganizationType;
   title: string;
   foundation: string;
+  name_kanji?: string;
+  headquarters?: string;
 };
 
 export type PublicationEntity = BaseEntity & {
@@ -99,6 +149,7 @@ export type PublicationEntity = BaseEntity & {
   title: string;
   foundation: string;
   publisher: string;
+  publisherLink?: { displayName: string; slug: string };
   demography: string;
   frequency: string;
 };
@@ -107,6 +158,7 @@ export type EntityInfo =
   | WorkEntity
   | PersonEntity
   | CharacterEntity
+  | MusicArtistEntity
   | OrganizationEntity
   | PublicationEntity;
 
@@ -161,7 +213,7 @@ export function hasVisiblePersonalDetails(
     entity.entityType === "character" ||
     (isPerson(entity) &&
       entity.roles.some((role) =>
-        (["mangaka", "seiyuu", "artist"] as PersonRole[]).includes(role),
+        (["mangaka", "seiyuu", "artist", "staff"] as PersonRole[]).includes(role),
       ))
   );
 }

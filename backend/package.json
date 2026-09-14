@@ -1,0 +1,47 @@
+{
+  "name": "otakulist-backend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "tsx watch --env-file-if-exists=.env src/server.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node --env-file-if-exists=.env dist/server.js",
+    "user:role": "tsx --env-file-if-exists=.env src/scripts/set-user-role.ts",
+    "seed:frieren": "tsx --env-file-if-exists=.env src/scripts/seed-frieren.ts",
+    "seed:kitou-akari": "tsx --env-file-if-exists=.env src/scripts/seed-kitou-akari.ts",
+    "seed:yui-horie": "tsx --env-file-if-exists=.env src/scripts/seed-yui-horie.ts",
+    "seed:rumiko-takahashi": "tsx --env-file-if-exists=.env src/scripts/seed-rumiko-takahashi.ts",
+    "seed:hiroyuki-kitakubo": "tsx --env-file-if-exists=.env src/scripts/seed-hiroyuki-kitakubo.ts",
+    "seed:bones": "tsx --env-file-if-exists=.env src/scripts/seed-bones.ts",
+    "seed:madhouse": "tsx --env-file-if-exists=.env src/scripts/seed-madhouse.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:integration": "vitest run tests/auth.integration.test.ts"
+  },
+  "dependencies": {
+    "@fastify/cookie": "11.1.2",
+    "@fastify/cors": "11.3.0",
+    "@fastify/jwt": "10.2.2",
+    "@fastify/multipart": "10.1.1",
+    "@fastify/static": "10.1.3",
+    "bcrypt": "6.0.0",
+    "fastify": "5.12.4",
+    "file-type": "22.1.0",
+    "graphql": "16.11.0",
+    "mercurius": "16.10.0",
+    "mongoose": "9.10.0",
+    "sharp": "0.35.4",
+    "zod": "4.6.2"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "6.0.0",
+    "@types/node": "24.10.0",
+    "tsx": "4.23.13",
+    "typescript": "7.0.2",
+    "vitest": "5.0.0"
+  }
+}

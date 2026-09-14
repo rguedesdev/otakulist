@@ -54,7 +54,42 @@ Este projeto é uma tentativa de criar um trancker de animes, mangas e light nov
 
 ## 🛠️ Instalação
 
-- Em breve...
+### Desenvolvimento local
+
+O MongoDB roda em Docker, com volume persistente e acesso restrito à máquina
+local:
+
+```bash
+docker compose up -d mongodb
+docker compose ps
+```
+
+Em seguida, configure e inicie as aplicações em terminais separados:
+
+```bash
+cd backend
+cp .env.example .env
+# troque JWT_SECRET por uma chave aleatória longa
+npm install
+npm run dev
+```
+
+```bash
+cd frontend
+cp .env.example .env.local
+npm install
+npm run dev
+```
+
+- Frontend: `http://localhost:3000`
+- GraphQL: `http://localhost:5000/graphql`
+- Healthcheck: `http://localhost:5000/health`
+
+Para encerrar o banco sem apagar os dados:
+
+```bash
+docker compose stop mongodb
+```
 
 ## 🖼️ Prints do Projeto
 

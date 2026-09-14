@@ -1,67 +1,77 @@
-// Imports Principais
 import Image from "next/image";
+import Link from "next/link";
+import { FiTv } from "react-icons/fi";
+import { GiEvilBook } from "react-icons/gi";
+import { LuBookHeart } from "react-icons/lu";
 
-// Style Sheet CSS
+import { assetUrl } from "@/shared/auth/api";
 import styles from "./characterbyanime.module.css";
 
-// Icones
-import { RiRestartLine } from "react-icons/ri";
-import { RiQuillPenLine } from "react-icons/ri";
-import { FaRegCheckCircle } from "react-icons/fa";
-import { FiTv } from "react-icons/fi";
+export type CharacterAppearance = {
+  id: string;
+  title: string;
+  slug: string;
+  coverUrl: string;
+  medium: "ANIME" | "MANGA" | "LIGHT_NOVEL";
+  formats: string[];
+};
 
-function CharacterByMedia() {
+const mediumDetails = {
+  ANIME: { path: "anime", Icon: FiTv },
+  MANGA: { path: "manga", Icon: GiEvilBook },
+  LIGHT_NOVEL: { path: "light-novel", Icon: LuBookHeart },
+} as const;
+
+const animeFormatLabels: Record<string, string> = {
+  TV: "TV",
+  MOVIE: "Filme",
+  OVA: "OVA",
+  ONA: "ONA",
+  SPECIAL: "Especial",
+};
+
+function appearanceFormat(appearance: CharacterAppearance) {
+  if (appearance.medium === "MANGA") return "Manga";
+  if (appearance.medium === "LIGHT_NOVEL") return "Light Novel";
+  const formats = [...new Set(appearance.formats.map((format) => animeFormatLabels[format] ?? format))];
+  return ["Anime", ...formats].join(" • ");
+}
+
+function CharacterByMedia({ appearances }: { appearances: CharacterAppearance[] }) {
+  if (appearances.length === 0) return null;
+
   return (
     <section className={styles.characterBySeiyuuContainer}>
       <h2 className={styles.characterBySeiyuuSectionTitle}>Aparece em</h2>
       <div className={styles.characterBySeiyuuCardsContainer}>
-        {/* Card 1 */}
-        <article className={styles.characterBySeiyuuCard}>
-          <Image
-            className={styles.characterBySeiyuuCover}
-            src="/ranma.jpg"
-            alt="Manga Cover"
-            width={90}
-            height={130}
-            unoptimized
-            priority
-          />
-          <div className={styles.characterBySeiyuuTextsContainer}>
-            <div className={styles.characterBySeiyuuTexts}>
-              <h3 className={styles.characterBySeiyuuTitle}>Ranma 1⁄2</h3>
-              <dl className={styles.infoGroup}>
-                {/* <div className={styles.infoLine}>
-                  <dt className={styles.infoIcon}>
-                    <FiTv size={14} aria-hidden="true" />
-                  </dt>
-                  <dd className={styles.characterBySeiyuuInfo}>Ranma</dd>
-                </div> */}
-
-                {/* <div className={styles.infoLine}>
-                  <dt className={styles.infoIcon}>
-                    <RiRestartLine size={14} aria-hidden="true" />
-                  </dt>
-                  <dd className={styles.characterBySeiyuuInfo}>
-                    Ínicio: 13 Jun 1990
-                  </dd>
-                </div> */}
-
-                {/* <div className={styles.infoLine}>
-                  <dt className={styles.infoIcon}>
-                    <FaRegCheckCircle size={13} aria-hidden="true" />
-                  </dt>
-                  <dd className={styles.characterBySeiyuuInfo}>
-                    Término: 20 Abril 2004
-                  </dd>
-                </div> */}
-              </dl>
-            </div>
-          </div>
-        </article>
-
-        {/* Card 2 */}
-
-        {/* Card 3 */}
+        {appearances.map((appearance) => {
+          const { path, Icon } = mediumDetails[appearance.medium];
+          return (
+            <Link href={`/${path}/${appearance.slug}`} key={`${appearance.medium}-${appearance.id}`}>
+              <article className={styles.characterBySeiyuuCard}>
+                <Image
+                  className={styles.characterBySeiyuuCover}
+                  src={assetUrl(appearance.coverUrl) ?? appearance.coverUrl}
+                  alt={`Capa de ${appearance.title}`}
+                  width={75}
+                  height={110}
+                  unoptimized
+                />
+                <div className={styles.characterBySeiyuuTextsContainer}>
+                  <div className={styles.characterBySeiyuuTexts}>
+                    <h3 className={styles.characterBySeiyuuTitle}>{appearance.title}</h3>
+                    <dl className={styles.infoGroup}>
+                      <div className={styles.infoLine}>
+                        <dt className={styles.infoIcon}><Icon size={14} aria-hidden="true" /></dt>
+                        <dd className={styles.characterBySeiyuuInfo}>{appearanceFormat(appearance)}</dd>
+                      </div>
+                    </dl>
+                  </div>
+                </div>
+              </article>
+            </Link>
+          );
+        })}
       </div>
     </section>
   );

@@ -104,13 +104,13 @@ const upcomingAnime = [
 ];
 
 const schedule = [
+  { day: "Dom", count: "9 títulos" },
   { day: "Seg", count: "4 títulos" },
   { day: "Ter", count: "7 títulos" },
   { day: "Qua", count: "5 títulos" },
   { day: "Qui", count: "8 títulos" },
   { day: "Sex", count: "6 títulos" },
   { day: "Sáb", count: "11 títulos" },
-  { day: "Dom", count: "9 títulos" },
 ];
 
 function AnimePage() {
@@ -230,8 +230,8 @@ function AnimePage() {
               <FiCalendar aria-hidden="true" />
             </div>
             <div className={styles.scheduleDays}>
-              {schedule.map((item, index) => (
-                <button className={index === 4 ? styles.scheduleActive : undefined} type="button" key={item.day}>
+              {schedule.map((item) => (
+                <button className={item.day === "Sex" ? styles.scheduleActive : undefined} type="button" key={item.day}>
                   <strong>{item.day}</strong><span>{item.count}</span>
                 </button>
               ))}

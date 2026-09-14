@@ -2,6 +2,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { ReactNode } from "react";
+import { ReviewAction, type ReviewTarget } from "./ReviewAction";
 
 // Style Sheet CSS
 import styles from "./formatsidebar.module.css";
@@ -11,6 +12,7 @@ import {
   hasPersonRole,
   hasVisiblePersonalDetails,
   isAnime,
+  isPerson,
   isWork,
   mediumLabels,
 } from "@/shared/types/entities";
@@ -27,7 +29,6 @@ import { GrAmazon } from "react-icons/gr";
 import { SiCrunchyroll } from "react-icons/si";
 import { SiNetflix } from "react-icons/si";
 
-import { MdOutlineRateReview } from "react-icons/md";
 import { FiEdit } from "react-icons/fi";
 import { RiBilibiliLine } from "react-icons/ri";
 
@@ -87,12 +88,57 @@ function MusicPlatformLinks({ spotify, tidal, deezer, amazonMusic }: MusicPlatfo
 type FormatSidebarInfoProps = {
   entity: EntityInfo;
   children?: ReactNode;
+  reviewTarget?: ReviewTarget;
 };
 
 function FormatSidebarInfo({
   entity,
   children,
+  reviewTarget,
 }: FormatSidebarInfoProps) {
+  const externalLinkItems = [
+    { href: entity.externalLinks?.website, label: "Site Oficial", className: styles.linkWebsite, iconClassName: styles.iconWebsiteContainer, icon: <HiOutlineLink className={styles.iconWebsite} size={16} /> },
+    { href: entity.externalLinks?.x, label: "X/Twitter", className: styles.linkXTwitter, iconClassName: styles.iconXTwitterContainer, icon: <FaXTwitter className={styles.iconXTwitter} size={16} /> },
+    { href: entity.externalLinks?.instagram, label: "Instagram", className: styles.linkInstagram, iconClassName: styles.iconInstagramContainer, icon: <FaInstagram className={styles.iconInstagram} size={18} /> },
+    { href: entity.externalLinks?.pixiv, label: "Pixiv", className: styles.linkPixiv, iconClassName: styles.iconPixivContainer, icon: <Image src="/social-medias/pixiv.jpg" alt="" width={20} height={20} /> },
+    { href: entity.externalLinks?.youtube, label: "YouTube", className: styles.linkYoutube, iconClassName: styles.iconYoutubeContainer, icon: <FaYoutube className={styles.iconYoutube} size={16} /> },
+  ].filter((item): item is typeof item & { href: string } => Boolean(item.href));
+
+  const streamingLinkItems = isAnime(entity)
+    ? [
+        { href: entity.streamingLinks?.crunchyroll, label: "Crunchyroll", className: styles.linkCrunchroll, iconClassName: styles.iconlinkCrunchrollContainer, icon: <SiCrunchyroll className={styles.iconlinkCrunchroll} size={16} /> },
+        { href: entity.streamingLinks?.netflix, label: "Netflix", className: styles.linkNetflix, iconClassName: styles.iconlinkNetflixContainer, icon: <SiNetflix style={{ color: "#E50914" }} className={styles.iconlinkNetflix} size={16} /> },
+        { href: entity.streamingLinks?.primeVideo, label: "Prime Video", className: styles.linkPrimeVideo, iconClassName: styles.iconlinkPrimeVideoContainer, icon: <GrAmazon className={styles.iconlinkPrimeVideo} size={16} /> },
+        { href: entity.streamingLinks?.bilibili, label: "BiliBili", className: styles.linkBiliBili, iconClassName: styles.iconlinkBiliBiliContainer, icon: <RiBilibiliLine className={styles.iconlinkBiliBili} size={18} /> },
+        { href: entity.streamingLinks?.retrocrush, label: "RetroCrush", className: styles.linkRetroCrush, iconClassName: styles.iconlinkRetroCrushContainer, icon: <Image src="/streamings/retrocrush.png" alt="" width={20} height={20} /> },
+        { href: entity.streamingLinks?.hulu, label: "Hulu", className: styles.linkHulu, iconClassName: styles.iconlinkHuluContainer, icon: <Image src="/streamings/hulu.png" alt="" width={18} height={18} /> },
+        { href: entity.streamingLinks?.hidive, label: "HiDive", className: styles.linkHiDive, iconClassName: styles.iconlinkHiDiveContainer, icon: <Image src="/streamings/hidive.png" alt="" width={18} height={18} /> },
+        { href: entity.streamingLinks?.uNext, label: "U-Next", className: styles.linkUNext, iconClassName: styles.iconlinkUNextContainer, icon: <Image src="/streamings/u-next.png" alt="" width={16} height={16} /> },
+        { href: entity.streamingLinks?.abemaTv, label: "Abema TV", className: styles.linkAbemaTV, iconClassName: styles.iconlinkAbemaTVContainer, icon: <Image src="/streamings/abematv.png" alt="" width={16} height={16} /> },
+        { href: entity.streamingLinks?.adn, label: "Anime Digital Network", className: styles.linkADN, iconClassName: styles.iconlinkADNContainer, icon: <Image src="/streamings/adn.png" alt="" width={20} height={20} /> },
+        { href: entity.streamingLinks?.museAsia, label: "Muse Asia", className: styles.linkMuseAsia, iconClassName: styles.iconlinkMuseAsiaContainer, icon: <Image src="/streamings/muse-asia.png" alt="" width={22} height={22} /> },
+        { href: entity.streamingLinks?.laftel, label: "Laftel TV", className: styles.linkLaftel, iconClassName: styles.iconlinkLaftelContainer, icon: <Image src="/streamings/laftel.png" alt="" width={22} height={22} /> },
+        { href: entity.streamingLinks?.tver, label: "TVer", className: styles.linkTVer, iconClassName: styles.iconlinkTVerContainer, icon: <Image src="/streamings/tver.png" alt="" width={18} height={18} /> },
+        { href: entity.streamingLinks?.iqiyi, label: "iQIYI", className: styles.linkIQIYI, iconClassName: styles.iconlinkIQIYIContainer, icon: <Image src="/streamings/iQIYI.png" alt="" width={20} height={20} /> },
+        { href: entity.streamingLinks?.tubi, label: "Tubi", className: styles.linkTubi, iconClassName: styles.iconlinkTubiContainer, icon: <Image src="/streamings/tubi.png" alt="" width={20} height={20} /> },
+        { href: entity.streamingLinks?.dAnimeStore, label: "d Anime Store", className: styles.linkDAnime, iconClassName: styles.iconlinkDAnimeContainer, icon: <Image src="/streamings/danime-store.png" alt="" width={12} height={12} /> },
+      ].filter((item): item is typeof item & { href: string } => Boolean(item.href))
+    : [];
+  const storeLinkItems = isWork(entity)
+    ? [
+        { href: entity.storeLinks?.amazon, label: "Amazon", className: styles.linkAmazonStore, iconClassName: styles.iconlinkAmazonStoreContainer, icon: <GrAmazon className={styles.iconlinkAmazonStore} size={16} /> },
+        { href: entity.storeLinks?.cdJapan, label: "CD Japan", className: styles.linkCDJapan, iconClassName: styles.iconlinkCDJapanContainer, icon: <Image src="/store/cdjapan.png" alt="" width={20} height={20} /> },
+        { href: entity.storeLinks?.mercadoLivre, label: "Mercado Livre", className: styles.linkMercadoLivre, iconClassName: styles.iconlinkMercadoLivreContainer, icon: <Image src="/store/mercado-livre.png" alt="" width={22} height={22} /> },
+        { href: entity.storeLinks?.rakuten, label: "Rakuten", className: styles.linkRakuten, iconClassName: styles.iconlinkRakutenContainer, icon: <SiRakuten className={styles.iconlinkRakuten} size={16} /> },
+        { href: entity.storeLinks?.shopee, label: "Shopee", className: styles.linkShopee, iconClassName: styles.iconlinkShopeeContainer, icon: <SiShopee className={styles.iconlinkShopee} size={16} /> },
+        { href: entity.storeLinks?.ebay, label: "Ebay", className: styles.linkEbay, iconClassName: styles.iconlinkEbayContainer, icon: <Image src="/store/ebay.png" alt="" width={16} height={16} /> },
+        { href: entity.storeLinks?.otakuyasan, label: "Otakuya-san", className: styles.linkOtakuyasan, iconClassName: styles.iconlinkOtakuyasanContainer, icon: <Image src="/store/otakuyasan.png" alt="" width={22} height={22} /> },
+        { href: entity.storeLinks?.hmv, label: "HMV & Books", className: styles.linkHMV, iconClassName: styles.iconlinkHMVContainer, icon: <Image src="/store/hmv.png" alt="" width={22} height={22} /> },
+        { href: entity.storeLinks?.honto, label: "Honto", className: styles.linkHonto, iconClassName: styles.iconlinkHontoContainer, icon: <Image src="/store/honto.png" alt="" width={22} height={22} /> },
+        { href: entity.storeLinks?.toranoana, label: "Toranoana", className: styles.linkToranoana, iconClassName: styles.iconlinkToranoanaContainer, icon: <Image src="/store/toranoana.png" alt="" width={22} height={22} /> },
+        { href: entity.storeLinks?.animate, label: "Animate", className: styles.linkAnimate, iconClassName: styles.iconlinkAnimateContainer, icon: <Image src="/store/animate.jpg" alt="" width={22} height={22} /> },
+      ].filter((item): item is typeof item & { href: string } => Boolean(item.href))
+    : [];
 
   return (
     <aside className={styles.sidebarWrapper}>
@@ -176,11 +222,45 @@ function FormatSidebarInfo({
                     </dd>
                   </>
                 )}
+
+                {isPerson(entity) && (hasPersonRole(entity, "staff") || hasPersonRole(entity, "mangaka")) && entity.activity_period && (
+                  <>
+                    <dt className={styles.animeDescriptionTerm}>Período de atividade</dt>
+                    <dd className={styles.animeDescriptionDetail}>{entity.activity_period}</dd>
+                  </>
+                )}
+
+                {isPerson(entity) && entity.occupations?.length ? (
+                  <>
+                    <dt className={styles.animeDescriptionTerm}>Atuação</dt>
+                    <dd className={styles.animeDescriptionDetail}>{entity.occupations.join(", ")}</dd>
+                  </>
+                ) : null}
               </>
             </>
           ) : (
             <></>
           )}
+
+          {entity.entityType === "music_artist" && (
+            <>
+              <dt className={styles.animeDescriptionTerm}>Tipo</dt>
+              <dd className={styles.animeDescriptionDetail}>{entity.artist_kind === "band" ? "Banda" : "Artista solo"}</dd>
+              {entity.name_kanji && <><dt className={styles.animeDescriptionTerm}>Nome em Kanji</dt><dd className={styles.animeDescriptionDetail}>{entity.name_kanji}</dd></>}
+              {entity.date_of_birth && <><dt className={styles.animeDescriptionTerm}>Data de Nascimento</dt><dd className={styles.animeDescriptionDetail}>{entity.date_of_birth}</dd></>}
+              {entity.origin && <><dt className={styles.animeDescriptionTerm}>Origem</dt><dd className={styles.animeDescriptionDetail}>{entity.origin}</dd></>}
+              {entity.activity_period && <><dt className={styles.animeDescriptionTerm}>Período de atividade</dt><dd className={styles.animeDescriptionDetail}>{entity.activity_period}</dd></>}
+              {entity.record_label && <><dt className={styles.animeDescriptionTerm}>Gravadora</dt><dd className={styles.animeDescriptionDetail}>{entity.record_label}</dd></>}
+              {entity.musical_genres?.length ? <><dt className={styles.animeDescriptionTerm}>Gêneros musicais</dt><dd className={styles.animeDescriptionDetail}>{entity.musical_genres.join(", ")}</dd></> : null}
+            </>
+          )}
+
+          {entity.entityType === "organization" ? (
+            <>
+              <dt className={styles.animeDescriptionTerm}>Tipo</dt>
+              <dd className={styles.animeDescriptionDetail}>{entity.organizationType === "publisher" ? "Editora" : "Estúdio"}</dd>
+            </>
+          ) : null}
 
           {isWork(entity) && entity.medium !== "anime" && entity.status ? (
             <>
@@ -212,9 +292,9 @@ function FormatSidebarInfo({
             <>
               <dt className={styles.animeDescriptionTerm}>Editora</dt>
               <dd className={styles.animeDescriptionDetail}>
-                <Link className={styles.publisherLink} href={`/`}>
-                  {entity.publisher}
-                </Link>
+                {"publisherLink" in entity && entity.publisherLink
+                  ? <Link className={styles.publisherLink} href={`/publisher/${entity.publisherLink.slug}`}>{entity.publisher}</Link>
+                  : entity.publisher}
               </dd>
             </>
           ) : (
@@ -224,7 +304,11 @@ function FormatSidebarInfo({
           {entity.entityType === "publication" ||
           entity.entityType === "organization" ? (
             <>
-              <dt className={styles.animeDescriptionTerm}>Fundado em</dt>
+              <dt className={styles.animeDescriptionTerm}>
+                {entity.entityType === "publication" && entity.publicationType === "magazine"
+                  ? "Ano de criação"
+                  : "Fundado em"}
+              </dt>
               <dd className={styles.animeDescriptionDetail}>
                 {entity.foundation}
               </dd>
@@ -246,16 +330,26 @@ function FormatSidebarInfo({
 
           {isAnime(entity) && entity.studio ? (
             <>
-              <dt className={styles.animeDescriptionTerm}>Estúdio</dt>
+              <dt className={styles.animeDescriptionTerm}>Estúdios</dt>
               <dd className={styles.animeDescriptionDetail}>
-                {entity.studio}
+                {entity.studioLinks?.length
+                  ? entity.studioLinks.map((studio, index) => <span key={`${studio.slug ?? "legacy"}-${studio.displayName}`}>{index > 0 && ", "}{studio.slug ? <Link className={styles.publisherLink} href={`/studio/${studio.slug}`}>{studio.displayName}</Link> : studio.displayName}</span>)
+                  : entity.studio}
               </dd>
             </>
           ) : (
             <></>
           )}
 
-          {isAnime(entity) && entity.producers ? (
+          {entity.entityType === "organization" && entity.name_kanji ? (
+            <><dt className={styles.animeDescriptionTerm}>Nome em Kanji</dt><dd className={styles.animeDescriptionDetail}>{entity.name_kanji}</dd></>
+          ) : <></>}
+
+          {entity.entityType === "organization" && entity.headquarters ? (
+            <><dt className={styles.animeDescriptionTerm}>Sede</dt><dd className={styles.animeDescriptionDetail}>{entity.headquarters}</dd></>
+          ) : <></>}
+
+          {isAnime(entity) && entity.producers.length > 0 ? (
             <>
               <dt className={styles.animeDescriptionTerm}>Produtores</dt>
               <dd className={styles.animeDescriptionDetail}>
@@ -270,12 +364,9 @@ function FormatSidebarInfo({
             <>
               <dt className={styles.animeDescriptionTerm}>Magazine</dt>
               <dd className={styles.animeDescriptionDetail}>
-                <Link
-                  className={styles.magazineLink}
-                  href={`/magazine/shounen-jump`}
-                >
-                  {entity.magazine}
-                </Link>
+                {entity.magazineLink
+                  ? <Link className={styles.magazineLink} href={`/magazine/${entity.magazineLink.slug}`}>{entity.magazine}</Link>
+                  : entity.magazine}
               </dd>
             </>
           ) : (
@@ -320,7 +411,7 @@ function FormatSidebarInfo({
             <></>
           )}
 
-          {isWork(entity) && entity.medium === "manga" ? (
+          {isWork(entity) && (entity.medium === "anime" || entity.medium === "manga") && entity.demography ? (
             <>
               <dt className={styles.animeDescriptionTerm}>Demografia</dt>
               <dd className={styles.animeDescriptionDetail}>
@@ -344,371 +435,56 @@ function FormatSidebarInfo({
         </dl>
       </div>
 
-      {/* Bloco 3: Links úteis */}
-      <div className={styles.relatedLinks}>
-        <h3 className={styles.relatedLinksTitle}>Links Relacionados</h3>
-        <Link className={styles.linkWebsite} href={`/`}>
-          <span className={styles.iconWebsiteContainer}>
-            <HiOutlineLink className={styles.iconWebsite} size={16} />
-          </span>
-          <span className={styles.linkText}>Site Oficial</span>
-        </Link>
-
-        <Link className={styles.linkXTwitter} href={`/`}>
-          <span className={styles.iconXTwitterContainer}>
-            <FaXTwitter className={styles.iconXTwitter} size={16} />
-          </span>
-          <span className={styles.linkText}>X/Twitter</span>
-        </Link>
-
-        <Link className={styles.linkInstagram} href={`/`}>
-          <span className={styles.iconInstagramContainer}>
-            <FaInstagram className={styles.iconInstagram} size={18} />
-          </span>
-          <span className={styles.linkText}>Instagram</span>
-        </Link>
-
-        <Link className={styles.linkPixiv} href={`/`}>
-          <span className={styles.iconPixivContainer}>
-            <Image
-              src="/social-medias/pixiv.jpg"
-              alt="Pixiv Logo"
-              width={20}
-              height={20}
-            />
-          </span>
-          <span className={styles.linkText}>Pixiv</span>
-        </Link>
-
-        <Link className={styles.linkYoutube} href={`/`}>
-          <span className={styles.iconYoutubeContainer}>
-            <FaYoutube className={styles.iconYoutube} size={16} />
-          </span>
-          <span className={styles.linkText}>YouTube</span>
-        </Link>
-
-      </div>
+      {externalLinkItems.length > 0 && (
+        <div className={styles.relatedLinks}>
+          <h3 className={styles.relatedLinksTitle}>Links Relacionados</h3>
+          {externalLinkItems.map((item) => (
+            <Link className={item.className} href={item.href} key={item.label} target="_blank" rel="noreferrer">
+              <span className={item.iconClassName}>{item.icon}</span>
+              <span className={styles.linkText}>{item.label}</span>
+            </Link>
+          ))}
+        </div>
+      )}
 
       {children}
 
-      {isAnime(entity) ? (
-        <>
-          {/* Bloco 4: Streamings Links */}
-          <div className={styles.streamingsLinks}>
-            <h3 className={styles.streamingsLinksTitle}>Assista em</h3>
-
-            <Link className={styles.linkCrunchroll} href={`/`}>
-              <span className={styles.iconlinkCrunchrollContainer}>
-                <SiCrunchyroll
-                  className={styles.iconlinkCrunchroll}
-                  size={16}
-                />
-              </span>
-              <span className={styles.linkText}>Crunchyroll</span>
+      {streamingLinkItems.length > 0 && (
+        <div className={styles.streamingsLinks}>
+          <h3 className={styles.streamingsLinksTitle}>Assista em</h3>
+          {streamingLinkItems.map((item) => (
+            <Link className={item.className} href={item.href} key={item.label} target="_blank" rel="noreferrer">
+              <span className={item.iconClassName}>{item.icon}</span>
+              <span className={styles.linkText}>{item.label}</span>
             </Link>
-
-            <Link className={styles.linkNetflix} href={`/`}>
-              <span className={styles.iconlinkNetflixContainer}>
-                <SiNetflix
-                  style={{ color: "#E50914" }}
-                  className={styles.iconlinkNetflix}
-                  size={16}
-                />
-              </span>
-              <span className={styles.linkText}>Netflix</span>
-            </Link>
-
-            <Link className={styles.linkPrimeVideo} href={`/`}>
-              <span className={styles.iconlinkPrimeVideoContainer}>
-                <GrAmazon className={styles.iconlinkPrimeVideo} size={16} />
-              </span>
-              <span className={styles.linkText}>Prime Video</span>
-            </Link>
-
-            <Link className={styles.linkBiliBili} href={`/`}>
-              <span className={styles.iconlinkBiliBiliContainer}>
-                <RiBilibiliLine className={styles.iconlinkBiliBili} size={18} />
-              </span>
-              <span className={styles.linkText}>BiliBili</span>
-            </Link>
-
-            <Link className={styles.linkRetroCrush} href={`/`}>
-              <span className={styles.iconlinkRetroCrushContainer}>
-                <Image
-                  src="/streamings/retrocrush.png"
-                  alt="RetroCrush Logo"
-                  width={20}
-                  height={20}
-                />
-              </span>
-              <span className={styles.linkText}>RetroCrush</span>
-            </Link>
-
-            <Link className={styles.linkHulu} href={`/`}>
-              <span className={styles.iconlinkHuluContainer}>
-                <Image
-                  src="/streamings/hulu.png"
-                  alt="Hulu Logo"
-                  width={18}
-                  height={18}
-                />
-              </span>
-              <span className={styles.linkText}>Hulu</span>
-            </Link>
-
-            <Link className={styles.linkHiDive} href={`/`}>
-              <span className={styles.iconlinkHiDiveContainer}>
-                <Image
-                  src="/streamings/hidive.png"
-                  alt="HiDive Logo"
-                  width={18}
-                  height={18}
-                />
-              </span>
-              <span className={styles.linkText}>HiDive</span>
-            </Link>
-
-            <Link className={styles.linkUNext} href={`/`}>
-              <span className={styles.iconlinkUNextContainer}>
-                <Image
-                  src="/streamings/u-next.png"
-                  alt="U-Next Logo"
-                  width={16}
-                  height={16}
-                />
-              </span>
-              <span className={styles.linkText}>U-Next</span>
-            </Link>
-
-            <Link className={styles.linkAbemaTV} href={`/`}>
-              <span className={styles.iconlinkAbemaTVContainer}>
-                <Image
-                  src="/streamings/abematv.png"
-                  alt="Abema TV Logo"
-                  width={16}
-                  height={16}
-                />
-              </span>
-              <span className={styles.linkText}>Abema TV</span>
-            </Link>
-
-            <Link className={styles.linkADN} href={`/`}>
-              <span className={styles.iconlinkADNContainer}>
-                <Image
-                  src="/streamings/adn.png"
-                  alt="ADN Logo"
-                  width={20}
-                  height={20}
-                />
-              </span>
-              <span className={styles.linkText}>Anime Digital Network</span>
-            </Link>
-
-            <Link className={styles.linkMuseAsia} href={`/`}>
-              <span className={styles.iconlinkMuseAsiaContainer}>
-                <Image
-                  src="/streamings/muse-asia.png"
-                  alt="MuseAsia Logo"
-                  width={22}
-                  height={22}
-                />
-              </span>
-              <span className={styles.linkText}>Muse Asia</span>
-            </Link>
-
-            <Link className={styles.linkLaftel} href={`/`}>
-              <span className={styles.iconlinkLaftelContainer}>
-                <Image
-                  src="/streamings/laftel.png"
-                  alt="LAftel TV Logo"
-                  width={22}
-                  height={22}
-                />
-              </span>
-              <span className={styles.linkText}>Laftel TV</span>
-            </Link>
-
-            <Link className={styles.linkTVer} href={`/`}>
-              <span className={styles.iconlinkTVerContainer}>
-                <Image
-                  src="/streamings/tver.png"
-                  alt="TVer Logo"
-                  width={18}
-                  height={18}
-                />
-              </span>
-              <span className={styles.linkText}>TVer</span>
-            </Link>
-
-            <Link className={styles.linkIQIYI} href={`/`}>
-              <span className={styles.iconlinkIQIYIContainer}>
-                <Image
-                  src="/streamings/iQIYI.png"
-                  alt="iQIYI Logo"
-                  width={20}
-                  height={20}
-                />
-              </span>
-              <span className={styles.linkText}>iQIYI</span>
-            </Link>
-
-            <Link className={styles.linkTubi} href={`/`}>
-              <span className={styles.iconlinkTubiContainer}>
-                <Image
-                  src="/streamings/tubi.png"
-                  alt="Tubi Logo"
-                  width={20}
-                  height={20}
-                />
-              </span>
-              <span className={styles.linkText}>Tubi</span>
-            </Link>
-
-            <Link className={styles.linkDAnime} href={`/`}>
-              <span className={styles.iconlinkDAnimeContainer}>
-                <Image
-                  src="/streamings/danime-store.png"
-                  alt="D Anime Store Logo"
-                  width={12}
-                  height={12}
-                />
-              </span>
-              <span className={styles.linkText}>d Anime Store</span>
-            </Link>
-          </div>
-        </>
-      ) : (
-        <></>
+          ))}
+        </div>
       )}
 
-      {/* Bloco 5: Store Links */}
-      {(isWork(entity) && entity.medium !== "anime") ||
-      entity.entityType === "publication" ? (
+      {storeLinkItems.length > 0 && (
         <div className={styles.storeLinks}>
           <h3 className={styles.storeLinksTitle}>Compre em</h3>
-          <Link className={styles.linkAmazonStore} href={`/`}>
-            <span className={styles.iconlinkAmazonStoreContainer}>
-              <GrAmazon className={styles.iconlinkAmazonStore} size={16} />
-            </span>
-            <span className={styles.linkText}>Amazon</span>
-          </Link>
-          <Link className={styles.linkCDJapan} href={`/`}>
-            <span className={styles.iconlinkCDJapanContainer}>
-              <Image
-                src="/store/cdjapan.png"
-                alt="CD Japan Logo"
-                width={20}
-                height={20}
-              />
-            </span>
-            <span className={styles.linkText}>CD Japan</span>
-          </Link>
-          <Link className={styles.linkMercadoLivre} href={`/`}>
-            <span className={styles.iconlinkMercadoLivreContainer}>
-              <Image
-                src="/store/mercado-livre.png"
-                alt="Mercado Livre Logo"
-                width={22}
-                height={22}
-              />
-            </span>
-            <span className={styles.linkText}>Mercado Livre</span>
-          </Link>
-          <Link className={styles.linkRakuten} href={`/`}>
-            <span className={styles.iconlinkRakutenContainer}>
-              <SiRakuten className={styles.iconlinkRakuten} size={16} />
-            </span>
-            <span className={styles.linkText}>Rakuten</span>
-          </Link>
-          <Link className={styles.linkShopee} href={`/`}>
-            <span className={styles.iconlinkShopeeContainer}>
-              <SiShopee className={styles.iconlinkShopee} size={16} />
-            </span>
-            <span className={styles.linkText}>Shopee</span>
-          </Link>
-          <Link className={styles.linkEbay} href={`/`}>
-            <span className={styles.iconlinkEbayContainer}>
-              <Image
-                src="/store/ebay.png"
-                alt="Otakuya-san"
-                width={16}
-                height={16}
-              />
-            </span>
-            <span className={styles.linkText}>Ebay</span>
-          </Link>
-          <Link className={styles.linkOtakuyasan} href={`/`}>
-            <span className={styles.iconlinkOtakuyasanContainer}>
-              <Image
-                src="/store/otakuyasan.png"
-                alt="Otakuya-san"
-                width={22}
-                height={22}
-              />
-            </span>
-            <span className={styles.linkText}>Otakuya-san</span>
-          </Link>
-          <Link className={styles.linkHMV} href={`/`}>
-            <span className={styles.iconlinkHMVContainer}>
-              <Image src="/store/hmv.png" alt="HMV" width={22} height={22} />
-            </span>
-            <span className={styles.linkText}>HMV & Books</span>
-          </Link>
-          <Link className={styles.linkHonto} href={`/`}>
-            <span className={styles.iconlinkHontoContainer}>
-              <Image
-                src="/store/honto.png"
-                alt="Honto"
-                width={22}
-                height={22}
-              />
-            </span>
-            <span className={styles.linkText}>Honto</span>
-          </Link>
-          <Link className={styles.linkToranoana} href={`/`}>
-            <span className={styles.iconlinkToranoanaContainer}>
-              <Image
-                src="/store/toranoana.png"
-                alt="Toranoana"
-                width={22}
-                height={22}
-              />
-            </span>
-            <span className={styles.linkText}>Toranoana</span>
-          </Link>
-          <Link className={styles.linkAnimate} href={`/`}>
-            <span className={styles.iconlinkAnimateContainer}>
-              <Image
-                src="/store/animate.jpg"
-                alt="Animate"
-                width={22}
-                height={22}
-              />
-            </span>
-            <span className={styles.linkText}>Animate</span>
-          </Link>
+          {storeLinkItems.map((item) => (
+            <Link className={item.className} href={item.href} key={item.label} target="_blank" rel="noreferrer">
+              <span className={item.iconClassName}>{item.icon}</span>
+              <span className={styles.linkText}>{item.label}</span>
+            </Link>
+          ))}
         </div>
-      ) : (
-        <></>
       )}
 
-      {/* Bloco 6: Review e Editar */}
-      <div className={styles.reviewEdit}>
-        <h3 className={styles.reviewEditTitle}>Colaborar</h3>
-        <button className={styles.btnReview}>
-          <span className={styles.iconbtnReviewContainer}>
-            <MdOutlineRateReview className={styles.iconbtnReview} size={16} />
-          </span>
-          <span className={styles.linkText}>Review</span>
-        </button>
-
-        <button className={styles.btnEdit}>
-          <span className={styles.iconbtnEditContainer}>
-            <FiEdit className={styles.iconbtnEdit} size={16} />
-          </span>
-          <span className={styles.linkText}>Editar</span>
-        </button>
-      </div>
+      {isWork(entity) && (
+        <div className={styles.reviewEdit}>
+          <h3 className={styles.reviewEditTitle}>Colaborar</h3>
+          {reviewTarget && <ReviewAction target={reviewTarget} />}
+          <button className={styles.btnEdit} type="button">
+            <span className={styles.iconbtnEditContainer}>
+              <FiEdit className={styles.iconbtnEdit} size={16} />
+            </span>
+            <span className={styles.linkText}>Editar</span>
+          </button>
+        </div>
+      )}
     </aside>
   );
 }

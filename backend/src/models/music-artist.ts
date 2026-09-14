@@ -1,0 +1,62 @@
+import mongoose, { type Model } from "mongoose";
+
+const { Schema, model, models } = mongoose;
+
+export const MUSIC_ARTIST_KINDS = ["SOLO", "BAND"] as const;
+export const MUSIC_ARTIST_PUBLICATION_STATUSES = ["DRAFT", "PUBLISHED"] as const;
+
+export interface MusicArtistDocument {
+  displayName: string;
+  slug: string;
+  kind: (typeof MUSIC_ARTIST_KINDS)[number];
+  nameKanji: string | null;
+  imageUrl: string;
+  description: string | null;
+  origin: string | null;
+  dateOfBirth: string | null;
+  activityPeriod: string | null;
+  recordLabel: string | null;
+  genres: string[];
+  platformLinks: Record<string, string | undefined>;
+  publicationStatus: (typeof MUSIC_ARTIST_PUBLICATION_STATUSES)[number];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const optionalUrl = { type: String, trim: true, default: undefined } as const;
+
+const musicArtistSchema = new Schema<MusicArtistDocument>(
+  {
+    displayName: { type: String, required: true, trim: true, maxlength: 200 },
+    slug: { type: String, required: true, unique: true, trim: true, lowercase: true, maxlength: 220 },
+    kind: { type: String, enum: MUSIC_ARTIST_KINDS, required: true },
+    nameKanji: { type: String, trim: true, default: null, maxlength: 200 },
+    imageUrl: { type: String, required: true, trim: true, maxlength: 2_048 },
+    description: { type: String, trim: true, default: null, maxlength: 10_000 },
+    origin: { type: String, trim: true, default: null, maxlength: 200 },
+    dateOfBirth: { type: String, trim: true, default: null, maxlength: 100 },
+    activityPeriod: { type: String, trim: true, default: null, maxlength: 100 },
+    recordLabel: { type: String, trim: true, default: null, maxlength: 200 },
+    genres: [{ type: String, trim: true, maxlength: 100 }],
+    platformLinks: {
+      spotify: optionalUrl,
+      tidal: optionalUrl,
+      deezer: optionalUrl,
+      amazonMusic: optionalUrl,
+    },
+    publicationStatus: {
+      type: String,
+      enum: MUSIC_ARTIST_PUBLICATION_STATUSES,
+      default: "DRAFT",
+      required: true,
+    },
+  },
+  { timestamps: true, versionKey: false },
+);
+
+musicArtistSchema.index({ publicationStatus: 1, displayName: 1 });
+
+export const MusicArtist =
+  (models.MusicArtist as Model<MusicArtistDocument> | undefined) ??
+  model<MusicArtistDocument>("MusicArtist", musicArtistSchema);
+

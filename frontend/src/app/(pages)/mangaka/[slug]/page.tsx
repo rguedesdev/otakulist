@@ -1,40 +1,34 @@
-// Style Sheet CSS
+import { notFound } from "next/navigation";
+
+import { assetUrl } from "@/shared/auth/api";
+import { FormatSidebarInfo } from "@/shared/components/FormatSidebarInfo/page";
+import { HeroSection } from "@/shared/components/HeroSection/page";
+import type { PersonEntity, PersonRole } from "@/shared/types/entities";
+import { AnimesByMangaka } from "./components/AnimesByMangaka/page";
+import { MangasByMangaka, type MangakaMangaCredit } from "./components/MangasByMangaka/page";
+import type { StaffAnimeCredit } from "@/app/(pages)/staff/[slug]/components/AnimesByStaff/page";
 import styles from "./mangakaslug.module.css";
 
-// Components
-import { HeroSection } from "@/shared/components/HeroSection/page";
-import { FormatSidebarInfo } from "@/shared/components/FormatSidebarInfo/page";
-import { MangasByMangaka } from "./components/MangasByMangaka/page";
-import { AnimesByMangaka } from "./components/AnimesByMangaka/page";
-import type { PersonEntity } from "@/shared/types/entities";
+export const dynamic = "force-dynamic";
+const query = `query Mangaka($slug: String!) { mangaka(slug: $slug) {
+  displayName nameKanji imageUrl description roles dateOfBirth hometown activityPeriod occupations
+  animeCredits { role contribution anime { title slug coverUrl startDate endDate } }
+  mangaCredits { role contribution manga { title slug coverUrl startDate endDate } }
+} }`;
+type StoredPerson = { displayName: string; nameKanji: string | null; imageUrl: string | null; description: string | null; roles: string[]; dateOfBirth: string | null; hometown: string | null; activityPeriod: string | null; occupations: string[]; animeCredits: StaffAnimeCredit[]; mangaCredits: MangakaMangaCredit[] };
 
-function MangakaBySlug() {
-  const MangakaInfo: PersonEntity = {
-    cover: "/rumiko.png",
-    name_romaji: "Takahashi Rumiko",
-    name_kanji: "高橋留美子",
-    hometown: "Niigata, Japão",
-    description:
-      "Takahashi Rumiko (ou Rumiko Takahashi no ocidente) é uma das mulheres mais ricas do Japão. Os mangas que ela cria (e suas adaptações para anime) são muito populares nos Estados Unidos e na Europa, onde foram lançados em inglês em ambos os formatos. Suas obras são mundialmente conhecidas, e muitas de suas séries figuraram entre os primeiros mangas lançados em inglês na década de 1990. Takahashi também é a autora de quadrinhos mais vendida da história; mais de 100 milhões de exemplares de suas diversas obras já foram comercializados.",
-    entityType: "person",
-    roles: ["mangaka"],
-    date_of_birth: "10 Out 1957",
-  };
+async function MangakaBySlug({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  let mangaka: StoredPerson | null = null;
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000"}/graphql`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ query, variables: { slug } }), cache: "no-store" });
+    const body = await response.json() as { data?: { mangaka: StoredPerson | null } };
+    mangaka = body.data?.mangaka ?? null;
+  } catch { /* página inexistente quando a API estiver indisponível */ }
+  if (!mangaka?.imageUrl) notFound();
 
-  return (
-    <div className={styles.page}>
-      <HeroSection entity={MangakaInfo} />
-      <main className={styles.mangakaSlugContainer}>
-        <div className={styles.contentContainer}>
-          <FormatSidebarInfo entity={MangakaInfo} />
-          <div className={styles.centralContainer}>
-            <MangasByMangaka />
-            <AnimesByMangaka />
-          </div>
-        </div>
-      </main>
-    </div>
-  );
+  const entity: PersonEntity = { cover: assetUrl(mangaka.imageUrl) ?? mangaka.imageUrl, description: mangaka.description ?? "", entityType: "person", roles: mangaka.roles.map((role) => role.toLowerCase() as PersonRole), name_romaji: mangaka.displayName, name_kanji: mangaka.nameKanji ?? "", hometown: mangaka.hometown ?? "", date_of_birth: mangaka.dateOfBirth ?? "", activity_period: mangaka.activityPeriod ?? undefined, occupations: mangaka.occupations };
+  return <div className={styles.page}><HeroSection entity={entity} /><main className={styles.mangakaSlugContainer}><div className={styles.contentContainer}><FormatSidebarInfo entity={entity} /><div className={styles.centralContainer}><MangasByMangaka credits={mangaka.mangaCredits} /><AnimesByMangaka credits={mangaka.animeCredits} /></div></div></main></div>;
 }
 
 export default MangakaBySlug;

@@ -350,23 +350,22 @@
 }
 
 .mangaCard {
+  position: relative;
+  translate: 0 0;
   min-width: 0;
   overflow: hidden;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-large);
   box-shadow: var(--shadow-card);
-  backface-visibility: hidden;
-  transform: translate3d(0, 0, 0);
-  will-change: transform;
   transition:
-    transform 0.2s ease-in-out,
+    translate 0.18s ease-out,
     border-color 0.2s ease-in-out,
     box-shadow 0.2s ease-in-out;
 }
 
 .mangaCard:hover {
-  transform: translate3d(0, -4px, 0);
+  translate: 0 -4px;
   border-color: var(--color-accent-border);
   box-shadow: var(--shadow-card-hover);
 }
@@ -377,16 +376,11 @@
   overflow: hidden;
   isolation: isolate;
   background: var(--color-surface-raised);
-  backface-visibility: hidden;
-  transform: translate3d(0, 0, 0);
 }
 
 .mangaCover img {
   display: block;
   object-fit: cover;
-  backface-visibility: hidden;
-  transform: translate3d(0, 0, 0);
-  will-change: transform;
 }
 
 .cardScore,
@@ -403,9 +397,6 @@
   font-size: 9px;
   font-weight: 750;
   line-height: 10px;
-  backface-visibility: hidden;
-  transform: translate3d(0, 0, 0);
-  will-change: transform;
 }
 
 .cardScore {
