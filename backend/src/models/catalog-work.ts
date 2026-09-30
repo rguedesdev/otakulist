@@ -12,6 +12,7 @@ export interface CatalogWorkDocument {
   coverUrl: string;
   status: string;
   publicationStatus: "DRAFT" | "PUBLISHED";
+  adultContent: boolean;
   entityId: mongoose.Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
@@ -25,6 +26,7 @@ const catalogWorkSchema = new Schema<CatalogWorkDocument>(
     coverUrl: { type: String, required: true, trim: true },
     status: { type: String, required: true, trim: true },
     publicationStatus: { type: String, enum: ["DRAFT", "PUBLISHED"], required: true, default: "DRAFT" },
+    adultContent: { type: Boolean, default: false, required: true },
     entityId: { type: Schema.Types.ObjectId, required: true },
   },
   { timestamps: true, versionKey: false },

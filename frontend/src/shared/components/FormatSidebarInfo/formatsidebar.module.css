@@ -2073,3 +2073,58 @@
 .reviewEdit > button > span:first-child {
   border-radius: var(--radius-small);
 }
+
+
+/* Formulário de proposta de edição de anime */
+.suggestionBackdrop {
+  position: fixed; z-index: 1400; inset: 0; box-sizing: border-box; padding: 24px;
+  display: grid; place-items: center; overflow-y: auto;
+  background: rgba(5, 5, 10, .78); backdrop-filter: blur(7px);
+}
+.suggestionModal {
+  position: relative; box-sizing: border-box; width: min(100%, 720px);
+  max-height: calc(100dvh - 48px); padding: 32px; overflow-y: auto;
+  color: var(--color-text-primary, #f4f4f5); background: var(--color-surface, #18181b);
+  border: 1px solid var(--color-border-strong, #3f3f46); border-radius: 16px;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, .55);
+}
+.suggestionClose {
+  position: absolute; top: 16px; right: 16px; width: 38px; height: 38px;
+  display: grid; place-items: center; color: var(--color-text-secondary, #a1a1aa);
+  background: var(--color-surface-raised, #27272a); border: 1px solid var(--color-border, #3f3f46);
+  border-radius: 8px; cursor: pointer;
+}
+.suggestionHeader { max-width: 600px; padding-right: 48px; }
+.suggestionHeader > span { color: var(--color-accent-highlight, #93c5fd); font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+.suggestionHeader h2 { margin: 8px 0; font-size: clamp(23px, 4vw, 30px); line-height: 1.2; }
+.suggestionHeader p { margin: 0; color: var(--color-text-secondary, #a1a1aa); font-size: 14px; line-height: 1.55; }
+.suggestionForm { margin-top: 26px; display: grid; gap: 20px; }
+.suggestionField { min-width: 0; display: grid; gap: 8px; color: var(--color-text-primary, #f4f4f5); font-size: 14px; font-weight: 700; }
+.suggestionField > span { margin-top: -4px; color: var(--color-text-muted, #a1a1aa); font-size: 12px; font-weight: 400; }
+.suggestionField input, .suggestionField textarea {
+  box-sizing: border-box; width: 100%; min-height: 46px; padding: 12px 14px;
+  color: var(--color-text-primary, #f4f4f5); background: var(--color-bg-subtle, #09090b);
+  border: 1px solid var(--color-border-strong, #3f3f46); border-radius: 8px;
+  font: inherit; font-size: 14px; font-weight: 400; line-height: 1.55;
+}
+.suggestionField textarea { min-height: 180px; resize: vertical; }
+.suggestionField input:focus, .suggestionField textarea:focus { border-color: var(--color-accent, #3b82f6); outline: 3px solid color-mix(in srgb, var(--color-accent, #3b82f6) 22%, transparent); }
+.suggestionActions { display: flex; justify-content: flex-end; gap: 10px; padding-top: 4px; }
+.suggestionActions button, .suggestionLogin a {
+  min-height: 44px; padding: 10px 16px; display: inline-flex; align-items: center; justify-content: center;
+  color: var(--color-text-primary, #f4f4f5); background: var(--color-surface-raised, #27272a);
+  border: 1px solid var(--color-border-strong, #3f3f46); border-radius: 8px; cursor: pointer;
+  font-size: 13px; font-weight: 750; text-decoration: none;
+}
+.suggestionActions button:last-child, .suggestionLogin a { color: #fff; background: var(--color-accent, #2563eb); border-color: var(--color-accent, #2563eb); }
+.suggestionActions button:disabled { opacity: .6; cursor: wait; }
+.suggestionError { margin: 0; color: var(--color-danger, #f87171); font-size: 13px; }
+.suggestionMessage { margin: 24px 0 0; padding: 16px; color: var(--color-text-primary, #f4f4f5); background: var(--color-surface-raised, #27272a); border-radius: 8px; line-height: 1.55; }
+.suggestionLogin { margin-top: 24px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+.suggestionLogin p { color: var(--color-text-secondary, #a1a1aa); }
+@media (max-width: 600px) {
+  .suggestionBackdrop { padding: 12px; place-items: end center; }
+  .suggestionModal { width: 100%; max-height: calc(100dvh - 24px); padding: 24px 18px; border-radius: 14px; }
+  .suggestionForm { gap: 16px; } .suggestionField textarea { min-height: 150px; }
+  .suggestionLogin { align-items: stretch; flex-direction: column; }
+}

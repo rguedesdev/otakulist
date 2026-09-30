@@ -13,6 +13,13 @@ const requiredUrl = requiredText(2_048).refine(
   (value) => /^https?:\/\//i.test(value) || value.startsWith("/"),
   "Use uma URL http(s) ou um caminho interno iniciado por /",
 );
+const discographyRelease = z.object({
+  title: requiredText(200),
+  releaseType: requiredText(100),
+  year: requiredText(20),
+  tracks: z.coerce.number().int().min(0).max(10_000),
+  cover: requiredUrl,
+});
 
 export const musicArtistSlugSchema = z.object({ slug });
 
@@ -28,6 +35,7 @@ export const createMusicArtistSchema = z.object({
     activityPeriod: optionalText(100),
     recordLabel: optionalText(200),
     genres: z.array(requiredText(100)).max(30).default([]),
+    discography: z.array(discographyRelease).max(100).default([]),
     platformLinks: z.object({
       spotify: optionalUrl,
       tidal: optionalUrl,
@@ -39,4 +47,3 @@ export const createMusicArtistSchema = z.object({
 });
 
 export const updateMusicArtistSchema = createMusicArtistSchema.extend({ slug });
-

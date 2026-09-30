@@ -31,6 +31,7 @@ type AnimeSeason = {
   duration: string;
   studio: string;
   broadcastSeason: string;
+  broadcastSchedule: string;
   source: string;
   synopsis: string;
 };
@@ -88,7 +89,9 @@ function SeasonSection({ seasons, workKey }: { seasons: AnimeSeason[]; workKey?:
         }
         setSavedProgress(Object.fromEntries(seasons.map((season) => [
           season.id,
-          Math.min(season.episodes, Math.max(0, tracker.seasonProgress?.[season.id] ?? 0)),
+          season.episodes > 0
+            ? Math.min(season.episodes, Math.max(0, tracker.seasonProgress?.[season.id] ?? 0))
+            : Math.max(0, tracker.seasonProgress?.[season.id] ?? 0),
         ])));
         setIsInList(true);
       } catch {
@@ -128,9 +131,12 @@ function SeasonSection({ seasons, workKey }: { seasons: AnimeSeason[]; workKey?:
     return () => document.removeEventListener("keydown", closeOnEscape);
   }, [selectedSeasonId]);
 
-  const selectedProgress = selectedSeason
+  const selectedProgress = selectedSeason && selectedSeason.episodes > 0
     ? (selectedSeason.watchedEpisodes / selectedSeason.episodes) * 100
-    : 0;
+    : null;
+  const selectedVisualProgress = selectedProgress ?? (
+    selectedSeason && selectedSeason.watchedEpisodes > 0 ? 50 : 0
+  );
 
   return (
     <section className={styles.seasonsContainer}>
@@ -163,11 +169,11 @@ function SeasonSection({ seasons, workKey }: { seasons: AnimeSeason[]; workKey?:
                   </span>
                   <span className={styles.infoLine}>
                     <span className={styles.infoIcon}><MdOutlineVideoLibrary size={15} aria-hidden="true" /></span>
-                    <span className={styles.seasonInfo}>{season.episodes} Episódios</span>
+                    <span className={styles.seasonInfo}>{season.episodes > 0 ? `${season.episodes} Episódios` : "Não Listado"}</span>
                   </span>
                 {isInList && <span className={styles.infoLine}>
                   <span className={styles.infoIcon}><TbProgressCheck size={15} aria-hidden="true" /></span>
-                  <span className={styles.seasonInfo}>Progresso: {season.watchedEpisodes}/{season.episodes}</span>
+                  <span className={styles.seasonInfo}>Progresso: {season.episodes > 0 ? `${season.watchedEpisodes}/${season.episodes}` : `${season.watchedEpisodes} assistidos`}</span>
                 </span>}
                 </span>
               </span>
@@ -201,18 +207,18 @@ function SeasonSection({ seasons, workKey }: { seasons: AnimeSeason[]; workKey?:
             {isInList && <div className={styles.modalProgress}>
               <div>
                 <span><TbProgressCheck aria-hidden="true" />Progresso desta temporada</span>
-                <strong>{selectedSeason.watchedEpisodes}/{selectedSeason.episodes} episódios</strong>
+                <strong>{selectedSeason.episodes > 0 ? `${selectedSeason.watchedEpisodes}/${selectedSeason.episodes} episódios` : `${selectedSeason.watchedEpisodes} episódios assistidos`}</strong>
               </div>
               <div className={styles.progressTrack} aria-hidden="true">
                 <span
                   className={
-                    selectedSeason.watchedEpisodes === selectedSeason.episodes
+                    selectedSeason.episodes > 0 && selectedSeason.watchedEpisodes === selectedSeason.episodes
                       ? styles.progressComplete
                       : selectedSeason.watchedEpisodes === 0
                         ? styles.progressEmpty
                         : undefined
                   }
-                  style={getProgressStyle(selectedProgress)}
+                  style={getProgressStyle(selectedVisualProgress)}
                 />
               </div>
               <small>Este progresso faz parte do total da obra principal.</small>
@@ -220,11 +226,12 @@ function SeasonSection({ seasons, workKey }: { seasons: AnimeSeason[]; workKey?:
 
             <dl className={styles.seasonDetails}>
               <div><dt><PiTelevisionSimple aria-hidden="true" />Formato</dt><dd>{animeReleaseFormatLabels[selectedSeason.releaseFormat]}</dd></div>
-              <div><dt><MdOutlineVideoLibrary aria-hidden="true" />Episódios</dt><dd>{selectedSeason.episodes}</dd></div>
+              <div><dt><MdOutlineVideoLibrary aria-hidden="true" />Episódios</dt><dd>{selectedSeason.episodes > 0 ? selectedSeason.episodes : "Não Listado"}</dd></div>
               <div><dt><FiClock aria-hidden="true" />Duração</dt><dd>{selectedSeason.duration}</dd></div>
               <div><dt><FiActivity aria-hidden="true" />Status</dt><dd>{selectedSeason.status}</dd></div>
               <div><dt><FiCalendar aria-hidden="true" />Exibição</dt><dd>{selectedSeason.start} – {selectedSeason.end}</dd></div>
               <div><dt><LiaCanadianMapleLeaf aria-hidden="true" />Temporada</dt><dd>{selectedSeason.broadcastSeason}</dd></div>
+              <div><dt><FiClock aria-hidden="true" />Transmissão</dt><dd>{selectedSeason.broadcastSchedule}</dd></div>
               <div><dt><PiFilmSlate aria-hidden="true" />Estúdio</dt><dd>{selectedSeason.studio}</dd></div>
               <div><dt><TbWorld aria-hidden="true" />Origem</dt><dd>{selectedSeason.source}</dd></div>
             </dl>

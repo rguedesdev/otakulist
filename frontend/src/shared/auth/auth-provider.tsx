@@ -28,6 +28,8 @@ interface UpdateProfileInput {
   displayName: string;
   bio: string;
   email: string;
+  showAdultContent: boolean;
+  hideAdultContentFromVisitors: boolean;
 }
 
 interface AuthContextValue {
@@ -42,7 +44,7 @@ interface AuthContextValue {
 }
 
 const USER_FIELDS = `
-  id username displayName bio email role avatarUrl createdAt updatedAt
+  id username displayName bio email role avatarUrl showAdultContent hideAdultContentFromVisitors createdAt updatedAt
 `;
 
 const LOGIN_MUTATION = `
@@ -92,6 +94,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       unsubscribe();
     };
   }, []);
+
+  useEffect(() => {
+    if (loading) return;
+    document.cookie = `otakulist-adult-content=${session?.user.showAdultContent ? "1" : "0"}; Path=/; SameSite=Lax`;
+  }, [loading, session?.user.showAdultContent]);
 
   const login = useCallback(async (input: LoginInput) => {
     const data = await graphqlRequest<{ login: AuthPayload }>(LOGIN_MUTATION, { input });

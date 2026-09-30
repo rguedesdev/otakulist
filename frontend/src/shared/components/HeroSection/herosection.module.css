@@ -181,13 +181,30 @@
   box-shadow: none;
 }
 
-.btnAddFavorite:hover {
+.btnAddFavorite:hover:not(:disabled) {
   background: var(--color-surface-hover);
   border-color: color-mix(in srgb, var(--color-danger) 38%, transparent);
 }
 
+.btnFavoriteActive {
+  color: #fff;
+  background: var(--color-danger);
+  border-color: var(--color-danger);
+}
+
+.btnFavoriteActive:hover:not(:disabled) {
+  color: var(--color-danger);
+  background: color-mix(in srgb, var(--color-danger) 12%, var(--color-surface-raised));
+  border-color: color-mix(in srgb, var(--color-danger) 45%, transparent);
+}
+
+.btnAddFavorite:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+
 .btnAddList:active,
-.btnAddFavorite:active {
+.btnAddFavorite:active:not(:disabled) {
   transform: none;
   filter: brightness(0.9);
   box-shadow: inset 0 0 0 1px var(--color-border-strong);
@@ -238,6 +255,8 @@
   font-size: 0.9rem;
   line-height: 1.7;
   margin: 0;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
 }
 
 .hrFaded {

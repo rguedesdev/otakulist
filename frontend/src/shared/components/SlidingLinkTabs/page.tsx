@@ -8,7 +8,7 @@ import styles from "./slidinglinktabs.module.css";
 
 type LinkTab = { id: string; label: string; href: string; icon?: ReactNode };
 
-export function SlidingLinkTabs({ tabs, activeId, className, activeClassName }: { tabs: LinkTab[]; activeId: string; className: string; activeClassName: string }) {
+export function SlidingLinkTabs({ tabs, activeId, className, activeClassName, ariaLabel = "Conteúdo do perfil" }: { tabs: LinkTab[]; activeId: string; className: string; activeClassName: string; ariaLabel?: string }) {
   const nav = useRef<HTMLElement | null>(null);
   const links = useRef(new Map<string, HTMLAnchorElement>());
   const [indicator, setIndicator] = useState({ left: 0, top: 0, width: 0, height: 0, visible: false });
@@ -30,7 +30,7 @@ export function SlidingLinkTabs({ tabs, activeId, className, activeClassName }: 
   }, [activeId]);
 
   return (
-    <nav ref={nav} className={className} aria-label="Conteúdo do perfil">
+    <nav ref={nav} className={className} aria-label={ariaLabel}>
       <span
         className={styles.indicator}
         aria-hidden="true"

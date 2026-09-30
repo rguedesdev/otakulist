@@ -147,6 +147,12 @@
   overflow: hidden;
 }
 
+.featuredFallback {
+  background:
+    radial-gradient(circle at 72% 28%, var(--color-accent-soft), transparent 16rem),
+    var(--color-surface-raised);
+}
+
 .featured img {
   object-fit: cover;
   object-position: center 28%;
@@ -208,14 +214,23 @@
 
 .featuredInfo h2 {
   margin-top: 5px;
+  display: -webkit-box;
+  overflow: hidden;
   font-size: clamp(28px, 3vw, 42px);
   line-height: 1.1;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .featuredInfo p {
   margin-top: 7px;
+  display: -webkit-box;
+  overflow: hidden;
   color: var(--color-text-secondary);
   font-size: 13px;
+  line-height: 1.5;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
 }
 
 .valueStrip {
@@ -367,6 +382,16 @@
   gap: 6px;
   color: var(--color-text-muted);
   font-size: 11px;
+}
+
+.emptyTrending {
+  grid-column: 1 / -1;
+  padding: 28px;
+  color: var(--color-text-muted);
+  text-align: center;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-large);
 }
 
 .discoveryLayout {

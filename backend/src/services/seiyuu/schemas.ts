@@ -8,6 +8,14 @@ const imageUrl = requiredText(2_048).refine(
   (value) => /^https?:\/\//i.test(value) || value.startsWith("/"),
   "Use uma URL http(s) ou um caminho interno iniciado por /",
 );
+const optionalUrl = z.string().trim().max(2_048).url("Link inválido").nullish().transform((value) => value || undefined);
+const externalLinks = z.object({
+  website: optionalUrl,
+  x: optionalUrl,
+  instagram: optionalUrl,
+  pixiv: optionalUrl,
+  youtube: optionalUrl,
+}).nullish().transform((value) => value ?? {});
 
 export const seiyuuSlugSchema = z.object({ slug });
 
@@ -20,6 +28,7 @@ export const createSeiyuuSchema = z.object({
     dateOfBirth: optionalText(100),
     hometown: optionalText(200),
     agency: optionalText(200),
+    externalLinks,
     publicationStatus: z.enum(["DRAFT", "PUBLISHED"]).default("DRAFT"),
   }),
 });

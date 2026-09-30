@@ -1,9 +1,8 @@
-import Image from "next/image";
-import Link from "next/link";
 import { LuCalendarRange } from "react-icons/lu";
 import { PiTargetFill } from "react-icons/pi";
 
 import { assetUrl } from "@/shared/auth/api";
+import { MediaCreditCard } from "@/shared/components/MediaCreditCard/page";
 import styles from "./magazinesbypublisher.module.css";
 
 export type PublisherMagazine = {
@@ -20,18 +19,17 @@ export function MagazinesByPublisher({ magazines }: { magazines: PublisherMagazi
   return <section className={styles.magazinesByPublisherContainer}>
     <h2 className={styles.magazinesByPublisherSectionTitle}>Magazines publicadas</h2>
     <div className={styles.magazinesByPublisherCardsContainer}>
-      {magazines.map((magazine) => <Link href={`/magazine/${magazine.slug}`} key={magazine.id}>
-        <article className={styles.magazinesByPublisherCard}>
-          <Image className={styles.magazinesByPublisherCover} src={assetUrl(magazine.imageUrl) ?? magazine.imageUrl} alt={`Capa de ${magazine.title}`} width={90} height={130} unoptimized />
-          <div className={styles.magazinesByPublisherTextsContainer}><div className={styles.magazinesByPublisherTexts}>
-            <h3 className={styles.magazinesByPublisherTitle}>{magazine.title}</h3>
-            <dl className={styles.infoGroup}>
-              <div className={styles.infoLine}><dt className={styles.infoIcon}><PiTargetFill size={16} aria-hidden="true" /></dt><dd className={styles.magazinesByPublisherInfo}>Demografia: {magazine.demography ?? "—"}</dd></div>
-              <div className={styles.infoLine}><dt className={styles.infoIcon}><LuCalendarRange size={14} aria-hidden="true" /></dt><dd className={styles.magazinesByPublisherInfo}>Periodicidade: {magazine.frequency ?? "—"}</dd></div>
-            </dl>
-          </div></div>
-        </article>
-      </Link>)}
+      {magazines.map((magazine) => <MediaCreditCard
+        href={`/magazine/${magazine.slug}`}
+        image={assetUrl(magazine.imageUrl) ?? magazine.imageUrl}
+        imageAlt={`Capa de ${magazine.title}`}
+        title={magazine.title}
+        details={[
+          { icon: <PiTargetFill size={16} aria-hidden="true" />, text: `Demografia: ${magazine.demography ?? "—"}` },
+          { icon: <LuCalendarRange size={14} aria-hidden="true" />, text: `Periodicidade: ${magazine.frequency ?? "—"}` },
+        ]}
+        key={magazine.id}
+      />)}
     </div>
   </section>;
 }

@@ -9,17 +9,19 @@ import { getSeiyuuProfile, type SeiyuuCharacterCredit } from "./data";
 
 const charactersQuery = `query CharactersBySeiyuu($slug: String!) {
   charactersBySeiyuu(slug: $slug) {
-    nameRomaji imageUrl voiceCredits { seiyuuSlug animeTitle }
+    nameRomaji slug imageUrl voiceCredits { seiyuuSlug animeTitle }
   }
 }`;
 const seiyuuQuery = `query Seiyuu($slug: String!) {
   seiyuu(slug: $slug) {
     displayName nameKanji imageUrl description dateOfBirth hometown agency
+    externalLinks { website x instagram pixiv youtube }
   }
 }`;
 
 type CharacterResult = {
   nameRomaji: string;
+  slug: string;
   imageUrl: string;
   voiceCredits: Array<{ seiyuuSlug: string; animeTitle: string }>;
 };
@@ -31,6 +33,7 @@ type SeiyuuResult = {
   dateOfBirth: string | null;
   hometown: string | null;
   agency: string | null;
+  externalLinks: Record<string, string | undefined>;
 };
 
 async function getStoredSeiyuu(slug: string): Promise<PersonEntity | null> {
@@ -55,6 +58,7 @@ async function getStoredSeiyuu(slug: string): Promise<PersonEntity | null> {
       roles: ["seiyuu"],
       date_of_birth: seiyuu.dateOfBirth ?? "",
       agency: seiyuu.agency ?? "",
+      externalLinks: seiyuu.externalLinks,
     };
   } catch {
     return null;
@@ -75,6 +79,7 @@ async function getCharacters(slug: string): Promise<SeiyuuCharacterCredit[] | nu
     return body.data.charactersBySeiyuu.flatMap((character) =>
       character.voiceCredits.filter((item) => item.seiyuuSlug === slug).map((credit) => ({
         characterName: character.nameRomaji,
+        characterSlug: character.slug,
         characterImage: assetUrl(character.imageUrl) ?? character.imageUrl,
         animeTitle: credit.animeTitle,
       })),

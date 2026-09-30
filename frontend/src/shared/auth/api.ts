@@ -24,7 +24,7 @@ const REFRESH_SESSION_MUTATION = `
   mutation RefreshSession {
     refreshSession {
       accessToken
-      user { id username displayName bio email role avatarUrl createdAt updatedAt }
+      user { id username displayName bio email role avatarUrl showAdultContent hideAdultContentFromVisitors createdAt updatedAt }
     }
   }
 `;

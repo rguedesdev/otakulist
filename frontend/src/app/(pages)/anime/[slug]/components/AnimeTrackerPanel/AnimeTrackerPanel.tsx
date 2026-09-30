@@ -51,6 +51,21 @@ function getProgressStyle(progress: number): ProgressStyle {
   };
 }
 
+function hasKnownEpisodeTotal(season: AnimeSeason) {
+  return season.episodes > 0;
+}
+
+function clampSeasonProgress(season: AnimeSeason, watchedEpisodes: number) {
+  const normalizedProgress = Math.max(0, watchedEpisodes);
+  return hasKnownEpisodeTotal(season)
+    ? Math.min(season.episodes, normalizedProgress)
+    : normalizedProgress;
+}
+
+function isSeasonIncomplete(season: AnimeSeason, watchedEpisodes: number) {
+  return !hasKnownEpisodeTotal(season) || watchedEpisodes < season.episodes;
+}
+
 function AnimeTrackerPanel({ seasons, workKey }: AnimeTrackerPanelProps) {
   const { user, accessToken } = useAuth();
   const isAuthenticated = Boolean(user);
@@ -58,7 +73,7 @@ function AnimeTrackerPanel({ seasons, workKey }: AnimeTrackerPanelProps) {
     () => Object.fromEntries(seasons.map((season) => [season.id, season.watchedEpisodes])),
   );
   const [selectedSeasonId, setSelectedSeasonId] = useState(
-    seasons.find((season) => season.watchedEpisodes < season.episodes)?.id ??
+    seasons.find((season) => isSeasonIncomplete(season, season.watchedEpisodes))?.id ??
       seasons[seasons.length - 1]?.id,
   );
   const [status, setStatus] = useState("planejado");
@@ -68,15 +83,17 @@ function AnimeTrackerPanel({ seasons, workKey }: AnimeTrackerPanelProps) {
   const [savingProgress, setSavingProgress] = useState(false);
 
   useEffect(() => {
-    const hydrateTracker = () => {
-      const emptyProgress = Object.fromEntries(
-        seasons.map((season) => [season.id, 0]),
-      );
-      setSeasonProgress(emptyProgress);
-      setSelectedSeasonId(seasons[0]?.id);
-      setStatus("planejado");
-      setIsAdded(false);
-      setSaved(false);
+    const hydrateTracker = (resetBeforeLoading = false) => {
+      if (resetBeforeLoading) {
+        const emptyProgress = Object.fromEntries(
+          seasons.map((season) => [season.id, 0]),
+        );
+        setSeasonProgress(emptyProgress);
+        setSelectedSeasonId(seasons[0]?.id);
+        setStatus("planejado");
+        setIsAdded(false);
+        setSaved(false);
+      }
 
       if (!user) return;
 
@@ -99,29 +116,29 @@ function AnimeTrackerPanel({ seasons, workKey }: AnimeTrackerPanelProps) {
           const hydratedProgress = Object.fromEntries(
             seasons.map((season) => [
                 season.id,
-                Math.min(
-                  season.episodes,
-                  Math.max(0, parsedTracker.seasonProgress?.[season.id] ?? season.watchedEpisodes),
+                clampSeasonProgress(
+                  season,
+                  parsedTracker.seasonProgress?.[season.id] ?? season.watchedEpisodes,
                 ),
               ]),
           );
           setSeasonProgress(hydratedProgress);
           setSelectedSeasonId(
-            seasons.find((season) => hydratedProgress[season.id] < season.episodes)?.id ??
+            seasons.find((season) => isSeasonIncomplete(season, hydratedProgress[season.id]))?.id ??
               seasons[seasons.length - 1]?.id,
           );
         } else if (parsedTracker.watchedEpisodes !== undefined) {
           let remainingEpisodes = parsedTracker.watchedEpisodes;
           const migratedProgress = Object.fromEntries(
             seasons.map((season) => {
-                const watched = Math.min(season.episodes, Math.max(0, remainingEpisodes));
+                const watched = clampSeasonProgress(season, remainingEpisodes);
                 remainingEpisodes -= watched;
                 return [season.id, watched];
               }),
           );
           setSeasonProgress(migratedProgress);
           setSelectedSeasonId(
-            seasons.find((season) => migratedProgress[season.id] < season.episodes)?.id ??
+            seasons.find((season) => isSeasonIncomplete(season, migratedProgress[season.id]))?.id ??
               seasons[seasons.length - 1]?.id,
           );
         }
@@ -133,7 +150,7 @@ function AnimeTrackerPanel({ seasons, workKey }: AnimeTrackerPanelProps) {
       }
     };
 
-    const animationFrame = window.requestAnimationFrame(hydrateTracker);
+    const animationFrame = window.requestAnimationFrame(() => hydrateTracker(true));
     const handleTrackerUpdate = (event: Event) => {
       if (!user) return;
       const storageKey = `otakulist:anime-tracker:${user.id}:${workKey}`;
@@ -150,20 +167,26 @@ function AnimeTrackerPanel({ seasons, workKey }: AnimeTrackerPanelProps) {
   }, [seasons, user, workKey]);
 
   const totalEpisodes = seasons.reduce((total, season) => total + season.episodes, 0);
+  const hasKnownTotal = seasons.length > 0 && seasons.every(hasKnownEpisodeTotal);
   const watchedEpisodes = seasons.reduce(
     (total, season) => total + (seasonProgress[season.id] ?? 0),
     0,
   );
-  const progress = Math.round((watchedEpisodes / totalEpisodes) * 100);
+  const progress = hasKnownTotal
+    ? Math.round((watchedEpisodes / totalEpisodes) * 100)
+    : null;
+  const visualProgress = progress ?? (watchedEpisodes > 0 ? 50 : 0);
   const activeSeason =
-    seasons.find((season) => (seasonProgress[season.id] ?? 0) < season.episodes) ??
+    seasons.find((season) => isSeasonIncomplete(season, seasonProgress[season.id] ?? 0)) ??
     seasons[seasons.length - 1];
   const selectedSeason =
     seasons.find((season) => season.id === selectedSeasonId) ?? activeSeason;
   const selectedWatchedEpisodes = selectedSeason ? seasonProgress[selectedSeason.id] ?? 0 : 0;
-  const selectedProgress = selectedSeason
+  const selectedHasKnownTotal = Boolean(selectedSeason && hasKnownEpisodeTotal(selectedSeason));
+  const selectedProgress = selectedSeason && selectedHasKnownTotal
     ? Math.round((selectedWatchedEpisodes / selectedSeason.episodes) * 100)
-    : 0;
+    : null;
+  const selectedVisualProgress = selectedProgress ?? (selectedWatchedEpisodes > 0 ? 50 : 0);
   const selectedSeasonIndex = selectedSeason
     ? seasons.findIndex((season) => season.id === selectedSeason.id)
     : -1;
@@ -196,9 +219,9 @@ function AnimeTrackerPanel({ seasons, workKey }: AnimeTrackerPanelProps) {
         };
       }
 
-      const nextSeasonProgress = Math.min(
-        selectedSeason.episodes,
-        Math.max(0, currentSeasonProgress + amount),
+      const nextSeasonProgress = clampSeasonProgress(
+        selectedSeason,
+        currentSeasonProgress + amount,
       );
       const nextProgress = { ...current, [selectedSeason.id]: nextSeasonProgress };
       const nextTotal = seasons.reduce(
@@ -206,10 +229,10 @@ function AnimeTrackerPanel({ seasons, workKey }: AnimeTrackerPanelProps) {
         0,
       );
 
-      if (nextTotal === totalEpisodes) setStatus("completo");
-      if (amount > 0 && nextSeasonProgress === selectedSeason.episodes) {
+      if (hasKnownTotal && nextTotal === totalEpisodes) setStatus("completo");
+      if (amount > 0 && selectedHasKnownTotal && nextSeasonProgress === selectedSeason.episodes) {
         const nextIncompleteSeason = seasons.find(
-          (season) => (nextProgress[season.id] ?? 0) < season.episodes,
+          (season) => isSeasonIncomplete(season, nextProgress[season.id] ?? 0),
         );
         setSelectedSeasonId(nextIncompleteSeason?.id ?? selectedSeason.id);
       }
@@ -222,7 +245,9 @@ function AnimeTrackerPanel({ seasons, workKey }: AnimeTrackerPanelProps) {
       }
       return nextProgress;
     });
-    if (status === "completo" && amount < 0) setStatus("assistindo");
+    if (status === "completo" && (!hasKnownTotal || amount < 0)) {
+      setStatus("assistindo");
+    }
   };
 
   const saveTracker = async () => {
@@ -263,15 +288,15 @@ function AnimeTrackerPanel({ seasons, workKey }: AnimeTrackerPanelProps) {
 
         <div className={styles.summaryProgress}>
           <div>
-            <span>{progress}% concluído</span>
+            <span>{progress === null ? "Total não listado" : `${progress}% concluído`}</span>
             <strong>
-              {watchedEpisodes}/{totalEpisodes} episódios
+              {hasKnownTotal ? `${watchedEpisodes}/${totalEpisodes} episódios` : `${watchedEpisodes} episódios assistidos`}
             </strong>
           </div>
           <div className={styles.summaryProgressTrack} aria-hidden="true">
             <span
-              className={watchedEpisodes === totalEpisodes ? styles.progressComplete : undefined}
-              style={getProgressStyle(progress)}
+              className={hasKnownTotal && watchedEpisodes === totalEpisodes ? styles.progressComplete : undefined}
+              style={getProgressStyle(visualProgress)}
             />
           </div>
         </div>
@@ -301,13 +326,16 @@ function AnimeTrackerPanel({ seasons, workKey }: AnimeTrackerPanelProps) {
                   <strong>Progresso por temporada</strong>
                   <span>A próxima temporada é liberada ao concluir a atual</span>
                 </div>
-                <small>{seasons.length} temporadas · {watchedEpisodes}/{totalEpisodes} episódios no total</small>
+                <small>
+                  {seasons.length} temporadas · {hasKnownTotal ? `${watchedEpisodes}/${totalEpisodes} episódios no total` : `${watchedEpisodes} episódios assistidos · total não listado`}
+                </small>
               </div>
               <div className={styles.seasonSelectorList}>
                 {seasons.map((season, seasonIndex) => {
                   const seasonWatched = seasonProgress[season.id] ?? 0;
-                  const isCurrent = season.id === activeSeason?.id && seasonWatched < season.episodes;
-                  const isComplete = seasonWatched === season.episodes;
+                  const seasonHasKnownTotal = hasKnownEpisodeTotal(season);
+                  const isCurrent = season.id === activeSeason?.id && isSeasonIncomplete(season, seasonWatched);
+                  const isComplete = seasonHasKnownTotal && seasonWatched === season.episodes;
                   const isSelected = season.id === selectedSeason?.id;
                   const hasLaterProgress = seasons
                     .slice(seasonIndex + 1)
@@ -327,7 +355,7 @@ function AnimeTrackerPanel({ seasons, workKey }: AnimeTrackerPanelProps) {
                       <span>{season.label}</span>
                       <strong className={isComplete ? styles.seasonCompleteState : styles.seasonLockedState}>
                         {isComplete ? <FiCheck aria-hidden="true" /> : isLocked ? <FiLock aria-hidden="true" /> : null}
-                        {isComplete ? "Concluída" : isCurrent ? `${seasonWatched}/${season.episodes}` : "Bloqueada"}
+                        {isComplete ? "Concluída" : isCurrent ? (seasonHasKnownTotal ? `${seasonWatched}/${season.episodes}` : `${seasonWatched} assistidos`) : "Bloqueada"}
                       </strong>
                       <span className={styles.seasonMiniTrack} aria-hidden="true">
                         <span
@@ -338,7 +366,13 @@ function AnimeTrackerPanel({ seasons, workKey }: AnimeTrackerPanelProps) {
                                 ? styles.progressEmpty
                                 : undefined
                           }
-                          style={getProgressStyle((seasonWatched / season.episodes) * 100)}
+                          style={getProgressStyle(
+                            seasonHasKnownTotal
+                              ? (seasonWatched / season.episodes) * 100
+                              : seasonWatched > 0
+                                ? 50
+                                : 0,
+                          )}
                         />
                       </span>
                     </button>
@@ -351,23 +385,24 @@ function AnimeTrackerPanel({ seasons, workKey }: AnimeTrackerPanelProps) {
               <div className={styles.progressMeta}>
                 <div>
                   <strong>{selectedSeason?.label}</strong>
-                  <span>{selectedProgress}% concluído nesta temporada</span>
+                  <span>{selectedProgress === null ? "Total não listado nesta temporada" : `${selectedProgress}% concluído nesta temporada`}</span>
                 </div>
                 <span className={styles.episodeCount}>
-                  {selectedWatchedEpisodes} / {selectedSeason?.episodes ?? 0} eps.
+                  {selectedHasKnownTotal ? `${selectedWatchedEpisodes} / ${selectedSeason?.episodes ?? 0} eps.` : `${selectedWatchedEpisodes} eps. assistidos`}
                 </span>
               </div>
               <div
                 className={styles.progressTrack}
                 role="progressbar"
                 aria-label={`Progresso da ${selectedSeason?.label ?? "temporada"}`}
-                aria-valuemin={0}
-                aria-valuemax={selectedSeason?.episodes ?? 0}
-                aria-valuenow={selectedWatchedEpisodes}
+                aria-valuemin={selectedHasKnownTotal ? 0 : undefined}
+                aria-valuemax={selectedHasKnownTotal ? selectedSeason?.episodes : undefined}
+                aria-valuenow={selectedHasKnownTotal ? selectedWatchedEpisodes : undefined}
+                aria-valuetext={selectedHasKnownTotal ? undefined : "Total não listado"}
               >
                 <span
-                  className={selectedWatchedEpisodes === (selectedSeason?.episodes ?? 0) ? styles.progressComplete : undefined}
-                  style={getProgressStyle(selectedProgress)}
+                  className={selectedHasKnownTotal && selectedWatchedEpisodes === selectedSeason?.episodes ? styles.progressComplete : undefined}
+                  style={getProgressStyle(selectedVisualProgress)}
                 />
               </div>
               <div className={styles.episodeControls}>
@@ -384,7 +419,7 @@ function AnimeTrackerPanel({ seasons, workKey }: AnimeTrackerPanelProps) {
                   type="button"
                   onClick={() => changeEpisodes(1)}
                   aria-label="Adicionar um episódio"
-                  disabled={selectedWatchedEpisodes === selectedSeason?.episodes}
+                  disabled={selectedHasKnownTotal && selectedWatchedEpisodes === selectedSeason?.episodes}
                 >
                   <FiPlus aria-hidden="true" />
                 </button>
@@ -398,7 +433,7 @@ function AnimeTrackerPanel({ seasons, workKey }: AnimeTrackerPanelProps) {
                 compact
                 value={status}
                 onChange={(nextStatus) => {
-                  if (nextStatus === "completo" && selectedSeason) {
+                  if (nextStatus === "completo" && selectedSeason && selectedHasKnownTotal) {
                     const completedSeasonProgress = {
                       ...seasonProgress,
                       [selectedSeason.id]: selectedSeason.episodes,
@@ -410,7 +445,7 @@ function AnimeTrackerPanel({ seasons, workKey }: AnimeTrackerPanelProps) {
                     );
                     const nextIncompleteSeason = seasons.find(
                       (season) =>
-                        (completedSeasonProgress[season.id] ?? 0) < season.episodes,
+                        isSeasonIncomplete(season, completedSeasonProgress[season.id] ?? 0),
                     );
 
                     setSeasonProgress(completedSeasonProgress);
@@ -418,7 +453,7 @@ function AnimeTrackerPanel({ seasons, workKey }: AnimeTrackerPanelProps) {
                       nextIncompleteSeason?.id ?? selectedSeason.id,
                     );
                     setStatus(
-                      completedEpisodes === totalEpisodes
+                      hasKnownTotal && completedEpisodes === totalEpisodes
                         ? "completo"
                         : "assistindo",
                     );

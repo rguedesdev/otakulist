@@ -22,11 +22,12 @@ import {
   type PublicationMedium,
 } from "@/shared/tracking/publication-list-api";
 import type { EntityInfo } from "@/shared/types/entities";
+import { getWorkFavorite, setWorkFavorite, type FavoriteMedium } from "@/shared/tracking/work-favorite-api";
 import { getEntityTitle, isWork } from "@/shared/types/entities";
 
 // Icons
 import { TbAlignJustified, TbPlaylistAdd, TbPlaylistX } from "react-icons/tb";
-import { MdOutlineFavoriteBorder } from "react-icons/md";
+import { MdFavorite, MdOutlineFavoriteBorder } from "react-icons/md";
 
 type HeroSectionProps = {
   entity: EntityInfo;
@@ -45,6 +46,10 @@ function HeroSection({ entity, animeTracker, publicationTracker }: HeroSectionPr
   const [isInList, setIsInList] = useState(false);
   const [addingToList, setAddingToList] = useState(false);
   const [removingFromList, setRemovingFromList] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [updatingFavorite, setUpdatingFavorite] = useState(false);
+  const favoriteMedium: FavoriteMedium | null = animeTracker ? "ANIME" : publicationTracker?.medium ?? null;
+  const favoriteSlug = animeTracker?.workKey ?? publicationTracker?.workKey ?? null;
   const entityIsWork = isWork(entity);
   const entityHasFlexibleCover = entity.entityType === "music_artist"
     || (entity.entityType === "organization" && entity.organizationType === "studio");
@@ -122,6 +127,37 @@ function HeroSection({ entity, animeTracker, publicationTracker }: HeroSectionPr
 
     return () => { active = false; window.cancelAnimationFrame(animationFrame); };
   }, [accessToken, animeTracker, publicationTracker, user]);
+  useEffect(() => {
+    let active = true;
+    if (!user || !accessToken || !favoriteMedium || !favoriteSlug) {
+      const animationFrame = window.requestAnimationFrame(() => setIsFavorite(false));
+      return () => window.cancelAnimationFrame(animationFrame);
+    }
+
+    void getWorkFavorite(favoriteMedium, favoriteSlug, accessToken)
+      .then((favorite) => {
+        if (active) setIsFavorite(favorite);
+      })
+      .catch(() => {
+        if (active) setIsFavorite(false);
+      });
+
+    return () => { active = false; };
+  }, [accessToken, favoriteMedium, favoriteSlug, user]);
+
+  const toggleFavorite = async () => {
+    if (!user || !accessToken || !favoriteMedium || !favoriteSlug || updatingFavorite) return;
+    setUpdatingFavorite(true);
+    try {
+      const favorite = await setWorkFavorite(favoriteMedium, favoriteSlug, !isFavorite, accessToken);
+      setIsFavorite(favorite);
+    } catch {
+      // Mantém o estado atual quando a API não puder concluir a alteração.
+    } finally {
+      setUpdatingFavorite(false);
+    }
+  };
+
 
   const addAnimeToList = async () => {
     if (!user || !accessToken || !animeTracker || isInList || addingToList) return;
@@ -249,11 +285,17 @@ function HeroSection({ entity, animeTracker, publicationTracker }: HeroSectionPr
                 </button>
 
                 <button
-                  className={styles.btnAddFavorite}
-                  aria-label="Adicionar aos favoritos"
-                  title="Adicionar aos favoritos"
+                  className={`${styles.btnAddFavorite} ${isFavorite ? styles.btnFavoriteActive : ""}`}
+                  type="button"
+                  onClick={() => void toggleFavorite()}
+                  disabled={!user || !favoriteMedium || !favoriteSlug || updatingFavorite}
+                  aria-label={isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos"}
+                  aria-pressed={isFavorite}
+                  title={isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos"}
                 >
-                  <MdOutlineFavoriteBorder size={20} aria-hidden="true" />
+                  {isFavorite
+                    ? <MdFavorite size={20} aria-hidden="true" />
+                    : <MdOutlineFavoriteBorder size={20} aria-hidden="true" />}
                 </button>
               </div>
             </>

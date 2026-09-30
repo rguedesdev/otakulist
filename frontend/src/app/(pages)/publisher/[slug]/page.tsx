@@ -15,6 +15,7 @@ type PublisherData = {
   description: string | null;
   foundation: string | null;
   headquarters: string | null;
+  externalLinks: Record<string, string | undefined>;
   magazines: PublisherMagazine[];
   lightNovels: PublisherLightNovel[];
 };
@@ -22,6 +23,7 @@ type PublisherData = {
 const query = `query Publisher($slug: String!) {
   publisher(slug: $slug) {
     displayName imageUrl description foundation headquarters
+    externalLinks { website x instagram pixiv youtube }
     magazines { id title slug imageUrl demography frequency }
     lightNovels { id title slug coverUrl status volumes }
   }
@@ -48,6 +50,7 @@ export default async function PublisherBySlug({ params }: { params: Promise<{ sl
     organizationType: "publisher",
     foundation: publisher.foundation ?? "—",
     headquarters: publisher.headquarters ?? "—",
+    externalLinks: publisher.externalLinks,
   };
 
   return <div className={styles.page}>

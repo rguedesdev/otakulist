@@ -2,6 +2,7 @@ import type { PersonEntity } from "@/shared/types/entities";
 
 export type SeiyuuCharacterCredit = {
   characterName: string;
+  characterSlug?: string;
   characterImage: string;
   animeTitle: string;
 };
@@ -38,4 +39,3 @@ const seiyuuProfiles: Record<string, SeiyuuProfile> = {
 export function getSeiyuuProfile(slug: string) {
   return seiyuuProfiles[slug] ?? null;
 }
-

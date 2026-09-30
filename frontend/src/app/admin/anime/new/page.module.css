@@ -13,6 +13,15 @@
 .linkGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .grid label, .linkGrid label { align-self: start; align-content: start; display: grid; gap: 7px; }
 .grid label > span, .linkGrid label > span { color: var(--color-text-secondary); font-size: 12px; font-weight: 750; }
+.adultControl { min-height: 43px; padding: 7px 10px; display: flex; align-items: center; justify-content: space-between; gap: 12px; background: var(--color-bg-subtle); border: 1px solid var(--color-border-strong); border-radius: var(--radius-small); }
+.adultControl > span { min-width: 0; display: grid; gap: 2px; }
+.adultControl strong { color: var(--color-text-primary); font-size: 11px; }
+.adultControl small { overflow: hidden; color: var(--color-text-muted); font-size: 9px; font-weight: 500; line-height: 1.25; text-overflow: ellipsis; white-space: nowrap; }
+.card .adultControl > input { width: 34px; min-height: 18px; padding: 0; flex: 0 0 auto; accent-color: var(--color-accent); cursor: pointer; }
+.automaticStatus { min-height: 67px; padding: 9px 11px; align-self: start; display: grid; align-content: center; gap: 2px; background: var(--color-bg-subtle); border: 1px solid var(--color-accent-border); border-radius: var(--radius-small); }
+.automaticStatus > span { color: var(--color-text-secondary); font-size: 10px; font-weight: 750; }
+.automaticStatus > strong { color: var(--color-accent-highlight); font-size: 12px; }
+.automaticStatus > small { color: var(--color-text-muted); font-size: 9px; line-height: 1.35; }
 .wide { grid-column: 1 / -1; }
 .card input, .card textarea, .card select, .row input, .row select { width: 100%; min-height: 43px; padding: 10px 12px; color: var(--color-text-primary); background: var(--color-bg-subtle); border: 1px solid var(--color-border-strong); border-radius: var(--radius-small); outline: none; }
 .card select, .row select { color-scheme: dark; cursor: pointer; }
@@ -138,3 +147,35 @@
 @media (prefers-reduced-motion: reduce) { .skeleton, .spinner, .loadingSeal { animation: none; } }
 @media (max-width: 760px) { .header { align-items: start; flex-direction: column; } .grid, .linkGrid { grid-template-columns: 1fr; } .wide { grid-column: auto; } .row { grid-template-columns: 1fr; } .relationshipActions { align-items: stretch; flex-direction: column; } .card { padding: 20px; } .imagePicker { align-items: flex-start; flex-direction: column; } .coverPreview { width: 96px; } .originField { grid-template-columns: 1fr; } }
 @media (max-width: 760px) { .accessPage { padding-top: 32px; } .loadingHeader { min-height: 76px; align-items: start; flex-direction: column; gap: 16px; } .loadingHeader > div { width: 100%; } .skeletonDescription { width: 75%; max-width: none; height: 12px; } .loadingFields { grid-template-columns: 1fr; } .loadingFieldWide { grid-column: auto; } .loadingFields > div:nth-child(n + 5) { display: none; } .loadingStatus { position: relative; left: auto; bottom: auto; width: fit-content; margin: -23px auto 0; transform: none; } .accessCard { margin-top: 5vh; padding: 36px 24px 32px; } }
+
+
+/* Alinhamento comum dos botões de ação em todos os formulários administrativos. */
+.fileButton,
+.clearImage,
+.add,
+.remove,
+.cancelAction {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  line-height: 1.2;
+}
+.fileButton > svg,
+.clearImage > svg,
+.add > svg,
+.remove > svg,
+.cancelAction > svg {
+  display: block;
+  flex: 0 0 auto;
+}
+
+/* O seletor .grid label tem especificidade maior que .fileButton; preserve o alinhamento em todos os formulários. */
+.grid label.fileButton,
+.imagePickerContent label.fileButton {
+  display: inline-flex;
+  align-items: center;
+  align-content: center;
+  justify-content: center;
+  gap: 8px;
+}

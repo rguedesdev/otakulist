@@ -96,7 +96,7 @@ export default function AnimeAdminPage() {
       <section className={styles.catalog}>
         <div className={styles.toolbar}>
           <div><h2>Gerenciar obras</h2><p>Abra uma obra para alterar informações, temporadas, vínculos e links.</p></div>
-          <form className={styles.search} onSubmit={submitSearch}>
+          <form className={styles.search} autoComplete="off" onSubmit={submitSearch}>
             <FiSearch aria-hidden="true" />
             <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar por título" aria-label="Buscar anime por título" />
             <button type="submit">Buscar</button>

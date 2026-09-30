@@ -14,6 +14,7 @@ export interface PersonDocument {
   agency: string | null;
   activityPeriod: string | null;
   occupations: string[];
+  externalLinks: Record<string, string | undefined>;
   publicationStatus: "DRAFT" | "PUBLISHED";
   createdAt: Date;
   updatedAt: Date;
@@ -32,6 +33,13 @@ const personSchema = new Schema<PersonDocument>(
     agency: { type: String, trim: true, default: null, maxlength: 200 },
     activityPeriod: { type: String, trim: true, default: null, maxlength: 200 },
     occupations: [{ type: String, trim: true, maxlength: 120 }],
+    externalLinks: {
+      website: { type: String, trim: true, default: undefined },
+      x: { type: String, trim: true, default: undefined },
+      instagram: { type: String, trim: true, default: undefined },
+      pixiv: { type: String, trim: true, default: undefined },
+      youtube: { type: String, trim: true, default: undefined },
+    },
     publicationStatus: { type: String, enum: ["DRAFT", "PUBLISHED"], default: "DRAFT", required: true },
   },
   { timestamps: true, versionKey: false },

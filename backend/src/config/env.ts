@@ -1,8 +1,10 @@
-import { resolve } from "node:path";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
 import { z } from "zod";
 
 const developmentSecret = "otakulist-development-only-jwt-secret";
+const backendRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../../");
 
 const environmentSchema = z
   .object({
@@ -18,7 +20,7 @@ const environmentSchema = z
     JWT_REFRESH_TTL_SECONDS: z.coerce.number().int().positive().default(30 * 24 * 60 * 60),
     BCRYPT_ROUNDS: z.coerce.number().int().min(10).max(15).default(12),
     CORS_ORIGIN: z.string().default("http://localhost:3000"),
-    UPLOAD_DIR: z.string().default("uploads"),
+    UPLOAD_DIR: z.string().default(resolve(backendRoot, "src/uploads")),
     MAX_AVATAR_SIZE_BYTES: z.coerce
       .number()
       .int()

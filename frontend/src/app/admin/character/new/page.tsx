@@ -3,12 +3,14 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
-import { FiArrowLeft, FiImage, FiPlus, FiTrash2, FiUploadCloud, FiUser } from "react-icons/fi";
+import { FiImage, FiPlus, FiTrash2, FiUploadCloud, FiUser } from "react-icons/fi";
 
 import { assetUrl, graphqlRequest, uploadCatalogImage } from "@/shared/auth/api";
 import { useAuth } from "@/shared/auth/auth-provider";
 import { CustomSelect } from "@/shared/components/CustomSelect/page";
 import styles from "../../anime/new/page.module.css";
+import { CancelLink } from "@/shared/components/AdminFormActions/CancelLink";
+import { SaveButton } from "@/shared/components/AdminFormActions/SaveButton";
 
 const CREATE_CHARACTER = `mutation CreateCharacter($input: CreateCharacterInput!) {
   createCharacter(input: $input) { slug }
@@ -129,7 +131,7 @@ export function CharacterFormPage({ editSlug }: { editSlug?: string }) {
         <p>Gerencie os dados exibidos na página pública e nos perfis de seiyuus.</p>
       </header>
 
-      <form className={styles.form} onSubmit={submit}>
+      <form className={styles.form} autoComplete="off" onSubmit={submit}>
         <section className={styles.card}>
           <div className={styles.sectionTitle}><span>01</span><div><h2>Identidade</h2><p>Informações principais do personagem.</p></div></div>
           <div className={styles.grid}>
@@ -163,7 +165,7 @@ export function CharacterFormPage({ editSlug }: { editSlug?: string }) {
 
         {error && <p className={styles.error}>{error}</p>}
         {savedSlug && <p className={styles.success}>Personagem {editSlug ? "atualizado" : "cadastrado"}. <Link href={`/character/${savedSlug}`}>Abrir página</Link></p>}
-        <div className={styles.footerActions}><Link className={styles.cancelAction} href="/admin/character"><FiArrowLeft /> Cancelar</Link><button type="submit" disabled={saving}>{saving ? "Salvando…" : editSlug ? "Salvar alterações" : "Cadastrar personagem"}</button></div>
+        <div className={styles.footerActions}><CancelLink className={styles.cancelAction} href="/admin/character">Cancelar</CancelLink><SaveButton disabled={saving}>{editSlug ? "Salvar alterações" : "Cadastrar personagem"}</SaveButton></div>
       </form>
     </main>
   );

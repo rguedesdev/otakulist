@@ -95,10 +95,12 @@
   justify-content: center;
   flex: 0 0 18px;
   color: var(--color-text-primary);
+  overflow: visible;
 }
 
 .infoLine dt svg {
   display: block;
+  overflow: visible;
 }
 
 .infoLine dd {

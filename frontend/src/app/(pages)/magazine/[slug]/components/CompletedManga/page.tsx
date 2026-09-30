@@ -1,9 +1,8 @@
-import Image from "next/image";
-import Link from "next/link";
 import { FaRegCheckCircle } from "react-icons/fa";
 import { RiQuillPenLine, RiRestartLine } from "react-icons/ri";
 
 import { assetUrl } from "@/shared/auth/api";
+import { MediaCreditCard } from "@/shared/components/MediaCreditCard/page";
 import type { MagazineManga } from "../CurrentPublishingManga/page";
 import styles from "./completedmanga.module.css";
 
@@ -32,37 +31,18 @@ function CompletedManga({ mangas }: { mangas: MagazineManga[] }) {
       <h2 className={styles.completedMangaSectionTitle}>Mangas finalizados</h2>
       <div className={styles.completedMangaCardsContainer}>
         {mangas.map((manga) => (
-          <Link href={`/manga/${manga.slug}`} key={manga.id}>
-            <article className={styles.completedMangaCard}>
-              <Image
-                className={styles.completedMangaCover}
-                src={assetUrl(manga.coverUrl) ?? manga.coverUrl}
-                alt={`Capa de ${manga.title}`}
-                width={90}
-                height={130}
-                unoptimized
-              />
-              <div className={styles.completedMangaTextsContainer}>
-                <div className={styles.completedMangaTexts}>
-                  <h3 className={styles.completedMangaTitle}>{manga.title}</h3>
-                  <dl className={styles.infoGroup}>
-                    <div className={styles.infoLine}>
-                      <dt className={styles.infoIcon}><RiQuillPenLine size={16} aria-hidden="true" /></dt>
-                      <dd className={styles.completedMangaInfo}>{creators(manga)}</dd>
-                    </div>
-                    <div className={styles.infoLine}>
-                      <dt className={styles.infoIcon}><RiRestartLine size={14} aria-hidden="true" /></dt>
-                      <dd className={styles.completedMangaInfo}>Início: {formatDate(manga.startDate)}</dd>
-                    </div>
-                    <div className={styles.infoLine}>
-                      <dt className={styles.infoIcon}><FaRegCheckCircle size={13} aria-hidden="true" /></dt>
-                      <dd className={styles.completedMangaInfo}>Término: {formatDate(manga.endDate)}</dd>
-                    </div>
-                  </dl>
-                </div>
-              </div>
-            </article>
-          </Link>
+          <MediaCreditCard
+            href={`/manga/${manga.slug}`}
+            image={assetUrl(manga.coverUrl) ?? manga.coverUrl}
+            imageAlt={`Capa de ${manga.title}`}
+            title={manga.title}
+            details={[
+              { icon: <RiQuillPenLine size={16} aria-hidden="true" />, text: creators(manga) },
+              { icon: <RiRestartLine size={14} aria-hidden="true" />, text: `Início: ${formatDate(manga.startDate)}` },
+              { icon: <FaRegCheckCircle size={13} aria-hidden="true" />, text: `Término: ${formatDate(manga.endDate)}` },
+            ]}
+            key={manga.id}
+          />
         ))}
       </div>
     </section>

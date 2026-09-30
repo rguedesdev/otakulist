@@ -19,6 +19,7 @@ const base = {
   title: requiredText(200), synopsis: requiredText(10_000), coverUrl: requiredText(2_048),
   alternativeTitles: z.array(z.object({ type: z.enum(ALTERNATIVE_TITLE_TYPES), title: requiredText(200) })).max(30).default([]),
   status: z.enum(MANGA_STATUSES), publicationStatus: z.enum(ANIME_PUBLICATION_STATUSES).default("DRAFT"),
+  adultContent: z.boolean().default(false),
   startDate: z.iso.date().nullish().transform((value) => value || null), endDate: z.iso.date().nullish().transform((value) => value || null),
   publisherId: z.string().regex(/^[0-9a-f]{24}$/i, "Editora inválida").nullish().transform((value) => value || null),
   publisher: optionalText(200), genres: z.array(requiredText(50)).max(30).default([]),

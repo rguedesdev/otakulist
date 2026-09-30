@@ -11,6 +11,7 @@ export interface StudioDocument {
   foundation: string | null;
   headquarters: string | null;
   website: string | null;
+  externalLinks: Record<string, string | undefined>;
   publicationStatus: "DRAFT" | "PUBLISHED";
   createdAt: Date;
   updatedAt: Date;
@@ -25,6 +26,13 @@ const studioSchema = new Schema<StudioDocument>({
   foundation: { type: String, trim: true, default: null, maxlength: 100 },
   headquarters: { type: String, trim: true, default: null, maxlength: 200 },
   website: { type: String, trim: true, default: null, maxlength: 2_048 },
+  externalLinks: {
+    website: { type: String, trim: true, default: undefined },
+    x: { type: String, trim: true, default: undefined },
+    instagram: { type: String, trim: true, default: undefined },
+    pixiv: { type: String, trim: true, default: undefined },
+    youtube: { type: String, trim: true, default: undefined },
+  },
   publicationStatus: { type: String, enum: ["DRAFT", "PUBLISHED"], default: "DRAFT", required: true },
 }, { timestamps: true, versionKey: false });
 

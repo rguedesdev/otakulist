@@ -13,6 +13,8 @@ export interface UserDocument {
   passwordHash: string;
   role: UserRole;
   avatarUrl: string | null;
+  showAdultContent: boolean;
+  hideAdultContentFromVisitors: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -41,6 +43,8 @@ const userSchema = new Schema<UserDocument>(
     passwordHash: { type: String, required: true, select: false },
     role: { type: String, enum: USER_ROLES, default: "FREE", required: true },
     avatarUrl: { type: String, default: null },
+    showAdultContent: { type: Boolean, default: false, required: true },
+    hideAdultContentFromVisitors: { type: Boolean, default: false, required: true },
   },
   {
     timestamps: true,

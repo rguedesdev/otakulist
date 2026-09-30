@@ -1,119 +1,274 @@
 import Image from "next/image";
 import Link from "next/link";
+import { cookies } from "next/headers";
+import { connection } from "next/server";
 
 import {
   FiArrowRight,
   FiCalendar,
   FiClock,
-  FiFilter,
-  FiPlay,
-  FiSearch,
   FiTv,
 } from "react-icons/fi";
 import { RiFireLine, RiSparkling2Line } from "react-icons/ri";
 
 import styles from "./anime.module.css";
-import { animeReleaseFormatLabels } from "@/shared/types/entities";
+import { AnimeSeasonFilters } from "./AnimeSeasonFilters";
+import { AnimeBroadcastCalendar, type AnimeBroadcastItem } from "./AnimeBroadcastCalendar";
+import { SeasonalAnimeSection } from "./SeasonalAnimeSection";
+import { assetUrl } from "@/shared/auth/api";
+import { MediaSearch } from "@/shared/components/MediaSearch/page";
+import { animeReleaseFormatLabels, type AnimeReleaseFormat } from "@/shared/types/entities";
+import {
+  getAnimeSeason,
+  getGraphqlAnimeSeason,
+  parseAnimeSeasonSlug,
+} from "@/shared/utils/anime-season";
 
-const seasonAnime = [
-  {
-    title: "Gachiakuta",
-    image: "/animes/gachiakuta.jpg",
-    href: "/anime/gachiakuta",
-    releaseFormat: "tv" as const,
-    episodes: "8 / 24 episódios",
-    genres: ["Ação", "Fantasia"],
-    score: "8.6",
-    day: "Domingo",
-  },
-  {
-    title: "MAO",
-    image: "/animes/mao2.jpg",
-    href: "/anime/mao",
-    releaseFormat: "tv" as const,
-    episodes: "5 / 12 episódios",
-    genres: ["Mistério", "Sobrenatural"],
-    score: "8.2",
-    day: "Terça-feira",
-  },
-  {
-    title: "Mayonaka Heart Tune",
-    image: "/animes/mayonaka.jpg",
-    href: "/anime/mayonaka-heart-tune",
-    releaseFormat: "tv" as const,
-    episodes: "6 / 12 episódios",
-    genres: ["Comédia", "Romance"],
-    score: "8.0",
-    day: "Quarta-feira",
-  },
-  {
-    title: "Kyoukai no Rinne",
-    image: "/animes/rinne2.jpg",
-    href: "/anime/kyoukai-no-rinne",
-    releaseFormat: "tv" as const,
-    episodes: "12 / 25 episódios",
-    genres: ["Comédia", "Fantasia"],
-    score: "7.7",
-    day: "Sábado",
-  },
-  {
-    title: "InuYasha",
-    image: "/animes/inuyasha2.png",
-    href: "/anime/inuyasha",
-    releaseFormat: "tv" as const,
-    episodes: "Completo",
-    genres: ["Aventura", "Romance"],
-    score: "8.4",
-    day: "Catálogo",
-  },
-];
+type SeasonalAnime = {
+  anime: {
+    id: string;
+    title: string;
+    slug: string;
+    coverUrl: string;
+    synopsis: string;
+    genres: string[];
+    reviewSummary?: { average: number; count: number };
+  };
+  installment: {
+    id: string;
+    label: string;
+    coverUrl: string | null;
+    episodes: number;
+    format: "TV" | "MOVIE" | "OVA" | "ONA" | "SPECIAL";
+    broadcastDay: AnimeBroadcastItem["day"] | null;
+    broadcastTime: string | null;
+    startDate: string | null;
+    endDate: string | null;
+    status: "ANNOUNCED" | "AIRING" | "FINISHED" | "CANCELLED";
+  };
+};
 
-const trendingAnime = [
-  { title: "Gachiakuta", change: "+2", score: "8.6", image: "/animes/gachiakuta.jpg", href: "/anime/gachiakuta" },
-  { title: "InuYasha", change: "—", score: "8.4", image: "/animes/inuyasha2.png", href: "/anime/inuyasha" },
-  { title: "MAO", change: "+4", score: "8.2", image: "/animes/mao2.jpg", href: "/anime/mao" },
-  { title: "Mayonaka Heart Tune", change: "+1", score: "8.0", image: "/animes/mayonaka.jpg", href: "/anime/mayonaka-heart-tune" },
-  { title: "Wolf's Rain", change: "-2", score: "8.0", image: "/animes/wolfs.jpg", href: "/anime/wolfs-rain" },
-];
+type RankedAnime = {
+  title: string;
+  slug: string;
+  coverUrl: string;
+  score: number;
+  ratingCount: number;
+};
 
-const upcomingAnime = [
-  {
-    title: "Baby I Love You Daze",
-    image: "/animes/baby.jpg",
-    href: "/anime/baby-i-love-you-daze",
-    date: "03 Out 2026",
-    releaseFormat: "special" as const,
-    description: "Uma estreia curta com romance e cotidiano.",
-  },
-  {
-    title: "Wolf's Rain",
-    image: "/animes/wolfs.jpg",
-    href: "/anime/wolfs-rain",
-    date: "11 Out 2026",
-    releaseFormat: "tv" as const,
-    description: "Fantasia, drama e uma jornada em busca do paraíso.",
-  },
-  {
-    title: "InuYasha",
-    image: "/animes/inuyasha2.png",
-    href: "/anime/inuyasha",
-    date: "19 Out 2026",
-    releaseFormat: "tv" as const,
-    description: "Aventura sobrenatural entre duas épocas.",
-  },
-];
+const animePageQuery = `query AnimePage($season: AnimeSeason!, $year: Int!, $limit: Int, $includeAdult: Boolean!) {
+  seasonalAnime(season: $season, year: $year, limit: $limit, includeAdult: $includeAdult) {
+    anime { id title slug coverUrl genres reviewSummary { average count } }
+    installment { id label coverUrl episodes format startDate endDate status broadcastDay broadcastTime }
+  }
+  seasonSchedule: seasonalAnime(season: $season, year: $year, includeAdult: $includeAdult, deduplicate: false) {
+    anime { id title slug coverUrl synopsis genres reviewSummary { average count } }
+    installment { id label coverUrl episodes format startDate endDate status broadcastDay broadcastTime }
+  }
+  trendingAnime: topRatedWorks(medium: ANIME, limit: 5, includeAdult: $includeAdult) {
+    title slug coverUrl score ratingCount
+  }
+}`;
 
-const schedule = [
-  { day: "Dom", count: "9 títulos" },
-  { day: "Seg", count: "4 títulos" },
-  { day: "Ter", count: "7 títulos" },
-  { day: "Qua", count: "5 títulos" },
-  { day: "Qui", count: "8 títulos" },
-  { day: "Sex", count: "6 títulos" },
-  { day: "Sáb", count: "11 títulos" },
-];
+const animeStatusLabels: Record<SeasonalAnime["installment"]["status"], string> = {
+  ANNOUNCED: "Anunciado",
+  AIRING: "Em exibição",
+  FINISHED: "Finalizado",
+  CANCELLED: "Cancelado",
+};
 
-function AnimePage() {
+const animeBroadcastDayLabels: Record<AnimeBroadcastItem["day"], string> = {
+  SUNDAY: "Domingo",
+  MONDAY: "Segunda-feira",
+  TUESDAY: "Terça-feira",
+  WEDNESDAY: "Quarta-feira",
+  THURSDAY: "Quinta-feira",
+  FRIDAY: "Sexta-feira",
+  SATURDAY: "Sábado",
+};
+
+async function getSeasonalAnime(
+  season: ReturnType<typeof getAnimeSeason>,
+  includeAdult: boolean,
+  limit: number | null,
+) {
+  const emptyContent = { items: [], schedule: [], trending: [] as RankedAnime[] };
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000"}/graphql`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        query: animePageQuery,
+        variables: {
+          season: getGraphqlAnimeSeason(season.key),
+          year: season.year,
+          limit,
+          includeAdult,
+        },
+      }),
+      cache: "no-store",
+    });
+    if (!response.ok) return emptyContent;
+    const body = await response.json() as {
+      data?: {
+        seasonalAnime: SeasonalAnime[];
+        seasonSchedule: SeasonalAnime[];
+        trendingAnime: RankedAnime[];
+      };
+      errors?: Array<{ message: string }>;
+    };
+    if (body.errors || !body.data) return emptyContent;
+    return {
+      items: body.data.seasonalAnime,
+      schedule: body.data.seasonSchedule,
+      trending: body.data.trendingAnime,
+    };
+  } catch {
+    return emptyContent;
+  }
+}
+
+function formatEpisodeCount(episodes: number) {
+  if (episodes === 0) return "Não Listado";
+  return `${episodes} ${episodes === 1 ? "episódio" : "episódios"}`;
+}
+
+function formatReleaseDate(value: string | null) {
+  if (!value) return "Data não informada";
+  return new Intl.DateTimeFormat("pt-BR", {
+    day: "2-digit",
+    month: "short",
+    timeZone: "UTC",
+    year: "numeric",
+  }).format(new Date(`${value}T00:00:00.000Z`));
+}
+
+function currentDateInJapan() {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    day: "2-digit",
+    month: "2-digit",
+    timeZone: "Asia/Tokyo",
+    year: "numeric",
+  }).formatToParts(new Date());
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  return `${values.year}-${values.month}-${values.day}`;
+}
+
+function shiftDateKey(value: string, days: number) {
+  const date = new Date(`${value}T00:00:00.000Z`);
+  date.setUTCDate(date.getUTCDate() + days);
+  return date.toISOString().slice(0, 10);
+}
+
+function currentWeekInJapan(today: string) {
+  const weekday = new Date(`${today}T00:00:00.000Z`).getUTCDay();
+  const start = shiftDateKey(today, -weekday);
+  return { start, end: shiftDateKey(start, 7) };
+}
+
+function isBroadcastWeekEligible(
+  installment: SeasonalAnime["installment"],
+  today: string,
+  weekStart: string,
+  weekEnd: string,
+) {
+  if (installment.status === "CANCELLED" || installment.status === "FINISHED") return false;
+  const startDate = installment.startDate?.slice(0, 10);
+  const endDate = installment.endDate?.slice(0, 10);
+  if (endDate && endDate < today) return false;
+  if (!startDate) return installment.status !== "ANNOUNCED";
+  return startDate <= today || (startDate >= weekStart && startDate < weekEnd);
+}
+
+function shuffleItems<T>(items: T[]) {
+  const shuffled = [...items];
+  for (let index = shuffled.length - 1; index > 0; index -= 1) {
+    const randomIndex = Math.floor(Math.random() * (index + 1));
+    [shuffled[index], shuffled[randomIndex]] = [shuffled[randomIndex]!, shuffled[index]!];
+  }
+  return shuffled;
+}
+
+const animeFormats = ["TV", "MOVIE", "OVA"] as const;
+const animeFilterStatuses = ["AIRING", "ANNOUNCED"] as const;
+
+function firstSearchParam(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] : value;
+}
+
+async function AnimePage({
+  searchParams,
+}: {
+  searchParams: Promise<{
+    season?: string | string[];
+    format?: string | string[];
+    status?: string | string[];
+    genre?: string | string[];
+  }>;
+}) {
+  await connection();
+  const now = new Date();
+  const currentSeason = getAnimeSeason(now);
+  const params = await searchParams;
+  const requestedSeason = parseAnimeSeasonSlug(params.season);
+  const selectedSeason = requestedSeason ?? currentSeason;
+  const showAllSeasonAnime = requestedSeason !== null;
+  const requestedFormat = firstSearchParam(params.format)?.toUpperCase();
+  const requestedStatus = firstSearchParam(params.status)?.toUpperCase();
+  const selectedFormat = showAllSeasonAnime ? animeFormats.find((format) => format === requestedFormat) ?? null : null;
+  const selectedStatus = showAllSeasonAnime ? animeFilterStatuses.find((status) => status === requestedStatus) ?? null : null;
+  const requestedGenre = firstSearchParam(params.genre)?.trim() || null;
+  const cookieStore = await cookies();
+  const includeAdult = cookieStore.get("otakulist-adult-content")?.value === "1";
+  const {
+    items: seasonAnime,
+    schedule: scheduleAnime,
+    trending: trendingAnime,
+  } = await getSeasonalAnime(
+    selectedSeason,
+    includeAdult,
+    showAllSeasonAnime ? null : 5,
+  );
+  const todayInJapan = currentDateInJapan();
+  const broadcastWeek = currentWeekInJapan(todayInJapan);
+  const broadcastItems: AnimeBroadcastItem[] = scheduleAnime.flatMap(({ anime, installment }) =>
+    installment.format === "TV"
+      && installment.broadcastDay
+      && installment.broadcastTime
+      && isBroadcastWeekEligible(installment, todayInJapan, broadcastWeek.start, broadcastWeek.end)
+      ? [{
+        id: `${anime.id}-${installment.id}`,
+        title: anime.title,
+        slug: anime.slug,
+        image: assetUrl(installment.coverUrl ?? anime.coverUrl) ?? anime.coverUrl,
+        day: installment.broadcastDay,
+        time: installment.broadcastTime,
+        detail: `${animeStatusLabels[installment.status]} · ${formatEpisodeCount(installment.episodes)}`,
+      }]
+      : [],
+  );
+  const spotlightAnime = shuffleItems(
+    scheduleAnime
+      .filter(({ installment }) => installment.status !== "CANCELLED")
+      .filter((item, index, items) => (
+        items.findIndex((candidate) => candidate.anime.id === item.anime.id) === index
+      )),
+  )[0] ?? null;
+  const seasonGenres = [...new Set(seasonAnime.flatMap(({ anime }) => anime.genres))]
+    .sort((left, right) => left.localeCompare(right, "pt-BR"));
+  const selectedGenre = showAllSeasonAnime
+    ? seasonGenres.find((genre) => genre === requestedGenre) ?? null
+    : null;
+  const filteredSeasonAnime = seasonAnime.filter(({ anime, installment }) => (
+    (!selectedFormat || installment.format === selectedFormat)
+    && (!selectedStatus || installment.status === selectedStatus)
+    && (!selectedGenre || anime.genres.includes(selectedGenre))
+  ));
+  const hasActiveFilters = Boolean(selectedFormat || selectedStatus || selectedGenre);
+  const filterKey = [
+    selectedSeason.key, selectedSeason.year, selectedFormat, selectedStatus, selectedGenre,
+  ].filter(Boolean).join("-");
+
   return (
     <main className={styles.page}>
       <div className={styles.container}>
@@ -123,85 +278,74 @@ function AnimePage() {
             <h1>Encontre sua próxima história</h1>
             <p>Explore a temporada, acompanhe o que está em alta e veja o que estreia em breve.</p>
           </div>
-          <label className={styles.searchBox}>
-            <FiSearch aria-hidden="true" />
-            <span className={styles.srOnly}>Buscar anime</span>
-            <input type="search" placeholder="Buscar por título..." />
-          </label>
+          <MediaSearch medium="ANIME" label="Buscar anime" placeholder="Buscar por título..." />
         </header>
 
-        <div className={styles.filterBar} aria-label="Filtros de anime">
-          <span className={styles.filterLabel}><FiFilter aria-hidden="true" />Filtros</span>
-          <button className={styles.filterActive} type="button">Todos</button>
-          <button type="button">TV</button>
-          <button type="button">Filmes</button>
-          <button type="button">OVA</button>
-          <button type="button">Em lançamento</button>
-          <button type="button">Próximos</button>
-          <button type="button">Gêneros</button>
-        </div>
+        {showAllSeasonAnime && <AnimeSeasonFilters
+          genres={seasonGenres}
+          selectedFormat={selectedFormat}
+          selectedStatus={selectedStatus}
+          selectedGenre={selectedGenre}
+        />}
 
-        <section className={styles.spotlight} aria-labelledby="spotlight-title">
-          <Image
-            src="/animes/gachiakuta.jpg"
-            alt="Capa de Gachiakuta"
-            fill
-            sizes="(max-width: 760px) 100vw, 1280px"
-            priority
-          />
-          <div className={styles.spotlightShade} />
-          <div className={styles.spotlightContent}>
-            <span className={styles.spotlightLabel}><RiSparkling2Line aria-hidden="true" />Destaque da temporada</span>
-            <h2 id="spotlight-title">Gachiakuta</h2>
-            <div className={styles.spotlightMeta}>
-              <span>TV</span><span>24 episódios</span><span>Domingos</span><strong>★ 8.6</strong>
-            </div>
-            <p>
-              Em uma cidade suspensa onde os rejeitados são lançados em um abismo,
-              Rudo transforma a própria revolta em força para sobreviver.
-            </p>
-            <div className={styles.spotlightGenres}><span>Ação</span><span>Fantasia</span><span>Drama</span></div>
-            <Link href="/anime/gachiakuta">Ver detalhes <FiArrowRight aria-hidden="true" /></Link>
-          </div>
-          <div className={styles.spotlightAside}>
-            <span>Próximo episódio</span>
-            <strong>Domingo, 18:00</strong>
-            <small><FiClock aria-hidden="true" />em 2 dias</small>
-          </div>
-        </section>
+        {spotlightAnime && (() => {
+          const { anime, installment } = spotlightAnime;
+          const image = assetUrl(installment.coverUrl ?? anime.coverUrl) ?? anime.coverUrl;
+          const releaseFormat = installment.format.toLowerCase() as AnimeReleaseFormat;
+          const score = anime.reviewSummary && anime.reviewSummary.count > 0
+            ? anime.reviewSummary.average.toFixed(1)
+            : "—";
+          const broadcastDay = installment.broadcastDay
+            ? animeBroadcastDayLabels[installment.broadcastDay]
+            : null;
 
-        <section className={styles.section} aria-labelledby="season-title">
-          <div className={styles.sectionHeading}>
-            <div>
-              <span className={styles.sectionKicker}>Verão 2026</span>
-              <h2 id="season-title">Animes da temporada</h2>
+          return <section className={styles.spotlight} aria-labelledby="spotlight-title">
+            <Image
+              src={image}
+              alt={`Capa de ${anime.title}`}
+              fill
+              sizes="(max-width: 760px) 100vw, 1280px"
+              priority
+              unoptimized
+            />
+            <div className={styles.spotlightShade} />
+            <div className={styles.spotlightContent}>
+              <span className={styles.spotlightLabel}><RiSparkling2Line aria-hidden="true" />Destaque de {selectedSeason.label}</span>
+              <h2 id="spotlight-title">{anime.title}</h2>
+              <div className={styles.spotlightMeta}>
+                <span>{animeReleaseFormatLabels[releaseFormat]}</span>
+                <span>{formatEpisodeCount(installment.episodes)}</span>
+                {broadcastDay && <span>{broadcastDay}</span>}
+                <strong>★ {score}</strong>
+              </div>
+              <p>{anime.synopsis}</p>
+              <div className={styles.spotlightGenres}>{anime.genres.slice(0, 3).map((genre) => <span key={genre}>{genre}</span>)}</div>
+              <Link href={`/anime/${anime.slug}`}>Ver detalhes <FiArrowRight aria-hidden="true" /></Link>
             </div>
-            <div className={styles.seasonControls}>
-              <button type="button">‹</button>
-              <strong>Verão 2026</strong>
-              <button type="button">›</button>
-            </div>
-          </div>
+            {broadcastDay && installment.broadcastTime ? (
+              <div className={styles.spotlightAside}>
+                <span>Transmissão semanal</span>
+                <strong>{broadcastDay} às {installment.broadcastTime}</strong>
+                <small><FiClock aria-hidden="true" />Horário JST</small>
+              </div>
+            ) : installment.startDate ? (
+              <div className={styles.spotlightAside}>
+                <span>Data de estreia</span>
+                <strong>{formatReleaseDate(installment.startDate)}</strong>
+                <small><FiCalendar aria-hidden="true" />{animeStatusLabels[installment.status]}</small>
+              </div>
+            ) : null}
+          </section>;
+        })()}
 
-          <div className={styles.animeGrid}>
-            {seasonAnime.map((anime) => (
-              <Link className={styles.animeCard} href={anime.href} key={anime.title}>
-                <div className={styles.animeCover}>
-                  <Image src={anime.image} alt={`Capa de ${anime.title}`} fill sizes="(max-width: 580px) 46vw, (max-width: 980px) 30vw, 220px" />
-                  <span className={styles.cardScore}>★ {anime.score}</span>
-                  <span className={styles.airingBadge}><span />Em exibição</span>
-                </div>
-                <div className={styles.animeInfo}>
-                  <h3>{anime.title}</h3>
-                  <p>{animeReleaseFormatLabels[anime.releaseFormat]}<span>•</span>{anime.episodes}</p>
-                  <div className={styles.cardGenres}>{anime.genres.map((genre) => <span key={genre}>{genre}</span>)}</div>
-                  <small><FiCalendar aria-hidden="true" />{anime.day}</small>
-                </div>
-              </Link>
-            ))}
-          </div>
-          <Link className={styles.sectionAction} href="/anime?season=summer-2026">Ver todos da temporada <FiArrowRight aria-hidden="true" /></Link>
-        </section>
+        <SeasonalAnimeSection
+          key={filterKey}
+          initialSeason={selectedSeason}
+          initialItems={filteredSeasonAnime}
+          includeAdult={includeAdult}
+          expanded={showAllSeasonAnime}
+          hasActiveFilters={hasActiveFilters}
+        />
 
         <div className={styles.middleGrid}>
           <section className={styles.trendingPanel} aria-labelledby="trending-title">
@@ -211,66 +355,26 @@ function AnimePage() {
             </div>
             <ol>
               {trendingAnime.map((anime, index) => (
-                <li key={anime.title}>
-                  <Link href={anime.href}>
+                <li key={anime.slug}>
+                  <Link href={`/anime/${anime.slug}`}>
                     <span className={styles.rank}>{String(index + 1).padStart(2, "0")}</span>
-                    <Image src={anime.image} alt="" width={42} height={58} />
-                    <span className={styles.rankTitle}><strong>{anime.title}</strong><small>★ {anime.score}</small></span>
-                    <span className={anime.change.startsWith("+") ? styles.rankUp : styles.rankChange}>{anime.change}</span>
+                    <Image src={assetUrl(anime.coverUrl) ?? anime.coverUrl} alt="" width={42} height={58} unoptimized />
+                    <span className={styles.rankTitle}>
+                      <strong>{anime.title}</strong>
+                      <small>★ {anime.score.toFixed(1)} · {anime.ratingCount} {anime.ratingCount === 1 ? "avaliação" : "avaliações"}</small>
+                    </span>
                   </Link>
                 </li>
               ))}
             </ol>
+            {trendingAnime.length === 0 && (
+              <p className={styles.emptyRanking}>O ranking aparecerá quando a comunidade avaliar os animes.</p>
+            )}
             <Link className={styles.sectionAction} href="/ranking/anime">Ver ranking completo <FiArrowRight aria-hidden="true" /></Link>
           </section>
 
-          <section className={styles.schedulePanel} aria-labelledby="schedule-title">
-            <div className={styles.panelHeading}>
-              <div><span className={styles.sectionKicker}>Agenda semanal</span><h2 id="schedule-title">Calendário de episódios</h2></div>
-              <FiCalendar aria-hidden="true" />
-            </div>
-            <div className={styles.scheduleDays}>
-              {schedule.map((item) => (
-                <button className={item.day === "Sex" ? styles.scheduleActive : undefined} type="button" key={item.day}>
-                  <strong>{item.day}</strong><span>{item.count}</span>
-                </button>
-              ))}
-            </div>
-            <div className={styles.todaySchedule}>
-              <span className={styles.time}>18:00</span>
-              <Image src="/animes/gachiakuta.jpg" alt="" width={46} height={62} />
-              <span><strong>Gachiakuta</strong><small>Episódio 9</small></span>
-              <span className={styles.releaseState}><FiPlay aria-hidden="true" />Hoje</span>
-            </div>
-            <div className={styles.todaySchedule}>
-              <span className={styles.time}>21:30</span>
-              <Image src="/animes/mayonaka.jpg" alt="" width={46} height={62} />
-              <span><strong>Mayonaka Heart Tune</strong><small>Episódio 7</small></span>
-              <span className={styles.releaseState}>Hoje</span>
-            </div>
-          </section>
+          <AnimeBroadcastCalendar items={broadcastItems} />
         </div>
-
-        <section className={styles.section} aria-labelledby="upcoming-title">
-          <div className={styles.sectionHeading}>
-            <div><span className={styles.sectionKicker}>Próxima temporada</span><h2 id="upcoming-title">Próximos lançamentos</h2></div>
-            <Link className={styles.headingLink} href="/anime?status=upcoming">Ver calendário <FiArrowRight aria-hidden="true" /></Link>
-          </div>
-          <div className={styles.upcomingGrid}>
-            {upcomingAnime.map((anime) => (
-              <Link className={styles.upcomingCard} href={anime.href} key={anime.title}>
-                <Image src={anime.image} alt={`Capa de ${anime.title}`} width={104} height={144} />
-                <div>
-                  <span className={styles.releaseDate}><FiCalendar aria-hidden="true" />{anime.date}</span>
-                  <h3>{anime.title}</h3>
-                  <small>{animeReleaseFormatLabels[anime.releaseFormat]}</small>
-                  <p>{anime.description}</p>
-                </div>
-                <FiArrowRight className={styles.cardArrow} aria-hidden="true" />
-              </Link>
-            ))}
-          </div>
-        </section>
       </div>
     </main>
   );

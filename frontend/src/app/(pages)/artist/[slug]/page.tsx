@@ -20,6 +20,7 @@ type MusicArtistData = {
   activityPeriod: string | null;
   recordLabel: string | null;
   genres: string[];
+  discography: Array<{ title: string; releaseType: string; year: string; tracks: number; cover: string }>;
   platformLinks: { spotify?: string; tidal?: string; deezer?: string; amazonMusic?: string };
   animeSongs: Array<{
     anime: { title: string; slug: string; coverUrl: string };
@@ -34,6 +35,7 @@ const query = `query MusicArtist($slug: String!) {
   musicArtist(slug: $slug) {
     displayName kind nameKanji imageUrl description origin dateOfBirth activityPeriod recordLabel genres
     platformLinks { spotify tidal deezer amazonMusic }
+    discography { title releaseType year tracks cover }
     animeSongs { anime { title slug coverUrl } songTitle type sequence episodeRange }
   }
 }`;
@@ -90,7 +92,7 @@ export default async function ArtistBySlug({ params }: { params: Promise<{ slug:
   return (
     <EntityDetailPage entity={entity} sidebarChildren={<MusicPlatformLinks {...artist.platformLinks} />}>
       <AnimeSongSection title="Canções em animes" songs={animeSongs} />
-      <DiscographySection releases={[]} />
+      <DiscographySection releases={artist.discography.map((release) => ({ ...release, cover: assetUrl(release.cover) ?? release.cover }))} />
     </EntityDetailPage>
   );
 }

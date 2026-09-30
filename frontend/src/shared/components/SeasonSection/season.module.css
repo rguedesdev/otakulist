@@ -256,6 +256,8 @@
   color: var(--color-text-secondary);
   font-size: 12px;
   line-height: 1.65;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
 }
 
 .modalProgress {

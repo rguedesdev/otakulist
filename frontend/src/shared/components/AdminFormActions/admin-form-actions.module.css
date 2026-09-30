@@ -1,0 +1,33 @@
+.saveButton,
+.cancelLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  line-height: 1.2;
+  text-decoration: none;
+  transition: filter 180ms ease, background-color 180ms ease;
+}
+
+.saveButton > svg,
+.cancelLink > svg {
+  display: block;
+  width: 17px;
+  height: 17px;
+  flex: 0 0 auto;
+}
+
+.saveButton:not(:disabled):hover {
+  filter: brightness(1.12);
+}
+
+.cancelLink:hover {
+  filter: brightness(1.12);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .saveButton,
+  .cancelLink {
+    transition: none;
+  }
+}

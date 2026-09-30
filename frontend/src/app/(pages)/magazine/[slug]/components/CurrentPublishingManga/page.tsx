@@ -1,8 +1,7 @@
-import Image from "next/image";
-import Link from "next/link";
 import { RiQuillPenLine, RiRestartLine } from "react-icons/ri";
 
 import { assetUrl } from "@/shared/auth/api";
+import { MediaCreditCard } from "@/shared/components/MediaCreditCard/page";
 import styles from "./currentpublishingmanga.module.css";
 
 export type MagazineManga = {
@@ -42,36 +41,20 @@ function CurrentPublishingManga({ mangas }: { mangas: MagazineManga[] }) {
 
   return (
     <section className={styles.currentPublishingMangaContainer}>
-      <h2 className={styles.currentPublishingMangaSectionTitle}>Mangas em serialização</h2>
+      <h2 className={styles.currentPublishingMangaSectionTitle}>Mangas em publicação</h2>
       <div className={styles.currentPublishingMangaCardsContainer}>
         {mangas.map((manga) => (
-          <Link href={`/manga/${manga.slug}`} key={manga.id}>
-            <article className={styles.currentPublishingMangaCard}>
-              <Image
-                className={styles.currentPublishingMangaCover}
-                src={assetUrl(manga.coverUrl) ?? manga.coverUrl}
-                alt={`Capa de ${manga.title}`}
-                width={90}
-                height={130}
-                unoptimized
-              />
-              <div className={styles.currentPublishingMangaTextsContainer}>
-                <div className={styles.currentPublishingMangaTexts}>
-                  <h3 className={styles.currentPublishingMangaTitle}>{manga.title}</h3>
-                  <dl className={styles.infoGroup}>
-                    <div className={styles.infoLine}>
-                      <dt className={styles.infoIcon}><RiQuillPenLine size={16} aria-hidden="true" /></dt>
-                      <dd className={styles.currentPublishingMangaInfo}>{creators(manga)}</dd>
-                    </div>
-                    <div className={styles.infoLine}>
-                      <dt className={styles.infoIcon}><RiRestartLine size={14} aria-hidden="true" /></dt>
-                      <dd className={styles.currentPublishingMangaInfo}>Início: {formatDate(manga.startDate)}</dd>
-                    </div>
-                  </dl>
-                </div>
-              </div>
-            </article>
-          </Link>
+          <MediaCreditCard
+            href={`/manga/${manga.slug}`}
+            image={assetUrl(manga.coverUrl) ?? manga.coverUrl}
+            imageAlt={`Capa de ${manga.title}`}
+            title={manga.title}
+            details={[
+              { icon: <RiQuillPenLine size={16} aria-hidden="true" />, text: creators(manga) },
+              { icon: <RiRestartLine size={14} aria-hidden="true" />, text: `Início: ${formatDate(manga.startDate)}` },
+            ]}
+            key={manga.id}
+          />
         ))}
       </div>
     </section>

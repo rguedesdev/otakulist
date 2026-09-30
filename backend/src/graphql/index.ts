@@ -4,6 +4,7 @@ import type { IResolvers, MercuriusContext } from "mercurius";
 
 import { env } from "../config/env.js";
 import { Anime } from "../models/anime.js";
+import { AnimeEditSuggestion } from "../models/anime-edit-suggestion.js";
 import { AnimeListEntry } from "../models/anime-list-entry.js";
 import { CatalogWork } from "../models/catalog-work.js";
 import { PublicationListEntry } from "../models/publication-list-entry.js";
@@ -17,9 +18,23 @@ import { Publisher } from "../models/publisher.js";
 import { Studio } from "../models/studio.js";
 import { Session } from "../models/session.js";
 import { User } from "../models/user.js";
+import { WorkFavorite } from "../models/work-favorite.js";
 import { WorkReview } from "../models/work-review.js";
 import { animeSlugSchema, createAnimeSchema, updateAnimeSchema } from "../services/anime/schemas.js";
+import {
+  getAnimeSeasonDateRanges,
+  getBroadcastSeasonPattern,
+  installmentMatchesSeason,
+  type AnimeSeason,
+} from "../services/anime/season.js";
+import {
+  getAnimeStatusOverride,
+  getEffectiveAnimeStatus,
+  getOverallAnimeStatus,
+  type AnimeStatus,
+} from "../services/anime/status.js";
 import { removeAnimeListEntrySchema, saveAnimeListEntrySchema } from "../services/anime-list/schemas.js";
+import { pickDailyItem } from "../services/weekly-feature.js";
 import { getPublicationListEntrySchema, removePublicationListEntrySchema, savePublicationListEntrySchema } from "../services/publication-list/schemas.js";
 import { saveWorkReviewSchema, workReviewTargetSchema } from "../services/review/schemas.js";
 import { createLightNovelSchema, createMangaSchema, updateLightNovelSchema, updateMangaSchema } from "../services/publication-work/schemas.js";
@@ -67,6 +82,8 @@ export const schema = /* GraphQL */ `
   enum AnimePublicationStatus { DRAFT PUBLISHED }
   enum AnimeReleaseFormat { TV MOVIE OVA ONA SPECIAL }
   enum AnimeStatus { ANNOUNCED AIRING FINISHED CANCELLED }
+  enum AnimeSeason { WINTER SPRING SUMMER FALL }
+  enum AnimeBroadcastDay { SUNDAY MONDAY TUESDAY WEDNESDAY THURSDAY FRIDAY SATURDAY }
   enum AnimeSongType { OPENING ENDING INSERT }
   enum MusicArtistKind { SOLO BAND }
   enum AlternativeTitleType { JAPANESE ROMAJI ENGLISH PORTUGUESE LITERAL OTHER }
@@ -78,6 +95,26 @@ export const schema = /* GraphQL */ `
   type WorkReview { score: Float! comment: String updatedAt: String! }
   type PublicWorkReview { id: ID! score: Float! comment: String! updatedAt: String! author: PublicUser! }
   type ReviewSummary { average: Float! count: Int! }
+  type UserFavorite {
+    id: ID!
+    createdAt: String!
+    work: WorkSearchResult!
+  }
+  type TopRatedWork {
+    title: String!
+    slug: String!
+    medium: WorkMedium!
+    coverUrl: String!
+    score: Float!
+    ratingCount: Int!
+  }
+  type DiscoveryWork {
+    title: String!
+    slug: String!
+    medium: WorkMedium!
+    coverUrl: String!
+    description: String!
+  }
   input SaveWorkReviewInput { score: Float! comment: String }
 
   type User {
@@ -88,6 +125,8 @@ export const schema = /* GraphQL */ `
     email: String!
     role: UserRole!
     avatarUrl: String
+    showAdultContent: Boolean!
+    hideAdultContentFromVisitors: Boolean!
     createdAt: String!
     updatedAt: String!
   }
@@ -109,6 +148,8 @@ export const schema = /* GraphQL */ `
     displayName: String!
     bio: String
     email: String!
+    showAdultContent: Boolean!
+    hideAdultContentFromVisitors: Boolean!
   }
 
   type AuthPayload {
@@ -139,9 +180,12 @@ export const schema = /* GraphQL */ `
     episodes: Int!
     durationMinutes: Int
     status: AnimeStatus!
+    statusOverride: AnimeStatus
     startDate: String
     endDate: String
     broadcastSeason: String
+    broadcastDay: AnimeBroadcastDay
+    broadcastTime: String
     studio: Studio
     studioName: String
   }
@@ -159,6 +203,7 @@ export const schema = /* GraphQL */ `
     agency: String
     activityPeriod: String
     occupations: [String!]!
+    externalLinks: ExternalLinks!
     animeCredits: [PersonAnimeCredit!]!
     mangaCredits: [PersonMangaCredit!]!
     publicationStatus: AnimePublicationStatus!
@@ -178,6 +223,7 @@ export const schema = /* GraphQL */ `
     foundation: String
     headquarters: String
     website: String
+    externalLinks: ExternalLinks!
     publicationStatus: AnimePublicationStatus!
     animeCredits: [StudioAnimeCredit!]!
     createdAt: String!
@@ -192,6 +238,7 @@ export const schema = /* GraphQL */ `
     description: String
     foundation: String
     headquarters: String
+    externalLinks: ExternalLinks!
     publicationStatus: AnimePublicationStatus!
     magazines: [Magazine!]!
     lightNovels: [LightNovel!]!
@@ -209,6 +256,8 @@ export const schema = /* GraphQL */ `
     publisher: Publisher!
     demography: String
     frequency: String
+    externalLinks: ExternalLinks!
+    storeLinks: StoreLinks!
     publicationStatus: AnimePublicationStatus!
     mangas: [Manga!]!
     createdAt: String!
@@ -264,6 +313,13 @@ export const schema = /* GraphQL */ `
     laftel: String tver: String iqiyi: String tubi: String dAnimeStore: String
   }
   type MusicPlatformLinks { spotify: String tidal: String deezer: String amazonMusic: String }
+  type MusicArtistDiscographyRelease {
+    title: String!
+    releaseType: String!
+    year: String!
+    tracks: Int!
+    cover: String!
+  }
   type MusicArtistAnime {
     id: ID!
     title: String!
@@ -291,6 +347,7 @@ export const schema = /* GraphQL */ `
     activityPeriod: String
     recordLabel: String
     genres: [String!]!
+    discography: [MusicArtistDiscographyRelease!]!
     platformLinks: MusicPlatformLinks!
     publicationStatus: AnimePublicationStatus!
     animeSongs: [MusicArtistAnimeSong!]!
@@ -347,6 +404,7 @@ export const schema = /* GraphQL */ `
     dateOfBirth: String
     hometown: String
     agency: String
+    externalLinks: ExternalLinksInput
     publicationStatus: AnimePublicationStatus! = DRAFT
   }
   input CreateIndustryPersonInput {
@@ -358,9 +416,25 @@ export const schema = /* GraphQL */ `
     hometown: String
     activityPeriod: String
     occupations: [String!] = []
+    externalLinks: ExternalLinksInput
     publicationStatus: AnimePublicationStatus! = DRAFT
   }
 
+  enum WorkEditSuggestionStatus { PENDING APPROVED REJECTED }
+  type WorkEditSuggestion {
+    id: ID!
+    medium: WorkMedium!
+    anime: Anime
+    manga: Manga
+    lightNovel: LightNovel
+    proposer: PublicUser!
+    title: String
+    synopsis: String
+    genres: [String!]
+    status: WorkEditSuggestionStatus!
+    createdAt: String!
+  }
+  input WorkEditSuggestionInput { title: String synopsis: String genres: [String!] }
   type Anime {
     id: ID!
     title: String!
@@ -372,6 +446,7 @@ export const schema = /* GraphQL */ `
     producers: [String!]!
     demography: String
     rating: String
+    adultContent: Boolean!
     publicationStatus: AnimePublicationStatus!
     installments: [AnimeInstallment!]!
     characterCredits: [AnimeCharacterCredit!]!
@@ -383,6 +458,11 @@ export const schema = /* GraphQL */ `
     createdAt: String!
     updatedAt: String!
     reviewSummary: ReviewSummary!
+  }
+
+  type SeasonalAnime {
+    anime: Anime!
+    installment: AnimeInstallment!
   }
 
   type AnimeSeasonProgress { order: Int! watchedEpisodes: Int! }
@@ -417,9 +497,12 @@ export const schema = /* GraphQL */ `
     episodes: Int!
     durationMinutes: Int
     status: AnimeStatus!
+    statusOverride: AnimeStatus
     startDate: String
     endDate: String
     broadcastSeason: String
+    broadcastDay: AnimeBroadcastDay
+    broadcastTime: String
     studioId: ID
     studioName: String
   }
@@ -434,6 +517,13 @@ export const schema = /* GraphQL */ `
     episodeRange: String
   }
   input MusicPlatformLinksInput { spotify: String tidal: String deezer: String amazonMusic: String }
+  input MusicArtistDiscographyReleaseInput {
+    title: String!
+    releaseType: String!
+    year: String!
+    tracks: Int!
+    cover: String!
+  }
   input CreateMusicArtistInput {
     displayName: String!
     kind: MusicArtistKind!
@@ -445,6 +535,7 @@ export const schema = /* GraphQL */ `
     activityPeriod: String
     recordLabel: String
     genres: [String!] = []
+    discography: [MusicArtistDiscographyReleaseInput!] = []
     platformLinks: MusicPlatformLinksInput
     publicationStatus: AnimePublicationStatus! = DRAFT
   }
@@ -467,6 +558,7 @@ export const schema = /* GraphQL */ `
     producers: [String!] = []
     demography: String
     rating: String
+    adultContent: Boolean! = false
     publicationStatus: AnimePublicationStatus! = DRAFT
     installments: [AnimeInstallmentInput!]!
     characterCredits: [AnimeCharacterCreditInput!] = []
@@ -490,9 +582,18 @@ export const schema = /* GraphQL */ `
   type Query {
     me: User
     user(username: String!): PublicUser
-    anime(slug: String!): Anime
-    manga(slug: String!): Manga
-    lightNovel(slug: String!): LightNovel
+    anime(slug: String!, includeAdult: Boolean = false): Anime
+    dailyFeaturedAnime(includeAdult: Boolean = false): Anime
+    seasonalAnime(season: AnimeSeason!, year: Int!, limit: Int, includeAdult: Boolean = false, deduplicate: Boolean = true): [SeasonalAnime!]!
+    manga(slug: String!, includeAdult: Boolean = false): Manga
+    dailyMangaRecommendation(includeAdult: Boolean = false): Manga
+    recentPublishingMangas(limit: Int = 5, includeAdult: Boolean = false): [Manga!]!
+    browseMangas(includeAdult: Boolean = false): [Manga!]!
+    lightNovel(slug: String!, includeAdult: Boolean = false): LightNovel
+    publishingLightNovelSpotlight(includeAdult: Boolean = false): LightNovel
+    dailyLightNovelRecommendation(includeAdult: Boolean = false): LightNovel
+    recentPublishingLightNovels(limit: Int = 5, includeAdult: Boolean = false): [LightNovel!]!
+    browseLightNovels(includeAdult: Boolean = false): [LightNovel!]!
     character(slug: String!): Character
     seiyuu(slug: String!): IndustryPerson
     staff(slug: String!): IndustryPerson
@@ -502,12 +603,15 @@ export const schema = /* GraphQL */ `
     publisher(slug: String!): Publisher
     magazine(slug: String!): Magazine
     charactersBySeiyuu(slug: String!): [Character!]!
-    searchWorks(query: String!): [WorkSearchResult!]!
+    searchWorks(query: String!, medium: WorkMedium, includeAdult: Boolean = false): [WorkSearchResult!]!
+    topRatedWorks(medium: WorkMedium, limit: Int = 5, includeAdult: Boolean = false): [TopRatedWork!]!
+    discoveryWorks(includeAdult: Boolean = false): [DiscoveryWork!]!
     searchPeople(query: String!): [IndustryPerson!]!
     searchStudios(query: String!): [Studio!]!
     searchPublishers(query: String!): [Publisher!]!
     searchMagazines(query: String!): [Magazine!]!
     adminAnimes(query: String): [Anime!]!
+    pendingWorkEditSuggestions: [WorkEditSuggestion!]!
     adminMangas(query: String): [Manga!]!
     adminLightNovels(query: String): [LightNovel!]!
     adminCharacters(query: String): [Character!]!
@@ -520,9 +624,11 @@ export const schema = /* GraphQL */ `
     adminMagazines(query: String): [Magazine!]!
     myAnimeListEntry(animeSlug: String!): AnimeListEntry
     myPublicationListEntry(medium: WorkMedium!, slug: String!): PublicationListEntry
-    animeList(username: String!): [AnimeListEntry!]!
-    publicationList(username: String!, medium: WorkMedium!): [PublicationListEntry!]!
-    userReviews(username: String!): [UserWorkReview!]!
+    animeList(username: String!, includeAdult: Boolean = false): [AnimeListEntry!]!
+    publicationList(username: String!, medium: WorkMedium!, includeAdult: Boolean = false): [PublicationListEntry!]!
+    userFavorites(username: String!, includeAdult: Boolean = false): [UserFavorite!]!
+    myWorkFavorite(medium: WorkMedium!, slug: String!): Boolean!
+    userReviews(username: String!, includeAdult: Boolean = false): [UserWorkReview!]!
     workReviewComments(medium: WorkMedium!, slug: String!): [PublicWorkReview!]!
     myWorkReview(medium: WorkMedium!, slug: String!): WorkReview
   }
@@ -535,6 +641,8 @@ export const schema = /* GraphQL */ `
     updateMyProfile(input: UpdateProfileInput!): AuthPayload!
     createAnime(input: CreateAnimeInput!): Anime!
     updateAnime(slug: String!, input: CreateAnimeInput!): Anime!
+    suggestWorkEdit(medium: WorkMedium!, slug: String!, input: WorkEditSuggestionInput!): WorkEditSuggestion!
+    reviewWorkEditSuggestion(id: ID!, approve: Boolean!): WorkEditSuggestion!
     createManga(input: CreateMangaInput!): Manga!
     updateManga(slug: String!, input: CreateMangaInput!): Manga!
     createLightNovel(input: CreateLightNovelInput!): LightNovel!
@@ -559,6 +667,7 @@ export const schema = /* GraphQL */ `
     removeAnimeListEntry(animeSlug: String!): Boolean!
     savePublicationListEntry(medium: WorkMedium!, slug: String!, input: SavePublicationListEntryInput!): PublicationListEntry!
     removePublicationListEntry(medium: WorkMedium!, slug: String!): Boolean!
+    setWorkFavorite(medium: WorkMedium!, slug: String!, favorite: Boolean!): Boolean!
     saveWorkReview(medium: WorkMedium!, slug: String!, input: SaveWorkReviewInput!): WorkReview!
   }
 
@@ -570,6 +679,7 @@ export const schema = /* GraphQL */ `
     foundation: String
     headquarters: String
     website: String
+    externalLinks: ExternalLinksInput
     publicationStatus: AnimePublicationStatus! = DRAFT
   }
 
@@ -579,6 +689,7 @@ export const schema = /* GraphQL */ `
     description: String
     foundation: String
     headquarters: String
+    externalLinks: ExternalLinksInput
     publicationStatus: AnimePublicationStatus! = DRAFT
   }
 
@@ -590,6 +701,8 @@ export const schema = /* GraphQL */ `
     publisherId: ID!
     demography: String
     frequency: String
+    externalLinks: ExternalLinksInput
+    storeLinks: StoreLinksInput
     publicationStatus: AnimePublicationStatus! = DRAFT
   }
 
@@ -600,7 +713,7 @@ export const schema = /* GraphQL */ `
   type StaffCredit { personId: ID! role: String! contribution: String person: IndustryPerson! }
   type Manga {
     id: ID! title: String! slug: String! synopsis: String! coverUrl: String!
-    alternativeTitles: [AlternativeTitle!]! status: String! publicationStatus: AnimePublicationStatus!
+    alternativeTitles: [AlternativeTitle!]! status: String! publicationStatus: AnimePublicationStatus! adultContent: Boolean!
     startDate: String endDate: String magazine: String magazineEntity: Magazine publisher: String publisherEntity: Publisher demography: String genres: [String!]!
     chapters: Int! volumes: Int! serialization: String externalLinks: ExternalLinks!
     storeLinks: StoreLinks! characters: [Character!]! staffCredits: [StaffCredit!]! relatedWorks: [RelatedWork!]!
@@ -608,7 +721,7 @@ export const schema = /* GraphQL */ `
   }
   type LightNovel {
     id: ID! title: String! slug: String! synopsis: String! coverUrl: String!
-    alternativeTitles: [AlternativeTitle!]! status: String! publicationStatus: AnimePublicationStatus!
+    alternativeTitles: [AlternativeTitle!]! status: String! publicationStatus: AnimePublicationStatus! adultContent: Boolean!
     startDate: String endDate: String publisher: String publisherEntity: Publisher source: String genres: [String!]!
     chapters: Int! volumes: Int! externalLinks: ExternalLinks! storeLinks: StoreLinks!
     characters: [Character!]! staffCredits: [StaffCredit!]! relatedWorks: [RelatedWork!]!
@@ -621,14 +734,14 @@ export const schema = /* GraphQL */ `
   }
   input CreateMangaInput {
     title: String! synopsis: String! coverUrl: String! alternativeTitles: [AlternativeTitleInput!] = []
-    status: String! publicationStatus: AnimePublicationStatus! = DRAFT startDate: String endDate: String
+    status: String! publicationStatus: AnimePublicationStatus! = DRAFT adultContent: Boolean! = false startDate: String endDate: String
     magazineId: ID magazine: String publisherId: ID publisher: String demography: String genres: [String!] = [] chapters: Int! volumes: Int!
     serialization: String characterIds: [ID!] = [] staffCredits: [StaffCreditInput!] = [] relatedWorks: [RelatedWorkInput!] = []
     externalLinks: ExternalLinksInput storeLinks: StoreLinksInput
   }
   input CreateLightNovelInput {
     title: String! synopsis: String! coverUrl: String! alternativeTitles: [AlternativeTitleInput!] = []
-    status: String! publicationStatus: AnimePublicationStatus! = DRAFT startDate: String endDate: String
+    status: String! publicationStatus: AnimePublicationStatus! = DRAFT adultContent: Boolean! = false startDate: String endDate: String
     publisherId: ID publisher: String source: String genres: [String!] = [] chapters: Int! volumes: Int!
     characterIds: [ID!] = [] staffCredits: [StaffCreditInput!] = [] relatedWorks: [RelatedWorkInput!] = []
     externalLinks: ExternalLinksInput storeLinks: StoreLinksInput
@@ -649,6 +762,27 @@ async function currentUser(context: GraphQLContext) {
     const payload = await context.request.jwtVerify<AccessTokenPayload>();
     if (payload.type !== "access") return null;
     return User.findById(payload.sub).select("+email");
+  } catch {
+    return null;
+  }
+}
+
+async function profileViewer(context: GraphQLContext) {
+  const authenticatedUser = await currentUser(context);
+  if (authenticatedUser) return authenticatedUser;
+
+  const token = context.request.cookies[REFRESH_COOKIE];
+  if (!token) return null;
+
+  try {
+    const payload = verifyRefreshToken(context.app, token);
+    const session = await Session.exists({
+      _id: payload.sid,
+      userId: payload.sub,
+      tokenHash: hashToken(token),
+      expiresAt: { $gt: new Date() },
+    });
+    return session ? User.findById(payload.sub) : null;
   } catch {
     return null;
   }
@@ -680,6 +814,12 @@ function workHref(work: { medium: string; slug: string }) {
   return `/${segment}/${work.slug}`;
 }
 
+async function effectiveCatalogWorkStatus(work: any) {
+  if (work.medium !== "ANIME" || !work.entityId) return work.status;
+  const anime = await Anime.findById(work.entityId).select("installments.status installments.statusOverride installments.startDate installments.endDate");
+  return anime ? getOverallAnimeStatus(anime.installments) : work.status;
+}
+
 function normalizeAnimeRating(value: string | null | undefined) {
   const legacyRatings: Record<string, string> = {
     "PG-13": "PG13",
@@ -688,6 +828,30 @@ function normalizeAnimeRating(value: string | null | undefined) {
     Rx: "R18",
   };
   return value ? legacyRatings[value] ?? value : value;
+}
+
+function animeInstallmentValues(installment: any) {
+  const startDate = installment.startDate ? new Date(`${installment.startDate}T00:00:00.000Z`) : null;
+  const endDate = installment.endDate ? new Date(`${installment.endDate}T00:00:00.000Z`) : null;
+  // Clientes antigos enviavam somente `status`; clientes novos enviam null para usar o modo automático.
+  const statusOverride = installment.statusOverride === undefined
+    ? installment.status as AnimeStatus
+    : installment.statusOverride as AnimeStatus | null;
+  const values = {
+    ...installment,
+    studio: installment.studioId ? null : installment.studioName,
+    studioName: undefined,
+    startDate,
+    endDate,
+    statusOverride,
+    status: "ANNOUNCED" as AnimeStatus,
+  };
+  return { ...values, status: getEffectiveAnimeStatus(values) };
+}
+
+async function legacyAdultAnimeIds(includeAdult: boolean) {
+  if (includeAdult) return [];
+  return Anime.find({ rating: { $in: ["R18", "R+", "Rx"] } }).distinct("_id");
 }
 
 async function reviewSummaryFor(medium: "ANIME" | "MANGA" | "LIGHT_NOVEL", entityId: any) {
@@ -742,7 +906,7 @@ function publicationWorkValues(input: any) {
 async function syncCatalogWork(medium: "MANGA" | "LIGHT_NOVEL", work: any) {
   return CatalogWork.findOneAndUpdate(
     { medium, entityId: work._id },
-    { title: work.title, slug: work.slug, coverUrl: work.coverUrl, status: work.status, publicationStatus: work.publicationStatus },
+    { title: work.title, slug: work.slug, coverUrl: work.coverUrl, status: work.status, publicationStatus: work.publicationStatus, adultContent: work.adultContent },
     { new: true, upsert: true, setDefaultsOnInsert: true },
   );
 }
@@ -784,6 +948,18 @@ async function updatePublicationWork(Model: any, medium: "MANGA" | "LIGHT_NOVEL"
 }
 
 export const resolvers: IResolvers<any, GraphQLContext> = {
+  WorkEditSuggestion: {
+    id: (suggestion: any) => suggestion.id ?? suggestion._id.toString(),
+    anime: (suggestion: any) => suggestion.animeId ? Anime.findById(suggestion.animeId) : null,
+    manga: (suggestion: any) => suggestion.mangaId ? Manga.findById(suggestion.mangaId) : null,
+    lightNovel: (suggestion: any) => suggestion.lightNovelId ? LightNovel.findById(suggestion.lightNovelId) : null,
+    medium: (suggestion: any) => suggestion.lightNovelId ? "LIGHT_NOVEL" : suggestion.mangaId ? "MANGA" : "ANIME",
+    proposer: async (suggestion: any) => {
+      const user = await User.findById(suggestion.proposerId);
+      return user ? { ...user.toObject(), id: user.id } : null;
+    },
+    createdAt: (suggestion: any) => suggestion.createdAt.toISOString(),
+  },
   Anime: {
     id: (anime: any) => anime.id ?? anime._id.toString(),
     rating: (anime: any) => normalizeAnimeRating(anime.rating),
@@ -844,6 +1020,8 @@ export const resolvers: IResolvers<any, GraphQLContext> = {
   },
   AnimeInstallment: {
     id: (installment: any) => installment.id ?? installment._id.toString(),
+    status: (installment: any) => getEffectiveAnimeStatus(installment),
+    statusOverride: (installment: any) => getAnimeStatusOverride(installment),
     studio: async (installment: any) => installment.studioId ? Studio.findById(installment.studioId) : null,
     studioName: (installment: any) => installment.studio ?? null,
     startDate: (installment: any) => installment.startDate?.toISOString().slice(0, 10) ?? null,
@@ -851,15 +1029,18 @@ export const resolvers: IResolvers<any, GraphQLContext> = {
   },
   RelatedWork: {
     id: (work: any) => work.id ?? work._id.toString(),
+    status: effectiveCatalogWorkStatus,
   },
   WorkSearchResult: {
     id: (work: any) => work.id ?? work._id.toString(),
     href: (work: any) => work.href ?? workHref(work),
+    status: effectiveCatalogWorkStatus,
   },
   IndustryPerson: {
     id: (person: any) => person.id ?? person._id.toString(),
     roles: (person: any) => person.roles ?? [],
     occupations: (person: any) => person.occupations ?? [],
+    externalLinks: (person: any) => person.externalLinks ?? {},
     animeCredits: async (person: any) => {
       const animes = await Anime.find({
         "staffCredits.personId": person._id,
@@ -894,6 +1075,13 @@ export const resolvers: IResolvers<any, GraphQLContext> = {
   },
   Studio: {
     id: (studio: any) => studio.id ?? studio._id.toString(),
+    externalLinks: (studio: any) => ({
+      website: studio.externalLinks?.website ?? studio.website ?? undefined,
+      x: studio.externalLinks?.x,
+      instagram: studio.externalLinks?.instagram,
+      pixiv: studio.externalLinks?.pixiv,
+      youtube: studio.externalLinks?.youtube,
+    }),
     animeCredits: async (studio: any) => {
       const animes = await Anime.find({ "installments.studioId": studio._id, publicationStatus: "PUBLISHED" }).sort({ title: 1 });
       return animes.map((anime) => {
@@ -954,6 +1142,7 @@ export const resolvers: IResolvers<any, GraphQLContext> = {
   MusicArtist: {
     id: (artist: any) => artist.id ?? artist._id.toString(),
     platformLinks: (artist: any) => artist.platformLinks ?? {},
+    discography: (artist: any) => artist.discography ?? [],
     animeSongs: async (artist: any) => {
       const animes = await Anime.find({ publicationStatus: "PUBLISHED", $or: [
         { "songCredits.artistId": artist._id },
@@ -1046,6 +1235,7 @@ export const resolvers: IResolvers<any, GraphQLContext> = {
   },
   Publisher: {
     id: (publisher: any) => publisher.id ?? publisher._id.toString(),
+    externalLinks: (publisher: any) => publisher.externalLinks ?? {},
     magazines: (publisher: any) => Magazine.find({ publisherId: publisher._id, publicationStatus: "PUBLISHED" }).sort({ title: 1 }),
     lightNovels: (publisher: any) => LightNovel.find({ publisherId: publisher._id, publicationStatus: "PUBLISHED" }).sort({ title: 1 }),
     createdAt: (publisher: any) => publisher.createdAt.toISOString(),
@@ -1053,6 +1243,8 @@ export const resolvers: IResolvers<any, GraphQLContext> = {
   },
   Magazine: {
     id: (magazine: any) => magazine.id ?? magazine._id.toString(),
+    externalLinks: (magazine: any) => magazine.externalLinks ?? {},
+    storeLinks: (magazine: any) => magazine.storeLinks ?? {},
     publisher: (magazine: any) => Publisher.findById(magazine.publisherId),
     mangas: (magazine: any) => Manga.find({ magazineId: magazine._id, publicationStatus: "PUBLISHED" }).sort({ title: 1 }),
     createdAt: (magazine: any) => magazine.createdAt.toISOString(),
@@ -1063,6 +1255,8 @@ export const resolvers: IResolvers<any, GraphQLContext> = {
   },
   User: {
     id: (user: any) => user.id ?? user._id.toString(),
+    showAdultContent: (user: any) => Boolean(user.showAdultContent),
+    hideAdultContentFromVisitors: (user: any) => Boolean(user.hideAdultContentFromVisitors),
     createdAt: (user: any) => user.createdAt.toISOString(),
     updatedAt: (user: any) => user.updatedAt.toISOString(),
   },
@@ -1077,6 +1271,100 @@ export const resolvers: IResolvers<any, GraphQLContext> = {
       if (!result.success) badInput("Nome de usuário inválido");
       return User.findOne({ username: result.data.username });
     },
+    dailyFeaturedAnime: async (_root, args) => {
+      const candidates = await Anime.find({
+        publicationStatus: "PUBLISHED",
+        ...(args.includeAdult
+          ? {}
+          : {
+              adultContent: { $ne: true },
+              rating: { $nin: ["R18", "R+", "Rx"] },
+            }),
+      }).sort({ title: 1, _id: 1 });
+
+      return pickDailyItem(candidates);
+    },
+    topRatedWorks: async (_root, args) => {
+      const hiddenAnimeIds = await legacyAdultAnimeIds(Boolean(args.includeAdult));
+      const limit = Number.isInteger(args.limit)
+        ? Math.min(Math.max(args.limit, 1), 100)
+        : 5;
+      const ranking = await WorkReview.aggregate<{
+        work: {
+          title: string;
+          slug: string;
+          medium: "ANIME" | "MANGA" | "LIGHT_NOVEL";
+          coverUrl: string;
+        };
+        score: number;
+        ratingCount: number;
+      }>([
+        {
+          $group: {
+            _id: "$workId",
+            score: { $avg: "$score" },
+            ratingCount: { $sum: 1 },
+          },
+        },
+        {
+          $lookup: {
+            from: CatalogWork.collection.name,
+            localField: "_id",
+            foreignField: "_id",
+            as: "work",
+          },
+        },
+        { $unwind: "$work" },
+        {
+          $match: {
+            "work.publicationStatus": "PUBLISHED",
+            ...(args.medium ? { "work.medium": args.medium } : {}),
+            ...(args.includeAdult ? {} : { "work.adultContent": { $ne: true } }),
+            ...(hiddenAnimeIds.length ? { "work.entityId": { $nin: hiddenAnimeIds } } : {}),
+          },
+        },
+        { $sort: { score: -1, ratingCount: -1, "work.title": 1 } },
+        { $limit: limit },
+      ]);
+
+      return ranking.map((item) => ({
+        title: item.work.title,
+        slug: item.work.slug,
+        medium: item.work.medium,
+        coverUrl: item.work.coverUrl,
+        score: item.score,
+        ratingCount: item.ratingCount,
+      }));
+    },
+    discoveryWorks: async (_root, args) => {
+      const publishedFilter = {
+        publicationStatus: "PUBLISHED",
+        ...(args.includeAdult ? {} : { adultContent: { $ne: true } }),
+      };
+      const [animes, mangas, novels] = await Promise.all([
+        Anime.aggregate<{ title: string; slug: string; coverUrl: string; synopsis: string }>([
+          { $match: { ...publishedFilter, ...(args.includeAdult ? {} : { rating: { $ne: "R18" } }) } },
+          { $sample: { size: 1 } },
+          { $project: { title: 1, slug: 1, coverUrl: 1, synopsis: 1 } },
+        ]),
+        Manga.aggregate<{ title: string; slug: string; coverUrl: string; synopsis: string }>([
+          { $match: publishedFilter },
+          { $sample: { size: 1 } },
+          { $project: { title: 1, slug: 1, coverUrl: 1, synopsis: 1 } },
+        ]),
+        LightNovel.aggregate<{ title: string; slug: string; coverUrl: string; synopsis: string }>([
+          { $match: publishedFilter },
+          { $sample: { size: 1 } },
+          { $project: { title: 1, slug: 1, coverUrl: 1, synopsis: 1 } },
+        ]),
+      ]);
+
+      return [
+        ...animes.map((item) => ({ ...item, medium: "ANIME", description: item.synopsis })),
+        ...mangas.map((item) => ({ ...item, medium: "MANGA", description: item.synopsis })),
+        ...novels.map((item) => ({ ...item, medium: "LIGHT_NOVEL", description: item.synopsis })),
+      ];
+    },
     anime: async (_root, args, context: GraphQLContext) => {
       const result = animeSlugSchema.safeParse(args);
       if (!result.success) badInput("Slug inválido");
@@ -1088,6 +1376,57 @@ export const resolvers: IResolvers<any, GraphQLContext> = {
       const user = await currentUser(context);
       return user?.role === "ZEUS" ? anime : null;
     },
+    seasonalAnime: async (_root, args) => {
+      const season = args.season as AnimeSeason;
+      const year = Number(args.year);
+      const limit = args.limit == null ? null : Number(args.limit);
+      if (!Number.isInteger(year) || year < 1900 || year > 3000) badInput("Ano de temporada inválido");
+      if (limit !== null && (!Number.isInteger(limit) || limit < 1 || limit > 100)) {
+        badInput("O limite deve estar entre 1 e 100");
+      }
+
+      const dateRanges = getAnimeSeasonDateRanges(season, year);
+      const candidates = await Anime.find({
+        publicationStatus: "PUBLISHED",
+        ...(args.includeAdult ? {} : {
+          adultContent: { $ne: true },
+          rating: { $nin: ["R18", "R+", "Rx"] },
+        }),
+        $or: [
+          { "installments.broadcastSeason": getBroadcastSeasonPattern(season, year) },
+          ...dateRanges.map(({ start, end }) => ({
+            "installments.startDate": { $gte: start, $lt: end },
+          })),
+        ],
+      });
+
+      const matches = candidates.flatMap((anime) => {
+        const installments = anime.installments
+          .filter((item) => installmentMatchesSeason(item, season, year))
+          .sort((left, right) => {
+            if (!left.startDate) return 1;
+            if (!right.startDate) return -1;
+            return left.startDate.getTime() - right.startDate.getTime();
+          });
+        const selectedInstallments = args.deduplicate === false ? installments : installments.slice(0, 1);
+        return selectedInstallments.map((installment) => ({ anime, installment }));
+      }).sort((left, right) => {
+        const leftTime = left.installment.startDate?.getTime() ?? Number.MAX_SAFE_INTEGER;
+        const rightTime = right.installment.startDate?.getTime() ?? Number.MAX_SAFE_INTEGER;
+        return leftTime - rightTime || left.anime.title.localeCompare(right.anime.title, "pt-BR");
+      });
+
+      if (limit === null) return matches;
+
+      const randomizedMatches = [...matches];
+      for (let index = randomizedMatches.length - 1; index > 0; index -= 1) {
+        const randomIndex = Math.floor(Math.random() * (index + 1));
+        const current = randomizedMatches[index]!;
+        randomizedMatches[index] = randomizedMatches[randomIndex]!;
+        randomizedMatches[randomIndex] = current;
+      }
+      return randomizedMatches.slice(0, limit);
+    },
     manga: async (_root, args, context: GraphQLContext) => {
       const result = animeSlugSchema.safeParse(args);
       if (!result.success) badInput("Endereço inválido");
@@ -1097,6 +1436,106 @@ export const resolvers: IResolvers<any, GraphQLContext> = {
       const user = await currentUser(context);
       return user?.role === "ZEUS" ? manga : null;
     },
+    dailyMangaRecommendation: async (_root, args) => {
+      const candidates = await WorkReview.aggregate<{ entityId: any }>([
+        {
+          $group: {
+            _id: "$workId",
+            score: { $avg: "$score" },
+          },
+        },
+        { $match: { score: { $gt: 6 } } },
+        {
+          $lookup: {
+            from: CatalogWork.collection.name,
+            localField: "_id",
+            foreignField: "_id",
+            as: "work",
+          },
+        },
+        { $unwind: "$work" },
+        {
+          $match: {
+            "work.medium": "MANGA",
+            "work.publicationStatus": "PUBLISHED",
+            ...(args.includeAdult ? {} : { "work.adultContent": { $ne: true } }),
+          },
+        },
+        { $sort: { "work.slug": 1 } },
+        { $project: { _id: 0, entityId: "$work.entityId" } },
+      ]);
+      if (!candidates.length) return null;
+
+      const dateKey = new Intl.DateTimeFormat("sv-SE", { timeZone: "America/Sao_Paulo" }).format(new Date());
+      const dateHash = Array.from(dateKey).reduce(
+        (hash, character) => Math.imul(hash ^ character.charCodeAt(0), 16777619) >>> 0,
+        2166136261,
+      );
+      const selected = candidates[dateHash % candidates.length];
+      return Manga.findById(selected.entityId);
+    },
+    dailyLightNovelRecommendation: async (_root, args) => {
+      const candidates = await WorkReview.aggregate<{ entityId: any }>([
+        {
+          $group: {
+            _id: "$workId",
+            score: { $avg: "$score" },
+          },
+        },
+        { $match: { score: { $gt: 6 } } },
+        {
+          $lookup: {
+            from: CatalogWork.collection.name,
+            localField: "_id",
+            foreignField: "_id",
+            as: "work",
+          },
+        },
+        { $unwind: "$work" },
+        {
+          $match: {
+            "work.medium": "LIGHT_NOVEL",
+            "work.publicationStatus": "PUBLISHED",
+            ...(args.includeAdult ? {} : { "work.adultContent": { $ne: true } }),
+          },
+        },
+        { $sort: { "work.slug": 1 } },
+        { $project: { _id: 0, entityId: "$work.entityId" } },
+      ]);
+      if (!candidates.length) return null;
+
+      const dateKey = new Intl.DateTimeFormat("sv-SE", { timeZone: "America/Sao_Paulo" }).format(new Date());
+      const dateHash = Array.from(dateKey).reduce(
+        (hash, character) => Math.imul(hash ^ character.charCodeAt(0), 16777619) >>> 0,
+        2166136261,
+      );
+      const selected = candidates[dateHash % candidates.length];
+      return LightNovel.findById(selected.entityId);
+    },
+    recentPublishingMangas: async (_root, args) => {
+      const limit = Math.max(1, Math.min(args.limit ?? 5, 20));
+      return Manga.find({
+        publicationStatus: "PUBLISHED",
+        status: "PUBLISHING",
+        ...(args.includeAdult ? {} : { adultContent: { $ne: true } }),
+      }).sort({ createdAt: -1 }).limit(limit);
+    },
+    browseMangas: async (_root, args) => Manga.find({
+      publicationStatus: "PUBLISHED",
+      ...(args.includeAdult ? {} : { adultContent: { $ne: true } }),
+    }).sort({ title: 1, _id: 1 }),
+    recentPublishingLightNovels: async (_root, args) => {
+      const limit = Math.max(1, Math.min(args.limit ?? 5, 20));
+      return LightNovel.find({
+        publicationStatus: "PUBLISHED",
+        status: "PUBLISHING",
+        ...(args.includeAdult ? {} : { adultContent: { $ne: true } }),
+      }).sort({ createdAt: -1, _id: 1 }).limit(limit);
+    },
+    browseLightNovels: async (_root, args) => LightNovel.find({
+      publicationStatus: "PUBLISHED",
+      ...(args.includeAdult ? {} : { adultContent: { $ne: true } }),
+    }).sort({ title: 1, _id: 1 }),
     lightNovel: async (_root, args, context: GraphQLContext) => {
       const result = animeSlugSchema.safeParse(args);
       if (!result.success) badInput("Endereço inválido");
@@ -1105,6 +1544,19 @@ export const resolvers: IResolvers<any, GraphQLContext> = {
       if (novel.publicationStatus === "PUBLISHED") return novel;
       const user = await currentUser(context);
       return user?.role === "ZEUS" ? novel : null;
+    },
+    publishingLightNovelSpotlight: async (_root, args) => {
+      const [novel] = await LightNovel.aggregate([
+        {
+          $match: {
+            publicationStatus: "PUBLISHED",
+            status: "PUBLISHING",
+            ...(args.includeAdult ? {} : { adultContent: { $ne: true } }),
+          },
+        },
+        { $sample: { size: 1 } },
+      ]);
+      return novel ?? null;
     },
     character: async (_root, args, context: GraphQLContext) => {
       const result = characterSlugSchema.safeParse(args);
@@ -1219,7 +1671,14 @@ export const resolvers: IResolvers<any, GraphQLContext> = {
       const query = typeof args.query === "string" ? args.query.trim() : "";
       if (query.length < 2) return [];
       const safeQuery = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-      return CatalogWork.find({ title: { $regex: safeQuery, $options: "i" }, publicationStatus: "PUBLISHED" }).sort({ title: 1 }).limit(12);
+      const hiddenAnimeIds = await legacyAdultAnimeIds(Boolean(args.includeAdult));
+      return CatalogWork.find({
+        title: { $regex: safeQuery, $options: "i" },
+        publicationStatus: "PUBLISHED",
+        ...(args.medium ? { medium: args.medium } : {}),
+        ...(args.includeAdult ? {} : { adultContent: { $ne: true } }),
+        ...(hiddenAnimeIds.length ? { entityId: { $nin: hiddenAnimeIds } } : {}),
+      }).sort({ title: 1 }).limit(12);
     },
     searchPeople: async (_root, args, context: GraphQLContext) => {
       await requireZeus(context);
@@ -1248,6 +1707,10 @@ export const resolvers: IResolvers<any, GraphQLContext> = {
       if (query.length < 2) return [];
       const safeQuery = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
       return Magazine.find({ title: { $regex: safeQuery, $options: "i" } }).sort({ title: 1 }).limit(12);
+    },
+    pendingWorkEditSuggestions: async (_root, _args, context: GraphQLContext) => {
+      await requireZeus(context);
+      return AnimeEditSuggestion.find({ status: "PENDING" }).sort({ createdAt: 1 });
     },
     adminAnimes: async (_root, args, context: GraphQLContext) => {
       await requireZeus(context);
@@ -1352,23 +1815,85 @@ export const resolvers: IResolvers<any, GraphQLContext> = {
       if (!work) return null;
       return PublicationListEntry.findOne({ userId: user._id, workId: work._id });
     },
-    animeList: async (_root, args) => {
+    animeList: async (_root, args, context: GraphQLContext) => {
       const result = usernameSchema.safeParse({ username: args.username });
       if (!result.success) badInput("Nome de usuário inválido");
-      const user = await User.findOne({ username: result.data.username }).select("_id");
+      const user = await User.findOne({ username: result.data.username }).select("_id hideAdultContentFromVisitors");
       if (!user) return [];
-      return AnimeListEntry.find({ userId: user._id }).sort({ updatedAt: -1 });
+      const viewer = await profileViewer(context);
+      const isOwner = Boolean(viewer?._id.equals(user._id));
+      const includeAdult = isOwner || (Boolean(args.includeAdult) && !user.hideAdultContentFromVisitors);
+      const hiddenAnimeIds = await legacyAdultAnimeIds(includeAdult);
+      const works = await CatalogWork.find({
+        medium: "ANIME",
+        publicationStatus: "PUBLISHED",
+        ...(includeAdult ? {} : { adultContent: { $ne: true } }),
+        ...(hiddenAnimeIds.length ? { entityId: { $nin: hiddenAnimeIds } } : {}),
+      }).select("entityId");
+      return AnimeListEntry.find({
+        userId: user._id,
+        animeId: { $in: works.map((work) => work.entityId) },
+      }).sort({ updatedAt: -1 });
     },
-    publicationList: async (_root, args) => {
+    publicationList: async (_root, args, context: GraphQLContext) => {
       const result = usernameSchema.safeParse({ username: args.username });
       if (!result.success || !["MANGA", "LIGHT_NOVEL"].includes(args.medium)) badInput("Lista inválida");
-      const user = await User.findOne({ username: result.data.username }).select("_id");
+      const user = await User.findOne({ username: result.data.username }).select("_id hideAdultContentFromVisitors");
       if (!user) return [];
-      const works = await CatalogWork.find({ medium: args.medium, publicationStatus: "PUBLISHED" }).select("_id");
+      const viewer = await profileViewer(context);
+      const isOwner = Boolean(viewer?._id.equals(user._id));
+      const includeAdult = isOwner || (Boolean(args.includeAdult) && !user.hideAdultContentFromVisitors);
+      const works = await CatalogWork.find({
+        medium: args.medium,
+        publicationStatus: "PUBLISHED",
+        ...(includeAdult ? {} : { adultContent: { $ne: true } }),
+      }).select("_id");
       return PublicationListEntry.find({
         userId: user._id,
         workId: { $in: works.map((work) => work._id) },
       }).sort({ updatedAt: -1 });
+    },
+    userFavorites: async (_root, args, context: GraphQLContext) => {
+      const result = usernameSchema.safeParse({ username: args.username });
+      if (!result.success) badInput("Nome de usuário inválido");
+      const user = await User.findOne({ username: result.data.username })
+        .select("_id hideAdultContentFromVisitors");
+      if (!user) return [];
+
+      const viewer = await profileViewer(context);
+      const isOwner = Boolean(viewer?._id.equals(user._id));
+      const includeAdult = isOwner || (Boolean(args.includeAdult) && !user.hideAdultContentFromVisitors);
+      const favorites = await WorkFavorite.find({ userId: user._id }).sort({ createdAt: -1 });
+      const hiddenAnimeIds = await legacyAdultAnimeIds(includeAdult);
+      const works = await CatalogWork.find({
+        _id: { $in: favorites.map((favorite) => favorite.workId) },
+        publicationStatus: "PUBLISHED",
+        ...(includeAdult ? {} : { adultContent: { $ne: true } }),
+        ...(hiddenAnimeIds.length ? { entityId: { $nin: hiddenAnimeIds } } : {}),
+      });
+      const worksById = new Map(works.map((work) => [work.id, work]));
+
+      return favorites.flatMap((favorite) => {
+        const work = worksById.get(favorite.workId.toString());
+        if (!work) return [];
+        return [{
+          id: favorite.id,
+          createdAt: favorite.createdAt.toISOString(),
+          work: { ...work.toObject(), id: work.id, href: workHref(work) },
+        }];
+      });
+    },
+    myWorkFavorite: async (_root, args, context: GraphQLContext) => {
+      const user = await currentUser(context);
+      if (!user) unauthenticated();
+      const result = workReviewTargetSchema.safeParse(args);
+      if (!result.success) badInput("Obra inválida");
+      const work = await CatalogWork.findOne({
+        ...result.data,
+        publicationStatus: "PUBLISHED",
+      }).select("_id");
+      if (!work) return false;
+      return Boolean(await WorkFavorite.exists({ userId: user._id, workId: work._id }));
     },
     userReviews: async (_root, args) => {
       const result = usernameSchema.safeParse({ username: args.username });
@@ -1380,6 +1905,7 @@ export const resolvers: IResolvers<any, GraphQLContext> = {
       const works = await CatalogWork.find({
         _id: { $in: reviews.map((review) => review.workId) },
         publicationStatus: "PUBLISHED",
+        ...(args.includeAdult ? {} : { adultContent: { $ne: true } }),
       });
       const worksById = new Map(works.map((work) => [work.id, work]));
 
@@ -1469,6 +1995,7 @@ export const resolvers: IResolvers<any, GraphQLContext> = {
 
         const user = await User.findById(payload.sub).select("+email");
         if (!user) unauthenticated();
+        setRefreshCookie(context.reply, token);
         return { accessToken: createAccessToken(context.app, user), user };
       } catch (error) {
         clearRefreshCookie(context.reply);
@@ -1500,6 +2027,8 @@ export const resolvers: IResolvers<any, GraphQLContext> = {
       user.displayName = result.data.input.displayName;
       user.bio = result.data.input.bio;
       user.email = result.data.input.email;
+      user.showAdultContent = result.data.input.showAdultContent;
+      user.hideAdultContentFromVisitors = result.data.input.hideAdultContentFromVisitors;
 
       try {
         await user.save();
@@ -1544,16 +2073,11 @@ export const resolvers: IResolvers<any, GraphQLContext> = {
 
         const anime = await Anime.create({
           ...input,
+          adultContent: input.adultContent || normalizeAnimeRating(input.rating) === "R18",
           slug: animeSlugFromTitle(input.title),
           externalLinks: input.externalLinks ?? {},
           streamingLinks: input.streamingLinks ?? {},
-          installments: input.installments.map((installment) => ({
-            ...installment,
-            studio: installment.studioId ? null : installment.studioName,
-            studioName: undefined,
-            startDate: installment.startDate ? new Date(`${installment.startDate}T00:00:00.000Z`) : null,
-            endDate: installment.endDate ? new Date(`${installment.endDate}T00:00:00.000Z`) : null,
-          })),
+          installments: input.installments.map(animeInstallmentValues),
           createdBy: user._id,
         });
         try {
@@ -1562,8 +2086,9 @@ export const resolvers: IResolvers<any, GraphQLContext> = {
             slug: anime.slug,
             medium: "ANIME",
             coverUrl: anime.coverUrl,
-            status: anime.installments.some((item) => item.status === "AIRING") ? "AIRING" : anime.installments.every((item) => item.status === "FINISHED") ? "FINISHED" : "ANNOUNCED",
+            status: getOverallAnimeStatus(anime.installments),
             publicationStatus: anime.publicationStatus,
+            adultContent: anime.adultContent,
             entityId: anime._id,
           });
         } catch (error) {
@@ -1579,6 +2104,70 @@ export const resolvers: IResolvers<any, GraphQLContext> = {
         }
         throw error;
       }
+    },
+    suggestWorkEdit: async (_root, args, context: GraphQLContext) => {
+      const user = await currentUser(context);
+      if (!user) unauthenticated();
+      const medium = args.medium as "ANIME" | "MANGA" | "LIGHT_NOVEL";
+      if (medium !== "ANIME" && medium !== "MANGA" && medium !== "LIGHT_NOVEL") badInput("Tipo de obra não suportado para sugestões");
+      const work = medium === "ANIME"
+        ? await Anime.findOne({ slug: args.slug, publicationStatus: "PUBLISHED" })
+        : medium === "MANGA"
+          ? await Manga.findOne({ slug: args.slug, publicationStatus: "PUBLISHED" })
+          : await LightNovel.findOne({ slug: args.slug, publicationStatus: "PUBLISHED" });
+      if (!work) throw new GraphQLError("Obra não encontrada", { extensions: { code: "NOT_FOUND" } });
+      const input = args.input ?? {};
+      let title = typeof input.title === "string" ? input.title.trim() : null;
+      let synopsis = typeof input.synopsis === "string" ? input.synopsis.trim() : null;
+      let genres = Array.isArray(input.genres) ? input.genres.map((item: unknown) => String(item).trim()).filter(Boolean) : null;
+      if (title === work.title) title = null;
+      if (synopsis === work.synopsis) synopsis = null;
+      if (genres && JSON.stringify(genres) === JSON.stringify(work.genres)) genres = null;
+      if (!title && !synopsis && !genres) badInput("Informe ao menos uma alteração sugerida");
+      if (title !== null && (!title || title.length > 200)) badInput("O título deve ter até 200 caracteres");
+      if (synopsis !== null && (!synopsis || synopsis.length > 10000)) badInput("A sinopse deve ter até 10.000 caracteres");
+      if (genres && (genres.length > 30 || genres.some((item: string) => item.length > 50))) badInput("Revise a lista de gêneros");
+      return AnimeEditSuggestion.create({
+        animeId: medium === "ANIME" ? work._id : null,
+        mangaId: medium === "MANGA" ? work._id : null,
+        lightNovelId: medium === "LIGHT_NOVEL" ? work._id : null,
+        medium,
+        proposerId: user._id,
+        title,
+        synopsis,
+        genres,
+      });
+    },
+    reviewWorkEditSuggestion: async (_root, args, context: GraphQLContext) => {
+      const reviewer = await requireZeus(context);
+      const suggestion = await AnimeEditSuggestion.findOne({ _id: args.id, status: "PENDING" });
+      if (!suggestion) throw new GraphQLError("Sugestão pendente não encontrada", { extensions: { code: "NOT_FOUND" } });
+      if (args.approve) {
+        const work = suggestion.lightNovelId
+          ? await LightNovel.findById(suggestion.lightNovelId)
+          : suggestion.mangaId
+            ? await Manga.findById(suggestion.mangaId)
+            : await Anime.findById(suggestion.animeId);
+        if (!work) throw new GraphQLError("Obra não encontrada", { extensions: { code: "NOT_FOUND" } });
+        if (suggestion.title) {
+          work.title = suggestion.title;
+          work.slug = animeSlugFromTitle(suggestion.title);
+        }
+        if (suggestion.synopsis) work.synopsis = suggestion.synopsis;
+        if (suggestion.genres) work.genres = suggestion.genres;
+        await work.save();
+        await CatalogWork.findOneAndUpdate(
+          { medium: suggestion.lightNovelId ? "LIGHT_NOVEL" : suggestion.mangaId ? "MANGA" : "ANIME", entityId: work._id },
+          { title: work.title, slug: work.slug },
+        );
+        suggestion.status = "APPROVED";
+      } else {
+        suggestion.status = "REJECTED";
+      }
+      suggestion.reviewerId = reviewer._id;
+      suggestion.reviewedAt = new Date();
+      await suggestion.save();
+      return suggestion;
     },
     updateAnime: async (_root, args, context: GraphQLContext) => {
       await requireZeus(context);
@@ -1618,16 +2207,11 @@ export const resolvers: IResolvers<any, GraphQLContext> = {
         const nextSlug = animeSlugFromTitle(input.title);
         anime.set({
           ...input,
+          adultContent: input.adultContent || normalizeAnimeRating(input.rating) === "R18",
           slug: nextSlug,
           externalLinks: input.externalLinks ?? {},
           streamingLinks: input.streamingLinks ?? {},
-          installments: input.installments.map((installment) => ({
-            ...installment,
-            studio: installment.studioId ? null : installment.studioName,
-            studioName: undefined,
-            startDate: installment.startDate ? new Date(`${installment.startDate}T00:00:00.000Z`) : null,
-            endDate: installment.endDate ? new Date(`${installment.endDate}T00:00:00.000Z`) : null,
-          })),
+          installments: input.installments.map(animeInstallmentValues),
         });
         await anime.save();
 
@@ -1637,12 +2221,9 @@ export const resolvers: IResolvers<any, GraphQLContext> = {
             title: anime.title,
             slug: anime.slug,
             coverUrl: anime.coverUrl,
-            status: anime.installments.some((item) => item.status === "AIRING")
-              ? "AIRING"
-              : anime.installments.every((item) => item.status === "FINISHED")
-                ? "FINISHED"
-                : "ANNOUNCED",
+            status: getOverallAnimeStatus(anime.installments),
             publicationStatus: anime.publicationStatus,
+            adultContent: anime.adultContent,
           },
           { new: true, upsert: true, setDefaultsOnInsert: true },
         );
@@ -1933,7 +2514,7 @@ export const resolvers: IResolvers<any, GraphQLContext> = {
       }
       for (const progress of result.data.input.seasonProgress) {
         const installment = installmentsByOrder.get(progress.order);
-        if (!installment || progress.watchedEpisodes > installment.episodes) {
+        if (!installment || (installment.episodes > 0 && progress.watchedEpisodes > installment.episodes)) {
           badInput("Progresso de temporada inválido");
         }
       }
@@ -1968,7 +2549,9 @@ export const resolvers: IResolvers<any, GraphQLContext> = {
       const publication = medium === "MANGA"
         ? await Manga.findById(work.entityId).select("chapters")
         : await LightNovel.findById(work.entityId).select("chapters");
-      if (!publication || input.readChapters > publication.chapters) badInput("Progresso de capítulos inválido");
+      if (!publication || (publication.chapters > 0 && input.readChapters > publication.chapters)) {
+        badInput("Progresso de capítulos inválido");
+      }
 
       return PublicationListEntry.findOneAndUpdate(
         { userId: user._id, workId: work._id },
@@ -1988,6 +2571,29 @@ export const resolvers: IResolvers<any, GraphQLContext> = {
       if (!work) badInput("Obra não encontrada");
       const deletion = await PublicationListEntry.deleteOne({ userId: user._id, workId: work._id });
       return deletion.deletedCount > 0;
+    },
+    setWorkFavorite: async (_root, args, context: GraphQLContext) => {
+      const user = await currentUser(context);
+      if (!user) unauthenticated();
+      const result = workReviewTargetSchema.safeParse(args);
+      if (!result.success) badInput("Obra inválida");
+      const work = await CatalogWork.findOne({
+        ...result.data,
+        publicationStatus: "PUBLISHED",
+      }).select("_id");
+      if (!work) badInput("Obra não encontrada");
+
+      if (args.favorite) {
+        await WorkFavorite.findOneAndUpdate(
+          { userId: user._id, workId: work._id },
+          { userId: user._id, workId: work._id },
+          { upsert: true, setDefaultsOnInsert: true },
+        );
+        return true;
+      }
+
+      await WorkFavorite.deleteOne({ userId: user._id, workId: work._id });
+      return false;
     },
     saveWorkReview: async (_root, args, context: GraphQLContext) => {
       const user = await currentUser(context);

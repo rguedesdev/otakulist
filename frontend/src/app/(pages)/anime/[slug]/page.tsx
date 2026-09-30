@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { cookies } from "next/headers";
 import { FaStar } from "react-icons/fa";
 import { FiActivity, FiClock } from "react-icons/fi";
 import { MdOutlineVideoLibrary } from "react-icons/md";
@@ -8,6 +9,7 @@ import { AnimeTrackerPanel } from "./components/AnimeTrackerPanel/AnimeTrackerPa
 import { assetUrl } from "@/shared/auth/api";
 import styles from "./animeslug.module.css";
 import { AnisongSection } from "@/shared/components/AnisongSection/page";
+import { AdultContentGate } from "@/shared/components/AdultContentGate/page";
 import { CharacterSection } from "@/shared/components/CharacterSection/page";
 import { FormatSidebarInfo } from "@/shared/components/FormatSidebarInfo/page";
 import { HeroSection } from "@/shared/components/HeroSection/page";
@@ -25,7 +27,7 @@ type Installment = {
   id: string; order: number; title: string; label: string; format: "TV" | "MOVIE" | "OVA" | "ONA" | "SPECIAL";
   synopsis: string; coverUrl: string | null; episodes: number; durationMinutes: number | null;
   status: "ANNOUNCED" | "AIRING" | "FINISHED" | "CANCELLED"; startDate: string | null; endDate: string | null;
-  broadcastSeason: string | null;
+  broadcastSeason: string | null; broadcastDay: "SUNDAY" | "MONDAY" | "TUESDAY" | "WEDNESDAY" | "THURSDAY" | "FRIDAY" | "SATURDAY" | null; broadcastTime: string | null;
   studio: { id: string; displayName: string; slug: string; imageUrl: string } | null;
   studioName: string | null;
 };
@@ -44,7 +46,7 @@ type AnimeSongCredit = {
 };
 type AnimeData = {
   title: string; synopsis: string; coverUrl: string; alternativeTitles: AnimeEntity["alternativeTitles"];
-  genres: string[]; producers: string[]; demography: string | null; rating: string | null;
+  genres: string[]; producers: string[]; demography: string | null; rating: string | null; adultContent: boolean;
   externalLinks: NonNullable<AnimeEntity["externalLinks"]>; streamingLinks: NonNullable<AnimeEntity["streamingLinks"]>;
   installments: Installment[];
   staffCredits: AnimeStaffCredit[];
@@ -55,12 +57,12 @@ type AnimeData = {
 };
 type AnimeQueryData = { anime: AnimeData | null; workReviewComments: PublicWorkReview[] };
 
-const query = `query Anime($slug: String!) {
-  anime(slug: $slug) {
-  title synopsis coverUrl alternativeTitles { type title } genres producers demography rating
+const query = `query Anime($slug: String!, $includeAdult: Boolean!) {
+  anime(slug: $slug, includeAdult: $includeAdult) {
+  title synopsis coverUrl alternativeTitles { type title } genres producers demography rating adultContent
   externalLinks { website x instagram pixiv youtube }
   streamingLinks { crunchyroll netflix primeVideo bilibili retrocrush hulu hidive uNext abemaTv adn museAsia laftel tver iqiyi tubi dAnimeStore }
-  installments { id order title label format synopsis coverUrl episodes durationMinutes status startDate endDate broadcastSeason studio { id displayName slug imageUrl } studioName }
+  installments { id order title label format synopsis coverUrl episodes durationMinutes status startDate endDate broadcastSeason broadcastDay broadcastTime studio { id displayName slug imageUrl } studioName }
   characterCredits {
     character { id nameRomaji slug imageUrl }
     seiyuu { id displayName slug imageUrl }
@@ -84,6 +86,7 @@ const formatMap: Record<Installment["format"], AnimeReleaseFormat> = {
   TV: "tv", MOVIE: "movie", OVA: "ova", ONA: "ona", SPECIAL: "special",
 };
 const statusMap = { ANNOUNCED: "Anunciado", AIRING: "Em exibição", FINISHED: "Finalizado", CANCELLED: "Cancelado" } as const;
+const broadcastDayLabels = { SUNDAY: "Domingo", MONDAY: "Segunda-feira", TUESDAY: "Terça-feira", WEDNESDAY: "Quarta-feira", THURSDAY: "Quinta-feira", FRIDAY: "Sexta-feira", SATURDAY: "Sábado" } as const;
 
 function displayDate(value: string | null) {
   if (!value) return "—";
@@ -95,10 +98,10 @@ function episodeRangeLabel(value: string | null) {
   return normalized ? ` (Episódios ${normalized})` : "";
 }
 
-async function getAnime(slug: string) {
+async function getAnime(slug: string, includeAdult: boolean) {
   const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000"}/graphql`, {
     method: "POST", headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ query, variables: { slug } }), cache: "no-store",
+    body: JSON.stringify({ query, variables: { slug, includeAdult } }), cache: "no-store",
   });
   if (!response.ok) throw new Error("Não foi possível carregar o anime");
   const body = await response.json() as { data?: AnimeQueryData };
@@ -107,7 +110,9 @@ async function getAnime(slug: string) {
 
 export default async function AnimeBySlug({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const data = await getAnime(slug);
+  const cookieStore = await cookies();
+  const includeAdult = cookieStore.get("otakulist-adult-content")?.value === "1";
+  const data = await getAnime(slug, includeAdult);
   if (!data?.anime) notFound();
   const { anime, workReviewComments } = data;
 
@@ -119,26 +124,32 @@ export default async function AnimeBySlug({ params }: { params: Promise<{ slug: 
     start: displayDate(item.startDate), end: item.endDate ? displayDate(item.endDate) : item.status === "AIRING" ? "Presente" : "—",
     duration: item.durationMinutes ? `${item.durationMinutes} min por episódio` : "Não informado",
     studio: item.studio?.displayName || item.studioName || "Não informado",
-    broadcastSeason: item.broadcastSeason || "Não informada", source: sourceWork?.title || "Original", synopsis: item.synopsis,
+    broadcastSeason: item.broadcastSeason || "Não informada",
+    broadcastSchedule: item.broadcastDay && item.broadcastTime ? `${broadcastDayLabels[item.broadcastDay]} às ${item.broadcastTime} hs (JST)` : "Não informada",
+    source: sourceWork?.title || "Original", synopsis: item.synopsis,
   }));
   const starts = installments.map((item) => item.startDate).filter((value): value is string => Boolean(value)).sort();
   const ends = installments.map((item) => item.endDate).filter((value): value is string => Boolean(value)).sort();
   const studioNames = [...new Set(installments.map((item) => item.studio?.displayName || item.studioName).filter((value): value is string => Boolean(value)))];
   const studioLinks = studioNames.map((displayName) => ({ displayName, slug: installments.find((item) => item.studio?.displayName === displayName)?.studio?.slug }));
   const status = installments.some((item) => item.status === "AIRING") ? "Em exibição"
-    : installments.every((item) => item.status === "FINISHED") ? "Finalizado" : "Anunciado";
+    : installments.some((item) => item.status === "ANNOUNCED") ? "Anunciado"
+      : installments.some((item) => item.status === "FINISHED") ? "Finalizado" : "Cancelado";
   const duration = installments.find((item) => item.durationMinutes)?.durationMinutes;
   const entity: AnimeEntity = {
     cover: anime.coverUrl, title: anime.title, description: anime.synopsis, alternativeTitles: anime.alternativeTitles,
     entityType: "work", medium: "anime", episodes: seasons.reduce((total, season) => total + season.episodes, 0),
     status, start: displayDate(starts[0] ?? null), end: displayDate(ends.at(-1) ?? null),
-    season: installments[0]?.broadcastSeason || "Não informada", studio: studioNames.join(", ") || "Não informado", studioLinks,
+    season: installments[0]?.format === "TV" ? installments[0].broadcastSeason || "Não informada" : undefined,
+    studio: studioNames.join(", ") || "Não informado", studioLinks,
     producers: anime.producers, demography: anime.demography ?? undefined, genders: anime.genres,
     duration: duration ? `${duration} min por episódio` : "Não informada", score: anime.reviewSummary.average,
     rating: anime.rating || "Não informada", externalLinks: anime.externalLinks,
     streamingLinks: anime.streamingLinks,
   };
   const formats = getUniqueAnimeReleaseFormats(seasons.map((season) => season.releaseFormat));
+  const hasKnownEpisodeTotal = seasons.every((season) => season.episodes > 0);
+  const showSeasonsSection = seasons.length > 1;
   const songTypeLabels = { OPENING: "Opening", ENDING: "Ending", INSERT: "Insert song" } as const;
   const songs = anime.songCredits.map((credit) => ({
     title: `${songTypeLabels[credit.type]}${credit.sequence ? ` ${credit.sequence}` : ""}${episodeRangeLabel(credit.episodeRange)}`,
@@ -155,7 +166,9 @@ export default async function AnimeBySlug({ params }: { params: Promise<{ slug: 
     ],
   }));
 
-  return <div className={styles.page}>
+  const isAdultContent = anime.adultContent || anime.rating === "R18" || anime.rating === "R+" || anime.rating === "Rx";
+
+  return <AdultContentGate blocked={isAdultContent && !includeAdult}><div className={styles.page}>
     <HeroSection
       entity={entity}
       animeTracker={{
@@ -165,10 +178,10 @@ export default async function AnimeBySlug({ params }: { params: Promise<{ slug: 
     />
     <div className={styles.factsBar} aria-label="Resumo do anime">
       <div className={styles.factItem}><PiTelevisionSimple aria-hidden="true" /><span><small>Formato</small>{formatAnimeReleaseFormats(formats)}</span></div>
-      <div className={styles.factItem}><MdOutlineVideoLibrary aria-hidden="true" /><span><small>Episódios</small>{entity.episodes} episódios</span></div>
+      <div className={styles.factItem}><MdOutlineVideoLibrary aria-hidden="true" /><span><small>Episódios</small>{hasKnownEpisodeTotal ? `${entity.episodes} episódios` : "Não Listado"}</span></div>
       <div className={styles.factItem}><FiClock aria-hidden="true" /><span><small>Duração</small>{entity.duration}</span></div>
       <div className={styles.factItem}><FiActivity aria-hidden="true" /><span><small>Status</small>{entity.status}</span></div>
-      <div className={styles.factItem}><FaStar aria-hidden="true" /><span><small>Score</small>{entity.score.toFixed(2)}</span></div>
+      <div className={styles.factItem}><FaStar aria-hidden="true" /><span><small>Score</small>{entity.score.toFixed(1)}</span></div>
     </div>
     <main className={styles.animeSlugContainer}>
       <WorkSectionTabs
@@ -176,14 +189,14 @@ export default async function AnimeBySlug({ params }: { params: Promise<{ slug: 
         sidebar={<FormatSidebarInfo entity={entity} reviewTarget={{ medium: "ANIME", slug, title: anime.title }} />}
         tracker={<AnimeTrackerPanel seasons={seasons} workKey={slug} />}
         sections={[
-          { id: "temporadas", label: "Temporadas", content: <SeasonSection seasons={seasons} workKey={slug} /> },
+          ...(showSeasonsSection ? [{ id: "temporadas" as const, label: "Temporadas", content: <SeasonSection seasons={seasons} workKey={slug} /> }] : []),
           { id: "personagens", label: "Personagens", content: <CharacterSection credits={anime.characterCredits} /> },
           ...(anime.staffCredits.length > 0 ? [{ id: "staff" as const, label: "Staff", content: <StaffSection credits={anime.staffCredits} /> }] : []),
-          { id: "musicas", label: "Músicas", content: <AnisongSection songs={songs} /> },
+          ...(songs.length > 0 ? [{ id: "musicas" as const, label: "Músicas", content: <AnisongSection songs={songs} /> }] : []),
           ...(anime.relatedWorks.length > 0 ? [{ id: "relacionados" as const, label: "Relacionados", content: <RelatedSection works={anime.relatedWorks} /> }] : []),
           { id: "comentarios", label: "Reviews", content: <ReviewCommentsSection comments={workReviewComments} /> },
         ]}
       />
     </main>
-  </div>;
+  </div></AdultContentGate>;
 }

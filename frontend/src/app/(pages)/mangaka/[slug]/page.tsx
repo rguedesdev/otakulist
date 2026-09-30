@@ -12,10 +12,11 @@ import styles from "./mangakaslug.module.css";
 export const dynamic = "force-dynamic";
 const query = `query Mangaka($slug: String!) { mangaka(slug: $slug) {
   displayName nameKanji imageUrl description roles dateOfBirth hometown activityPeriod occupations
+  externalLinks { website x instagram pixiv youtube }
   animeCredits { role contribution anime { title slug coverUrl startDate endDate } }
   mangaCredits { role contribution manga { title slug coverUrl startDate endDate } }
 } }`;
-type StoredPerson = { displayName: string; nameKanji: string | null; imageUrl: string | null; description: string | null; roles: string[]; dateOfBirth: string | null; hometown: string | null; activityPeriod: string | null; occupations: string[]; animeCredits: StaffAnimeCredit[]; mangaCredits: MangakaMangaCredit[] };
+type StoredPerson = { displayName: string; nameKanji: string | null; imageUrl: string | null; description: string | null; roles: string[]; dateOfBirth: string | null; hometown: string | null; activityPeriod: string | null; occupations: string[]; externalLinks: Record<string, string | undefined>; animeCredits: StaffAnimeCredit[]; mangaCredits: MangakaMangaCredit[] };
 
 async function MangakaBySlug({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -27,7 +28,7 @@ async function MangakaBySlug({ params }: { params: Promise<{ slug: string }> }) 
   } catch { /* página inexistente quando a API estiver indisponível */ }
   if (!mangaka?.imageUrl) notFound();
 
-  const entity: PersonEntity = { cover: assetUrl(mangaka.imageUrl) ?? mangaka.imageUrl, description: mangaka.description ?? "", entityType: "person", roles: mangaka.roles.map((role) => role.toLowerCase() as PersonRole), name_romaji: mangaka.displayName, name_kanji: mangaka.nameKanji ?? "", hometown: mangaka.hometown ?? "", date_of_birth: mangaka.dateOfBirth ?? "", activity_period: mangaka.activityPeriod ?? undefined, occupations: mangaka.occupations };
+  const entity: PersonEntity = { cover: assetUrl(mangaka.imageUrl) ?? mangaka.imageUrl, description: mangaka.description ?? "", entityType: "person", roles: mangaka.roles.map((role) => role.toLowerCase() as PersonRole), name_romaji: mangaka.displayName, name_kanji: mangaka.nameKanji ?? "", hometown: mangaka.hometown ?? "", date_of_birth: mangaka.dateOfBirth ?? "", activity_period: mangaka.activityPeriod ?? undefined, occupations: mangaka.occupations, externalLinks: mangaka.externalLinks };
   return <div className={styles.page}><HeroSection entity={entity} /><main className={styles.mangakaSlugContainer}><div className={styles.contentContainer}><FormatSidebarInfo entity={entity} /><div className={styles.centralContainer}><MangasByMangaka credits={mangaka.mangaCredits} /><AnimesByMangaka credits={mangaka.animeCredits} /></div></div></main></div>;
 }
 

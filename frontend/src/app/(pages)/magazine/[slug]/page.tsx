@@ -16,6 +16,8 @@ type MagazineData = {
   foundation: string | null;
   demography: string | null;
   frequency: string | null;
+  externalLinks: Record<string, string | undefined>;
+  storeLinks: Record<string, string | undefined>;
   publisher: { displayName: string; slug: string };
   mangas: MagazineManga[];
 };
@@ -23,6 +25,8 @@ type MagazineData = {
 const query = `query Magazine($slug: String!) {
   magazine(slug: $slug) {
     title description imageUrl foundation demography frequency
+    externalLinks { website x instagram pixiv youtube }
+    storeLinks { amazon cdJapan mercadoLivre rakuten shopee ebay otakuyasan hmv honto toranoana animate }
     publisher { displayName slug }
     mangas {
       id title slug coverUrl status startDate endDate
@@ -43,6 +47,8 @@ export default async function MagazineBySlug({ params }: { params: Promise<{ slu
     entityType: "publication", publicationType: "magazine",
     foundation: magazine.foundation ?? "—", publisher: magazine.publisher.displayName,
     publisherLink: magazine.publisher, demography: magazine.demography ?? "—", frequency: magazine.frequency ?? "—",
+    externalLinks: magazine.externalLinks,
+    storeLinks: magazine.storeLinks,
   };
   const publishingMangas = magazine.mangas.filter((manga) => manga.status === "PUBLISHING");
   const completedMangas = magazine.mangas.filter((manga) => manga.status === "FINISHED");

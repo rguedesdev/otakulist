@@ -55,7 +55,7 @@ export type AnimeEntity = BaseWork & {
   medium: "anime";
   rating: string;
   episodes: number;
-  season: string;
+  season?: string;
   studio: string;
   studioLinks?: Array<{ displayName: string; slug?: string }>;
   producers: string[];
@@ -88,7 +88,7 @@ export type MangaEntity = BaseWork & {
   demography: string;
   chapters: number;
   volumes: number;
-  serialization: string;
+  publicationPeriod: string;
 };
 
 export type LightNovelEntity = BaseWork & {
@@ -152,6 +152,7 @@ export type PublicationEntity = BaseEntity & {
   publisherLink?: { displayName: string; slug: string };
   demography: string;
   frequency: string;
+  storeLinks?: BaseWork["storeLinks"];
 };
 
 export type EntityInfo =

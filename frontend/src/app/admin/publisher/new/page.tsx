@@ -3,17 +3,20 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
-import { FiArrowLeft, FiBookOpen, FiImage, FiUploadCloud } from "react-icons/fi";
+import { FiBookOpen, FiImage, FiUploadCloud } from "react-icons/fi";
 
 import { assetUrl, graphqlRequest, uploadCatalogImage } from "@/shared/auth/api";
 import { useAuth } from "@/shared/auth/auth-provider";
 import { CustomSelect } from "@/shared/components/CustomSelect/page";
 import styles from "../../anime/new/page.module.css";
+import { CancelLink } from "@/shared/components/AdminFormActions/CancelLink";
+import { SaveButton } from "@/shared/components/AdminFormActions/SaveButton";
 
 const CREATE_PUBLISHER = `mutation CreatePublisher($input: CreatePublisherInput!) { createPublisher(input: $input) { slug } }`;
 const UPDATE_PUBLISHER = `mutation UpdatePublisher($slug: String!, $input: CreatePublisherInput!) { updatePublisher(slug: $slug, input: $input) { slug } }`;
-const ADMIN_PUBLISHER = `query Publisher($slug: String!) { publisher(slug: $slug) { displayName imageUrl description foundation headquarters publicationStatus } }`;
-type PublisherData = { displayName: string; imageUrl: string; description: string | null; foundation: string | null; headquarters: string | null; publicationStatus: "DRAFT" | "PUBLISHED" };
+const ADMIN_PUBLISHER = `query Publisher($slug: String!) { publisher(slug: $slug) { displayName imageUrl description foundation headquarters publicationStatus externalLinks { website x instagram pixiv youtube } } }`;
+type PublisherData = { displayName: string; imageUrl: string; description: string | null; foundation: string | null; headquarters: string | null; publicationStatus: "DRAFT" | "PUBLISHED"; externalLinks: Record<string, string | null> };
+const externalLinks = [["website", "Site oficial"], ["x", "X/Twitter"], ["instagram", "Instagram"], ["pixiv", "Pixiv"], ["youtube", "YouTube"]] as const;
 
 export function PublisherFormPage({ editSlug }: { editSlug?: string }) {
   const { user, accessToken, loading: authLoading } = useAuth();
@@ -48,7 +51,14 @@ export function PublisherFormPage({ editSlug }: { editSlug?: string }) {
     try {
       const uploadedImage = imageFile ? await uploadCatalogImage(imageFile, accessToken) : imageUrl;
       if (!uploadedImage) throw new Error("Selecione uma imagem para a editora");
-      const input = { displayName: displayName.trim(), imageUrl: uploadedImage, description: optional("description"), foundation: optional("foundation"), headquarters: optional("headquarters"), publicationStatus: String(form.get("publicationStatus")) };
+      const input = {
+        displayName: displayName.trim(), imageUrl: uploadedImage, description: optional("description"),
+        foundation: optional("foundation"), headquarters: optional("headquarters"), publicationStatus: String(form.get("publicationStatus")),
+        externalLinks: Object.fromEntries(externalLinks.flatMap(([key]) => {
+          const value = optional(`external.${key}`);
+          return value ? [[key, value]] : [];
+        })),
+      };
       const data = editSlug
         ? await graphqlRequest<{ updatePublisher: { slug: string } }>(UPDATE_PUBLISHER, { slug: editSlug, input }, accessToken)
         : await graphqlRequest<{ createPublisher: { slug: string } }>(CREATE_PUBLISHER, { input }, accessToken);
@@ -62,15 +72,15 @@ export function PublisherFormPage({ editSlug }: { editSlug?: string }) {
   if (!user || user.role !== "ZEUS") return <main className={styles.accessPage}><section className={styles.accessCard}><span className={styles.accessIcon}><FiBookOpen /></span><h1>Acesso restrito</h1><p>Entre com uma conta ZEUS para editar editoras.</p><Link className={styles.accessAction} href={user ? "/" : "/login"}>{user ? "Voltar" : "Entrar"}</Link></section></main>;
 
   return <main className={styles.page}><header className={styles.header}><div><span>Administração · Editora</span><h1>{editSlug ? "Editar editora" : "Cadastrar editora"}</h1></div><p>Este perfil poderá ser vinculado diretamente a mangas e light novels.</p></header>
-    <form className={styles.form} onSubmit={submit}><section className={styles.card}><div className={styles.sectionTitle}><span>01</span><div><h2>Perfil da editora</h2><p>Identidade e informações institucionais.</p></div></div><div className={styles.grid}>
+    <form className={styles.form} autoComplete="off" onSubmit={submit}><section className={styles.card}><div className={styles.sectionTitle}><span>01</span><div><h2>Perfil da editora</h2><p>Identidade e informações institucionais.</p></div></div><div className={styles.grid}>
       <label><span>Nome *</span><input required value={displayName} onChange={(event) => setDisplayName(event.target.value)} /></label>
       <label><span>Fundação</span><input name="foundation" defaultValue={initial?.foundation ?? ""} placeholder="Ex.: 1925" /></label>
       <label><span>Sede</span><input name="headquarters" defaultValue={initial?.headquarters ?? ""} placeholder="Cidade, província, país" /></label>
       <label><span>Visibilidade</span><CustomSelect name="publicationStatus" defaultValue={initial?.publicationStatus ?? "DRAFT"} options={[{ value: "DRAFT", label: "Rascunho" }, { value: "PUBLISHED", label: "Publicado" }]} /></label>
       <label className={styles.wide}><span>Descrição</span><textarea name="description" rows={7} defaultValue={initial?.description ?? ""} /></label>
       <div className={`${styles.wide} ${styles.imagePicker}`}><div className={styles.coverPreview}>{preview ? <Image src={preview} alt="Prévia da editora" fill sizes="112px" unoptimized /> : <span><FiImage /><small>Nenhuma imagem</small></span>}</div><div className={styles.imagePickerContent}><strong>Imagem da editora *</strong><p>Envie JPEG, PNG ou WebP.</p><label className={styles.fileButton}><FiUploadCloud />Selecionar imagem<input type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => setImageFile(event.target.files?.[0] ?? null)} /></label></div></div>
-    </div></section>
-    {error && <p className={styles.error}>{error}</p>}{savedSlug && <p className={styles.success}>Editora {editSlug ? "atualizada" : "cadastrada"}. <Link href={`/publisher/${savedSlug}`}>Abrir perfil</Link></p>}<div className={styles.footerActions}><Link className={styles.cancelAction} href="/admin/publisher"><FiArrowLeft /> Cancelar</Link><button type="submit" disabled={saving}>{saving ? "Salvando…" : editSlug ? "Salvar alterações" : "Cadastrar editora"}</button></div></form>
+    </div></section><section className={styles.card}><div className={styles.sectionTitle}><span>02</span><div><h2>Links da página</h2><p>Campos vazios não serão exibidos ao público.</p></div></div><h3 className={styles.subheading}>Links relacionados</h3><div className={styles.linkGrid}>{externalLinks.map(([key, label]) => <label key={key}><span>{label}</span><input type="url" name={`external.${key}`} placeholder="https://…" defaultValue={initial?.externalLinks[key] ?? ""} /></label>)}</div></section>
+    {error && <p className={styles.error}>{error}</p>}{savedSlug && <p className={styles.success}>Editora {editSlug ? "atualizada" : "cadastrada"}. <Link href={`/publisher/${savedSlug}`}>Abrir perfil</Link></p>}<div className={styles.footerActions}><CancelLink className={styles.cancelAction} href="/admin/publisher">Cancelar</CancelLink><SaveButton disabled={saving}>{editSlug ? "Salvar alterações" : "Cadastrar editora"}</SaveButton></div></form>
   </main>;
 }
 

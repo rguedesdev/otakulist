@@ -93,7 +93,7 @@ export default function CharacterAdminPage() {
       <section className={styles.catalog}>
         <div className={styles.toolbar}>
           <div><h2>Gerenciar personagens</h2><p>Edite identidade, imagem, publicação e trabalhos de voz.</p></div>
-          <form className={styles.search} onSubmit={submitSearch}>
+          <form className={styles.search} autoComplete="off" onSubmit={submitSearch}>
             <FiSearch aria-hidden="true" />
             <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar personagem" aria-label="Buscar personagem" />
             <button type="submit">Buscar</button>
@@ -125,4 +125,3 @@ export default function CharacterAdminPage() {
     </main>
   );
 }
-

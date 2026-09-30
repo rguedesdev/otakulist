@@ -16,12 +16,13 @@ type StudioData = {
   description: string | null;
   foundation: string | null;
   headquarters: string | null;
-  website: string | null;
+  externalLinks: Record<string, string | undefined>;
   animeCredits: StudioAnimeCredit[];
 };
 
 const query = `query Studio($slug: String!) { studio(slug: $slug) {
-  displayName nameKanji imageUrl description foundation headquarters website
+  displayName nameKanji imageUrl description foundation headquarters
+  externalLinks { website x instagram pixiv youtube }
   animeCredits { anime { id title slug coverUrl startDate endDate broadcastSeason } }
 } }`;
 
@@ -51,7 +52,7 @@ export default async function StudioBySlug({ params }: { params: Promise<{ slug:
     foundation: studio.foundation ?? "Não informado",
     name_kanji: studio.nameKanji ?? undefined,
     headquarters: studio.headquarters ?? undefined,
-    externalLinks: studio.website ? { website: studio.website } : undefined,
+    externalLinks: studio.externalLinks,
   };
 
   return <div className={styles.page}>

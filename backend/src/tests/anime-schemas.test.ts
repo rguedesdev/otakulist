@@ -49,6 +49,35 @@ describe("createAnimeSchema", () => {
     expect(createAnimeSchema.safeParse(input).success).toBe(false);
   });
 
+  it("aceita total de episódios em aberto representado por zero", () => {
+    const input = structuredClone(validInput);
+    input.input.installments[0]!.episodes = 0;
+    input.input.installments[0]!.status = "AIRING";
+    expect(createAnimeSchema.safeParse(input).success).toBe(true);
+  });
+
+  it("aceita transmissão opcional para anime TV", () => {
+    const input = structuredClone(validInput);
+    input.input.installments[0]!.broadcastDay = "THURSDAY";
+    input.input.installments[0]!.broadcastTime = "23:56";
+    const installment = createAnimeSchema.parse(input).input.installments[0];
+    expect(installment?.broadcastDay).toBe("THURSDAY");
+    expect(installment?.broadcastTime).toBe("23:56");
+  });
+
+  it("exige dia e horário de transmissão juntos", () => {
+    const input = structuredClone(validInput);
+    input.input.installments[0]!.broadcastDay = "THURSDAY";
+    expect(createAnimeSchema.safeParse(input).success).toBe(false);
+  });
+
+  it("recusa transmissão semanal em formato que não seja TV", () => {
+    const input = structuredClone(validInput);
+    input.input.installments[1]!.broadcastDay = "THURSDAY";
+    input.input.installments[1]!.broadcastTime = "23:56";
+    expect(createAnimeSchema.safeParse(input).success).toBe(false);
+  });
+
   it("recusa links externos sem protocolo", () => {
     const input = { ...validInput, input: { ...validInput.input, externalLinks: { website: "exemplo.com" } } };
     expect(createAnimeSchema.safeParse(input).success).toBe(false);

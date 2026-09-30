@@ -78,5 +78,5 @@ curl -X POST http://localhost:5000/uploads/avatar \
 A rota aceita um arquivo JPEG, PNG ou WebP de até 5 MiB, verifica o tipo real,
 limita a quantidade de pixels, remove metadados ao reprocessar e gera WebP com
 nome aleatório. Os metadados do perfil continuam disponíveis no GraphQL. O
-armazenamento local em `uploads/` pode ser substituído futuramente por S3 sem
+armazenamento local em `src/uploads/` pode ser substituído futuramente por S3 sem
 alterar o contrato da mutation de autenticação.

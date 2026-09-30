@@ -117,7 +117,7 @@ export function ReviewAction({ target }: { target: ReviewTarget }) {
         {authLoading ? <p className={styles.reviewModalState}>Verificando sua sessão…</p> : !user ? <div className={styles.reviewLoginState}>
           <p>Entre na sua conta para avaliar esta obra.</p>
           <Link href="/login">Entrar</Link>
-        </div> : <form className={styles.reviewForm} onSubmit={submit}>
+        </div> : <form className={styles.reviewForm} autoComplete="off" onSubmit={submit}>
           <fieldset disabled={loading || saving}>
             <legend>Nota <strong>*</strong></legend>
             <div className={styles.reviewScores}>

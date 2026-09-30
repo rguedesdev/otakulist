@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import type { ReactNode } from "react";
 import { ReviewAction, type ReviewTarget } from "./ReviewAction";
+import { WorkEditSuggestionAction } from "./WorkEditSuggestionAction";
 
 // Style Sheet CSS
 import styles from "./formatsidebar.module.css";
@@ -124,7 +125,7 @@ function FormatSidebarInfo({
         { href: entity.streamingLinks?.dAnimeStore, label: "d Anime Store", className: styles.linkDAnime, iconClassName: styles.iconlinkDAnimeContainer, icon: <Image src="/streamings/danime-store.png" alt="" width={12} height={12} /> },
       ].filter((item): item is typeof item & { href: string } => Boolean(item.href))
     : [];
-  const storeLinkItems = isWork(entity)
+  const storeLinkItems = "storeLinks" in entity
     ? [
         { href: entity.storeLinks?.amazon, label: "Amazon", className: styles.linkAmazonStore, iconClassName: styles.iconlinkAmazonStoreContainer, icon: <GrAmazon className={styles.iconlinkAmazonStore} size={16} /> },
         { href: entity.storeLinks?.cdJapan, label: "CD Japan", className: styles.linkCDJapan, iconClassName: styles.iconlinkCDJapanContainer, icon: <Image src="/store/cdjapan.png" alt="" width={20} height={20} /> },
@@ -411,7 +412,7 @@ function FormatSidebarInfo({
             <></>
           )}
 
-          {isWork(entity) && (entity.medium === "anime" || entity.medium === "manga") && entity.demography ? (
+          {isWork(entity) && "demography" in entity && entity.demography ? (
             <>
               <dt className={styles.animeDescriptionTerm}>Demografia</dt>
               <dd className={styles.animeDescriptionDetail}>
@@ -477,12 +478,12 @@ function FormatSidebarInfo({
         <div className={styles.reviewEdit}>
           <h3 className={styles.reviewEditTitle}>Colaborar</h3>
           {reviewTarget && <ReviewAction target={reviewTarget} />}
-          <button className={styles.btnEdit} type="button">
-            <span className={styles.iconbtnEditContainer}>
-              <FiEdit className={styles.iconbtnEdit} size={16} />
-            </span>
-            <span className={styles.linkText}>Editar</span>
-          </button>
+          {reviewTarget && isWork(entity) && (entity.medium === "anime" || entity.medium === "manga" || entity.medium === "light_novel")
+            ? <WorkEditSuggestionAction target={{ medium: entity.medium === "anime" ? "ANIME" : entity.medium === "manga" ? "MANGA" : "LIGHT_NOVEL", slug: reviewTarget.slug, title: entity.title, synopsis: entity.description, genres: entity.genders }} />
+            : <button className={styles.btnEdit} type="button">
+              <span className={styles.iconbtnEditContainer}><FiEdit className={styles.iconbtnEdit} size={16} /></span>
+              <span className={styles.linkText}>Editar</span>
+            </button>}
         </div>
       )}
     </aside>

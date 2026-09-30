@@ -54,6 +54,8 @@ export const updateProfileSchema = z.object({
       .optional()
       .transform((value) => value || null),
     email: z.string().trim().toLowerCase().pipe(z.email("Informe um e-mail válido")),
+    showAdultContent: z.boolean().default(false),
+    hideAdultContentFromVisitors: z.boolean().default(false),
   }),
 });
 

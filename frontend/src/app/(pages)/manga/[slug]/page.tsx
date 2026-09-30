@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { cookies } from "next/headers";
 import { BiHash } from "react-icons/bi";
 import { FaStar } from "react-icons/fa";
 import { GiEvilBook } from "react-icons/gi";
@@ -8,6 +9,7 @@ import { VscLibrary } from "react-icons/vsc";
 import styles from "./mangaslug.module.css";
 import { MangaTrackerPanel } from "./components/MangaTrackerPanel/MangaTrackerPanel";
 import { PublicationCharacterSection, type PublicationCharacter } from "@/shared/components/PublicationCharacterSection/page";
+import { AdultContentGate } from "@/shared/components/AdultContentGate/page";
 import { FormatSidebarInfo } from "@/shared/components/FormatSidebarInfo/page";
 import { HeroSection } from "@/shared/components/HeroSection/page";
 import { RelatedSection } from "@/shared/components/RelatedSection/page";
@@ -20,9 +22,9 @@ export const dynamic = "force-dynamic";
 
 type MangaData = {
   title: string; synopsis: string; coverUrl: string; alternativeTitles: MangaEntity["alternativeTitles"];
-  status: string; startDate: string | null; endDate: string | null; magazine: string | null; magazineEntity: { title: string; slug: string } | null;
+  status: string; adultContent: boolean; startDate: string | null; endDate: string | null; magazine: string | null; magazineEntity: { title: string; slug: string } | null;
   publisher: string | null; publisherEntity: { displayName: string; slug: string } | null; demography: string | null; genres: string[]; chapters: number;
-  volumes: number; serialization: string | null; externalLinks: NonNullable<MangaEntity["externalLinks"]>;
+  volumes: number; externalLinks: NonNullable<MangaEntity["externalLinks"]>;
   storeLinks: NonNullable<MangaEntity["storeLinks"]>;
   reviewSummary: { average: number; count: number };
   characters: PublicationCharacter[];
@@ -31,10 +33,10 @@ type MangaData = {
 };
 type MangaQueryData = { manga: MangaData | null; workReviewComments: PublicWorkReview[] };
 
-const query = `query Manga($slug: String!) {
-  manga(slug: $slug) {
-    title synopsis coverUrl alternativeTitles { type title } status startDate endDate magazine magazineEntity { title slug } publisher publisherEntity { displayName slug }
-    demography genres chapters volumes serialization externalLinks { website x instagram pixiv youtube }
+const query = `query Manga($slug: String!, $includeAdult: Boolean!) {
+  manga(slug: $slug, includeAdult: $includeAdult) {
+    title synopsis coverUrl alternativeTitles { type title } status adultContent startDate endDate magazine magazineEntity { title slug } publisher publisherEntity { displayName slug }
+    demography genres chapters volumes externalLinks { website x instagram pixiv youtube }
     storeLinks { amazon cdJapan mercadoLivre rakuten shopee ebay otakuyasan hmv honto toranoana animate }
     reviewSummary { average count }
     characters { id nameRomaji slug imageUrl }
@@ -56,10 +58,10 @@ function displayDate(value: string | null) {
   return new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "short", year: "numeric", timeZone: "UTC" }).format(new Date(`${value}T00:00:00Z`));
 }
 
-async function getManga(slug: string) {
+async function getManga(slug: string, includeAdult: boolean) {
   const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000"}/graphql`, {
     method: "POST", headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ query, variables: { slug } }), cache: "no-store",
+    body: JSON.stringify({ query, variables: { slug, includeAdult } }), cache: "no-store",
   });
   if (!response.ok) throw new Error("Não foi possível carregar o manga");
   const body = await response.json() as { data?: MangaQueryData };
@@ -68,9 +70,12 @@ async function getManga(slug: string) {
 
 export default async function MangaBySlug({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const data = await getManga(slug);
+  const cookieStore = await cookies();
+  const includeAdult = cookieStore.get("otakulist-adult-content")?.value === "1";
+  const data = await getManga(slug, includeAdult);
   if (!data?.manga) notFound();
   const { manga, workReviewComments } = data;
+  const publicationEnd = manga.endDate ? displayDate(manga.endDate) : "Presente";
 
   const entity: MangaEntity = {
     cover: manga.coverUrl, title: manga.title, description: manga.synopsis, alternativeTitles: manga.alternativeTitles,
@@ -82,18 +87,19 @@ export default async function MangaBySlug({ params }: { params: Promise<{ slug: 
     publisher: manga.publisherEntity?.displayName ?? manga.publisher ?? undefined,
     publisherLink: manga.publisherEntity ?? undefined,
     demography: manga.demography ?? "Não informada", genders: manga.genres,
-    chapters: manga.chapters, volumes: manga.volumes, serialization: manga.serialization ?? "Não informada",
+    chapters: manga.chapters, volumes: manga.volumes,
+    publicationPeriod: `${displayDate(manga.startDate)} – ${publicationEnd}`,
     externalLinks: manga.externalLinks, storeLinks: manga.storeLinks,
   };
 
-  return <div className={styles.page}>
+  return <AdultContentGate blocked={manga.adultContent && !includeAdult}><div className={styles.page}>
     <HeroSection entity={entity} publicationTracker={{ medium: "MANGA", workKey: slug }} />
     <div className={styles.factsBar} aria-label="Resumo do manga">
       <div className={styles.factItem}><GiEvilBook aria-hidden="true" /><span><small>Formato</small>Manga</span></div>
-      <div className={styles.factItem}><BiHash aria-hidden="true" /><span><small>Capítulos</small>{entity.chapters} capítulos</span></div>
+      <div className={styles.factItem}><BiHash aria-hidden="true" /><span><small>Capítulos</small>{entity.chapters > 0 ? `${entity.chapters} capítulos` : "Total em aberto"}</span></div>
       <div className={styles.factItem}><VscLibrary aria-hidden="true" /><span><small>Volumes</small>{entity.volumes} publicados</span></div>
-      <div className={styles.factItem}><LuCalendarRange aria-hidden="true" /><span><small>Serialização</small>{entity.serialization}</span></div>
-      <div className={styles.factItem}><FaStar aria-hidden="true" /><span><small>Score</small>{entity.score.toFixed(2)}</span></div>
+      <div className={styles.factItem}><LuCalendarRange aria-hidden="true" /><span><small>Publicação</small>{entity.publicationPeriod}</span></div>
+      <div className={styles.factItem}><FaStar aria-hidden="true" /><span><small>Score</small>{entity.score.toFixed(1)}</span></div>
     </div>
     <main className={styles.mangaSlugContainer}>
       <WorkSectionTabs
@@ -108,5 +114,5 @@ export default async function MangaBySlug({ params }: { params: Promise<{ slug: 
         ]}
       />
     </main>
-  </div>;
+  </div></AdultContentGate>;
 }

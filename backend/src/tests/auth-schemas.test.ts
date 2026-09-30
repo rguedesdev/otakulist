@@ -38,10 +38,14 @@ describe("registerSchema", () => {
         email: "user@example.com",
         password: "senha-segura",
         role: "ZEUS",
+        showAdultContent: true,
+        hideAdultContentFromVisitors: true,
       },
     });
 
     expect(result.input).not.toHaveProperty("role");
+    expect(result.input).not.toHaveProperty("showAdultContent");
+    expect(result.input).not.toHaveProperty("hideAdultContentFromVisitors");
   });
 });
 
@@ -61,7 +65,39 @@ describe("updateProfileSchema", () => {
       displayName: "Usuário",
       bio: null,
       email: "user@example.com",
+      showAdultContent: false,
+      hideAdultContentFromVisitors: false,
     });
+  });
+
+  it("aceita a ativação explícita de conteúdo adulto", () => {
+    const result = updateProfileSchema.parse({
+      input: {
+        username: "user_01",
+        displayName: "Usuário",
+        bio: "",
+        email: "user@example.com",
+        showAdultContent: true,
+      },
+    });
+
+    expect(result.input.showAdultContent).toBe(true);
+  });
+
+  it("aceita ocultar conteúdo adulto dos visitantes como preferência independente", () => {
+    const result = updateProfileSchema.parse({
+      input: {
+        username: "user_01",
+        displayName: "Usuário",
+        bio: "",
+        email: "user@example.com",
+        showAdultContent: false,
+        hideAdultContentFromVisitors: true,
+      },
+    });
+
+    expect(result.input.showAdultContent).toBe(false);
+    expect(result.input.hideAdultContentFromVisitors).toBe(true);
   });
 
   it("limita a biografia a 300 caracteres", () => {

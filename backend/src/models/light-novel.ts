@@ -10,6 +10,7 @@ export interface LightNovelDocument {
   title: string; slug: string; synopsis: string; coverUrl: string;
   alternativeTitles: Array<{ type: string; title: string }>;
   status: (typeof MANGA_STATUSES)[number]; publicationStatus: (typeof ANIME_PUBLICATION_STATUSES)[number];
+  adultContent: boolean;
   startDate: Date | null; endDate: Date | null; publisherId: mongoose.Types.ObjectId | null; publisher: string | null; source: string | null;
   genres: string[]; chapters: number; volumes: number;
   externalLinks: Record<string, string | undefined>; storeLinks: Record<string, string | undefined>;
@@ -27,6 +28,7 @@ const lightNovelSchema = new Schema<LightNovelDocument>({
   alternativeTitles: [new Schema({ type: { type: String, enum: ALTERNATIVE_TITLE_TYPES, required: true }, title: { type: String, required: true, trim: true, maxlength: 200 } }, { _id: false })],
   status: { type: String, enum: MANGA_STATUSES, required: true },
   publicationStatus: { type: String, enum: ANIME_PUBLICATION_STATUSES, required: true, default: "DRAFT" },
+  adultContent: { type: Boolean, default: false, required: true },
   startDate: { type: Date, default: null }, endDate: { type: Date, default: null },
   publisherId: { type: Schema.Types.ObjectId, ref: "Publisher", default: null },
   publisher: { type: String, trim: true, default: null }, source: { type: String, trim: true, default: null },

@@ -1,5 +1,7 @@
+"use client";
+
 import Image from "next/image";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { FaRegCheckCircle } from "react-icons/fa";
 import { RiRestartLine } from "react-icons/ri";
 
@@ -12,21 +14,25 @@ import styles from "./animesbymangaka.module.css";
 const date = (value: string | null) => value ? new Intl.DateTimeFormat("pt-BR", { dateStyle: "medium", timeZone: "UTC" }).format(new Date(`${value}T00:00:00Z`)) : "—";
 
 function AnimesByMangaka({ credits }: { credits: StaffAnimeCredit[] }) {
+  const router = useRouter();
   if (credits.length === 0) return null;
   return <section className={styles.animesByMangakaContainer}>
     <h2 className={styles.animesByMangakaSectionTitle}>Animes</h2>
     <div className={styles.animesByMangakaCardsContainer}>{credits.map(({ anime, role, contribution }) => {
       const normalizedCredit = normalizeStaffCredit({ role, contribution });
-      return <Link href={`/anime/${anime.slug}`} key={`${anime.slug}-${role}`}>
-      <article className={styles.animesByMangakaCard}>
+      return <button className={styles.animesByMangakaCard} type="button" onClick={() => router.push(`/anime/${anime.slug}`)} key={`${anime.slug}-${role}`}>
         <Image className={styles.animesByMangakaCover} src={assetUrl(anime.coverUrl) ?? anime.coverUrl} alt={anime.title} width={90} height={130} unoptimized />
-        <div className={styles.animesByMangakaTextsContainer}><div className={styles.animesByMangakaTexts}><h3 className={styles.animesByMangakaTitle}>{anime.title}</h3><dl className={styles.infoGroup}>
-          <div className={styles.infoLine}><dt className={styles.infoIcon}><StaffRoleIcon role={normalizedCredit.role} size={16} /></dt><dd className={styles.animesByMangakaInfo}>{normalizedCredit.role}{normalizedCredit.contribution ? ` • ${normalizedCredit.contribution}` : ""}</dd></div>
-          <div className={styles.infoLine}><dt className={styles.infoIcon}><RiRestartLine size={14} /></dt><dd className={styles.animesByMangakaInfo}>Início: {date(anime.startDate)}</dd></div>
-          <div className={styles.infoLine}><dt className={styles.infoIcon}><FaRegCheckCircle size={13} /></dt><dd className={styles.animesByMangakaInfo}>Término: {date(anime.endDate)}</dd></div>
-        </dl></div></div>
-      </article>
-    </Link>;
+        <span className={styles.animesByMangakaTextsContainer}>
+          <span className={styles.animesByMangakaTexts}>
+            <strong className={styles.animesByMangakaTitle}>{anime.title}</strong>
+            <span className={styles.infoGroup}>
+              <span className={styles.infoLine}><span className={styles.infoIcon}><StaffRoleIcon role={normalizedCredit.role} size={16} /></span><span className={styles.animesByMangakaInfo}>{normalizedCredit.role}{normalizedCredit.contribution ? ` • ${normalizedCredit.contribution}` : ""}</span></span>
+              <span className={styles.infoLine}><span className={styles.infoIcon}><RiRestartLine size={14} aria-hidden="true" /></span><span className={styles.animesByMangakaInfo}>Início: {date(anime.startDate)}</span></span>
+              <span className={styles.infoLine}><span className={styles.infoIcon}><FaRegCheckCircle size={13} aria-hidden="true" /></span><span className={styles.animesByMangakaInfo}>Término: {date(anime.endDate)}</span></span>
+            </span>
+          </span>
+        </span>
+      </button>;
     })}</div>
   </section>;
 }

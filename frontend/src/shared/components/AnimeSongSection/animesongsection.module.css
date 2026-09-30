@@ -120,6 +120,12 @@
   justify-content: center;
   flex: 0 0 18px;
   color: var(--color-text-primary);
+  overflow: visible;
+}
+
+.infoIcon svg {
+  display: block;
+  overflow: visible;
 }
 
 .infoLine dd {

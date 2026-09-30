@@ -60,16 +60,28 @@ export async function createSessionTokens(
 }
 
 export function setRefreshCookie(reply: FastifyReply, token: string) {
-  reply.setCookie(REFRESH_COOKIE, token, {
+  reply.clearCookie(REFRESH_COOKIE, {
     httpOnly: true,
     secure: env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/graphql",
+  });
+  reply.setCookie(REFRESH_COOKIE, token, {
+    httpOnly: true,
+    secure: env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
     maxAge: env.JWT_REFRESH_TTL_SECONDS,
   });
 }
 
 export function clearRefreshCookie(reply: FastifyReply) {
+  reply.clearCookie(REFRESH_COOKIE, {
+    httpOnly: true,
+    secure: env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+  });
   reply.clearCookie(REFRESH_COOKIE, {
     httpOnly: true,
     secure: env.NODE_ENV === "production",

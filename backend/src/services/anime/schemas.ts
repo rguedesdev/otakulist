@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import {
   ALTERNATIVE_TITLE_TYPES,
+  ANIME_BROADCAST_DAYS,
   ANIME_PUBLICATION_STATUSES,
   ANIME_RELEASE_FORMATS,
   ANIME_SONG_TYPES,
@@ -48,6 +49,7 @@ export const createAnimeSchema = z.object({
     demography: optionalText(100),
     rating: optionalText(50).transform((value) => value ? legacyAnimeRatings[value] ?? value : value),
     publicationStatus: z.enum(ANIME_PUBLICATION_STATUSES).default("DRAFT"),
+    adultContent: z.boolean().default(false),
     installments: z
       .array(
         z.object({
@@ -57,14 +59,24 @@ export const createAnimeSchema = z.object({
           format: z.enum(ANIME_RELEASE_FORMATS),
           synopsis: requiredText(10_000),
           coverUrl: optionalUrl.transform((value) => value ?? null),
-          episodes: z.number().int().positive().max(100_000),
+          episodes: z.number().int().nonnegative().max(100_000),
           durationMinutes: z.number().int().positive().max(10_000).nullish().transform((value) => value ?? null),
           status: z.enum(ANIME_STATUSES),
+          statusOverride: z.enum(ANIME_STATUSES).nullable().optional(),
           startDate: z.iso.date().nullish().transform((value) => value || null),
           endDate: z.iso.date().nullish().transform((value) => value || null),
           broadcastSeason: optionalText(100),
+          broadcastDay: z.enum(ANIME_BROADCAST_DAYS).nullish().transform((value) => value ?? null),
+          broadcastTime: z.string().regex(/^(?:[01]\d|2[0-3]):[0-5]\d$/, "Horário de transmissão inválido").nullish().transform((value) => value || null),
           studioId: z.string().regex(/^[0-9a-f]{24}$/i, "Estúdio inválido").nullish().transform((value) => value || null),
           studioName: optionalText(200),
+        }).superRefine((item, context) => {
+          if (Boolean(item.broadcastDay) !== Boolean(item.broadcastTime)) {
+            context.addIssue({ code: "custom", message: "Informe o dia e o horário da transmissão" });
+          }
+          if ((item.broadcastDay || item.broadcastTime) && item.format !== "TV") {
+            context.addIssue({ code: "custom", message: "A transmissão semanal só pode ser informada para anime TV" });
+          }
         }),
       )
       .min(1, "Cadastre ao menos um lançamento sequencial")

@@ -12,6 +12,8 @@ import { staffRoleOptions, staffRoleValue } from "@/shared/catalog/staff-roles";
 import { CustomDatePicker } from "@/shared/components/CustomDatePicker/page";
 import { CustomSelect as AdminSelect } from "@/shared/components/CustomSelect/page";
 import styles from "./page.module.css";
+import { CancelLink } from "@/shared/components/AdminFormActions/CancelLink";
+import { SaveButton } from "@/shared/components/AdminFormActions/SaveButton";
 
 const CREATE_ANIME = `
   mutation CreateAnime($input: CreateAnimeInput!) {
@@ -24,9 +26,9 @@ const UPDATE_ANIME = `
   }
 `;
 const ADMIN_ANIME = `query AdminAnime($slug: String!) {
-  anime(slug: $slug) {
-    id title slug synopsis coverUrl alternativeTitles { type title } genres producers demography rating publicationStatus
-    installments { order title label format synopsis coverUrl episodes durationMinutes status startDate endDate broadcastSeason studio { id displayName slug imageUrl } studioName }
+  anime(slug: $slug, includeAdult: true) {
+    id title slug synopsis coverUrl alternativeTitles { type title } genres producers demography rating adultContent publicationStatus
+    installments { order title label format synopsis coverUrl episodes durationMinutes status statusOverride startDate endDate broadcastSeason broadcastDay broadcastTime studio { id displayName slug imageUrl } studioName }
     characterCredits {
       character { id nameRomaji slug nameKanji imageUrl }
       seiyuu { id displayName slug nameKanji imageUrl }
@@ -43,7 +45,7 @@ const ADMIN_ANIME = `query AdminAnime($slug: String!) {
   }
 }`;
 const SEARCH_WORKS = `query SearchWorks($query: String!) {
-  searchWorks(query: $query) { id title slug medium coverUrl status href }
+  searchWorks(query: $query, includeAdult: true) { id title slug medium coverUrl status href }
 }`;
 const SEARCH_PEOPLE = `query SearchPeople($query: String!) {
   searchPeople(query: $query) { id displayName slug nameKanji imageUrl }
@@ -105,10 +107,12 @@ type PersonOption = { id: string; displayName: string; slug: string; nameKanji: 
 type CharacterOption = { id: string; nameRomaji: string; slug: string; nameKanji: string | null; imageUrl: string };
 type MusicArtistOption = { id: string; displayName: string; slug: string; kind: "SOLO" | "BAND"; imageUrl: string };
 type StudioOption = { id: string; displayName: string; slug: string; imageUrl: string };
+type AnimeStatus = "ANNOUNCED" | "AIRING" | "FINISHED" | "CANCELLED";
+type AnimeBroadcastDay = "SUNDAY" | "MONDAY" | "TUESDAY" | "WEDNESDAY" | "THURSDAY" | "FRIDAY" | "SATURDAY";
 type Installment = {
   title: string; label: string; format: string; synopsis: string; coverFile: File | null; coverUrl: string | null;
-  episodes: number; durationMinutes: number | null; status: string; startDate: string; endDate: string;
-  broadcastSeason: string; studio: StudioOption | null; studioName?: string | null;
+  episodes: number; durationMinutes: number | null; status: AnimeStatus; statusOverride: AnimeStatus | null; startDate: string; endDate: string;
+  broadcastSeason: string; broadcastDay: AnimeBroadcastDay | null; broadcastTime: string; studio: StudioOption | null; studioName?: string | null;
 };
 type RelatedWork = {
   relationType: string; work: WorkOption | null;
@@ -121,10 +125,53 @@ const emptyCharacterCredit = (): CharacterCredit => ({ character: null, seiyuu: 
 const emptySongCredit = (): SongCredit => ({ artist: null, featuredArtists: [], songTitle: "", type: "OPENING", sequence: 1, episodeRange: "" });
 
 const emptyInstallment = (): Installment => ({
-  title: "", label: "", format: "TV", synopsis: "", coverFile: null, coverUrl: null, episodes: 1,
-  durationMinutes: null, status: "ANNOUNCED", startDate: "", endDate: "",
-  broadcastSeason: "", studio: null,
+  title: "", label: "", format: "TV", synopsis: "", coverFile: null, coverUrl: null, episodes: 0,
+  durationMinutes: null, status: "ANNOUNCED", statusOverride: null, startDate: "", endDate: "",
+  broadcastSeason: "", broadcastDay: null, broadcastTime: "", studio: null,
 });
+
+const broadcastDayOptions = [
+  { value: "", label: "Não informada" },
+  { value: "MONDAY", label: "Segunda-feira" },
+  { value: "TUESDAY", label: "Terça-feira" },
+  { value: "WEDNESDAY", label: "Quarta-feira" },
+  { value: "THURSDAY", label: "Quinta-feira" },
+  { value: "FRIDAY", label: "Sexta-feira" },
+  { value: "SATURDAY", label: "Sábado" },
+  { value: "SUNDAY", label: "Domingo" },
+];
+
+const animeStatusOptions = [
+  { value: "ANNOUNCED", label: "Anunciado" },
+  { value: "AIRING", label: "Em exibição" },
+  { value: "FINISHED", label: "Finalizado" },
+  { value: "CANCELLED", label: "Cancelado" },
+];
+
+const animeStatusLabels: Record<AnimeStatus, string> = {
+  ANNOUNCED: "Anunciado",
+  AIRING: "Em exibição",
+  FINISHED: "Finalizado",
+  CANCELLED: "Cancelado",
+};
+
+function tokyoToday() {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    day: "2-digit",
+    month: "2-digit",
+    timeZone: "Asia/Tokyo",
+    year: "numeric",
+  }).formatToParts(new Date());
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  return `${values.year}-${values.month}-${values.day}`;
+}
+
+function automaticAnimeStatus(item: Pick<Installment, "startDate" | "endDate">): AnimeStatus {
+  const today = tokyoToday();
+  if (!item.startDate || item.startDate > today) return "ANNOUNCED";
+  if (item.endDate && item.endDate < today) return "FINISHED";
+  return "AIRING";
+}
 
 const emptyRelatedWork = (): RelatedWork => ({
   relationType: "OTHER", work: null,
@@ -139,7 +186,7 @@ function optionalObject(form: FormData, prefix: string, fields: readonly (readon
 type AnimeEditData = {
   id: string; title: string; slug: string; synopsis: string; coverUrl: string;
   alternativeTitles: AlternativeTitle[]; genres: string[]; producers: string[]; demography: string | null; rating: string | null;
-  publicationStatus: string;
+  publicationStatus: string; adultContent: boolean;
   installments: Array<Omit<Installment, "coverFile"> & { order: number }>;
   characterCredits: Array<{ character: CharacterOption; seiyuu: PersonOption }>;
   songCredits: Array<{ artist: MusicArtistOption; featuredArtists: MusicArtistOption[]; songTitle: string; type: "OPENING" | "ENDING" | "INSERT"; sequence: number | null; episodeRange: string | null }>;
@@ -531,7 +578,7 @@ export function AnimeFormPage({ editSlug }: { editSlug?: string }) {
         setInstallments(anime.installments.map((installment) => {
           const { order, ...values } = installment;
           void order;
-          return { ...values, coverFile: null };
+          return { ...values, broadcastTime: values.broadcastTime ?? "", coverFile: null };
         }));
         const source = anime.relatedWorks.find((work) => work.relationType === "SOURCE_MATERIAL") ?? null;
         setSourceWork(source);
@@ -608,12 +655,16 @@ export function AnimeFormPage({ editSlug }: { editSlug?: string }) {
       setError("O artista principal não pode ser repetido nas participações");
       return;
     }
-    if (installments.some((item) => !Number.isInteger(Number(item.episodes)) || Number(item.episodes) < 1)) {
-      setError("A quantidade de episódios deve ser um número inteiro maior que zero");
+    if (installments.some((item) => !Number.isInteger(Number(item.episodes)) || Number(item.episodes) < 0)) {
+      setError("A quantidade de episódios deve ser um número inteiro igual ou maior que zero");
       return;
     }
     if (installments.some((item) => item.durationMinutes !== null && (!Number.isInteger(Number(item.durationMinutes)) || Number(item.durationMinutes) < 1))) {
       setError("A duração deve ser informada em minutos inteiros, por exemplo: 24");
+      return;
+    }
+    if (installments.some((item) => Boolean(item.broadcastDay) !== Boolean(item.broadcastTime))) {
+      setError("Informe o dia e o horário da transmissão, ou deixe os dois campos vazios");
       return;
     }
     setSaving(true);
@@ -632,6 +683,7 @@ export function AnimeFormPage({ editSlug }: { editSlug?: string }) {
         demography: String(form.get("demography") ?? "").trim() || null,
         rating: String(form.get("rating") ?? "").trim() || null,
         publicationStatus: String(form.get("publicationStatus")),
+        adultContent: form.get("adultContent") === "on",
         installments: installments.map((installment, index) => {
           const { coverFile: selectedCover, coverUrl: currentCover, studio, studioName, ...item } = installment;
           void selectedCover;
@@ -641,7 +693,10 @@ export function AnimeFormPage({ editSlug }: { editSlug?: string }) {
             durationMinutes: item.durationMinutes === null ? null : Number(item.durationMinutes),
             coverUrl: installmentCovers[index],
             startDate: item.startDate || null, endDate: item.endDate || null,
-            broadcastSeason: item.broadcastSeason || null, studioId: studio?.id ?? null,
+            broadcastSeason: item.broadcastSeason || null,
+            broadcastDay: item.format === "TV" ? item.broadcastDay || null : null,
+            broadcastTime: item.format === "TV" ? item.broadcastTime || null : null,
+            studioId: studio?.id ?? null,
             studioName: studio ? null : studioName ?? null,
           };
         }),
@@ -692,7 +747,7 @@ export function AnimeFormPage({ editSlug }: { editSlug?: string }) {
         <p>{editSlug ? "Revise os dados, vínculos e lançamentos desta obra." : "A obra agrupa todos os lançamentos que formam sua sequência acompanhável."}</p>
       </header>
 
-      <form className={styles.form} onSubmit={submit}>
+      <form className={styles.form} autoComplete="off" onSubmit={submit}>
         <section className={styles.card}>
           <div className={styles.sectionTitle}><span>01</span><div><h2>Identidade da obra</h2><p>Informações compartilhadas por toda a franquia agrupada.</p></div></div>
           <div className={styles.grid}>
@@ -704,6 +759,13 @@ export function AnimeFormPage({ editSlug }: { editSlug?: string }) {
             <label><span>Demografia</span><input name="demography" placeholder="Shounen" defaultValue={initialAnime?.demography ?? ""} /></label>
             <label><span>Classificação</span><AdminSelect name="rating" defaultValue={normalizeAnimeRating(initialAnime?.rating)} options={ratingOptionsWithLegacyValue(initialAnime?.rating)} /></label>
             <label><span>Visibilidade</span><AdminSelect name="publicationStatus" defaultValue={initialAnime?.publicationStatus ?? "DRAFT"} options={[{ value: "DRAFT", label: "Rascunho" }, { value: "PUBLISHED", label: "Publicado" }]} /></label>
+            <label>
+              <span>Conteúdo +18</span>
+              <div className={styles.adultControl}>
+                <span><strong>Obra adulta</strong><small>Ocultar para usuários que não ativaram conteúdo adulto.</small></span>
+                <input type="checkbox" name="adultContent" defaultChecked={Boolean(initialAnime?.adultContent || normalizeAnimeRating(initialAnime?.rating) === "R18")} />
+              </div>
+            </label>
             <div className={`${styles.wide} ${styles.originField}`}>
               <div className={styles.originHeading}>
                 <strong>Origem / material original</strong>
@@ -739,13 +801,26 @@ export function AnimeFormPage({ editSlug }: { editSlug?: string }) {
               <div className={styles.grid}>
                 <label><span>Título *</span><input required value={item.title} onChange={(e) => updateInstallment(index, "title", e.target.value)} /></label>
                 <label><span>Rótulo *</span><input required value={item.label} placeholder="1ª Temporada" onChange={(e) => updateInstallment(index, "label", e.target.value)} /></label>
-                <label><span>Formato *</span><AdminSelect value={item.format} onChange={(format) => updateInstallment(index, "format", format)} options={[{ value: "TV", label: "TV" }, { value: "MOVIE", label: "Filme" }, { value: "OVA", label: "OVA" }, { value: "ONA", label: "ONA" }, { value: "SPECIAL", label: "Especial" }]} /></label>
-                <label><span>Status *</span><AdminSelect value={item.status} onChange={(status) => updateInstallment(index, "status", status)} options={[{ value: "ANNOUNCED", label: "Anunciado" }, { value: "AIRING", label: "Em exibição" }, { value: "FINISHED", label: "Finalizado" }, { value: "CANCELLED", label: "Cancelado" }]} /></label>
-                <label><span>Episódios *</span><input required min="1" step="1" inputMode="numeric" type="number" value={item.episodes} onChange={(e) => updateInstallment(index, "episodes", Number.isNaN(e.currentTarget.valueAsNumber) ? 1 : e.currentTarget.valueAsNumber)} /></label>
+                <label><span>Formato *</span><AdminSelect value={item.format} onChange={(format) => setInstallments((items) => items.map((value, itemIndex) => itemIndex === index ? { ...value, format, ...(format === "TV" ? {} : { broadcastDay: null, broadcastTime: "" }) } : value))} options={[{ value: "TV", label: "TV" }, { value: "MOVIE", label: "Filme" }, { value: "OVA", label: "OVA" }, { value: "ONA", label: "ONA" }, { value: "SPECIAL", label: "Especial" }]} /></label>
+                <label><span>Controle de status *</span><AdminSelect value={item.statusOverride ? "MANUAL" : "AUTO"} onChange={(mode) => updateInstallment(index, "statusOverride", mode === "AUTO" ? null : automaticAnimeStatus(item))} options={[{ value: "AUTO", label: "Automático pelas datas" }, { value: "MANUAL", label: "Definir manualmente" }]} /></label>
+                {item.statusOverride ? (
+                  <label><span>Status manual *</span><AdminSelect value={item.statusOverride} onChange={(status) => updateInstallment(index, "statusOverride", status as AnimeStatus)} options={animeStatusOptions} /></label>
+                ) : (
+                  <div className={styles.automaticStatus}>
+                    <span>Status calculado</span>
+                    <strong>{animeStatusLabels[automaticAnimeStatus(item)]}</strong>
+                    <small>Atualizado automaticamente pelas datas no fuso do Japão.</small>
+                  </div>
+                )}
+                <label><span>Episódios *</span><input required min="0" step="1" inputMode="numeric" type="number" value={item.episodes} onChange={(e) => updateInstallment(index, "episodes", Number.isNaN(e.currentTarget.valueAsNumber) ? 0 : e.currentTarget.valueAsNumber)} /></label>
                 <label><span>Duração por episódio (min)</span><input min="1" step="1" inputMode="numeric" type="number" value={item.durationMinutes ?? ""} placeholder="Ex.: 24" onChange={(e) => updateInstallment(index, "durationMinutes", Number.isNaN(e.currentTarget.valueAsNumber) ? null : e.currentTarget.valueAsNumber)} /></label>
                 <label><span>Início</span><CustomDatePicker value={item.startDate} onChange={(value) => updateInstallment(index, "startDate", value)} /></label>
                 <label><span>Término</span><CustomDatePicker value={item.endDate} min={item.startDate || undefined} onChange={(value) => updateInstallment(index, "endDate", value)} /></label>
                 <label><span>Temporada de exibição</span><input value={item.broadcastSeason} placeholder="Outono 2026" onChange={(e) => updateInstallment(index, "broadcastSeason", e.target.value)} /></label>
+                {item.format === "TV" && <>
+                  <label><span>Dia da transmissão (JST)</span><AdminSelect value={item.broadcastDay ?? ""} onChange={(day) => updateInstallment(index, "broadcastDay", day ? day as AnimeBroadcastDay : null)} options={broadcastDayOptions} /></label>
+                  <label><span>Horário da transmissão (JST)</span><input type="time" value={item.broadcastTime} onChange={(event) => updateInstallment(index, "broadcastTime", event.target.value)} /></label>
+                </>}
                 <label><span>Estúdio</span><StudioPicker value={item.studio} accessToken={accessToken ?? ""} onChange={(studio) => updateInstallment(index, "studio", studio)} />{!item.studio && item.studioName && <small className={styles.searchHint}>Vínculo antigo: {item.studioName}. Selecione o estúdio cadastrado para atualizar o vínculo.</small>}</label>
                 <label className={styles.wide}><span>Sinopse do lançamento *</span><textarea required rows={4} value={item.synopsis} onChange={(e) => updateInstallment(index, "synopsis", e.target.value)} /></label>
                 <div className={styles.wide}><ImagePicker file={item.coverFile} currentUrl={item.coverUrl} onChange={(file) => updateInstallment(index, "coverFile", file)} label="Capa específica do lançamento" /></div>
@@ -834,7 +909,7 @@ export function AnimeFormPage({ editSlug }: { editSlug?: string }) {
 
         {error && <p className={styles.error}>{error}</p>}
         {createdSlug && <p className={styles.success}>Anime {editSlug ? "atualizado" : "cadastrado"}. <Link href={`/anime/${createdSlug}`}>Abrir página</Link></p>}
-        <div className={styles.footerActions}><Link className={styles.cancelAction} href="/admin/anime">Cancelar</Link><button type="submit" disabled={saving}>{saving ? "Salvando…" : editSlug ? "Salvar alterações" : "Cadastrar anime"}</button></div>
+        <div className={styles.footerActions}><CancelLink className={styles.cancelAction} href="/admin/anime">Cancelar</CancelLink><SaveButton disabled={saving}>{editSlug ? "Salvar alterações" : "Cadastrar anime"}</SaveButton></div>
       </form>
     </main>
   );

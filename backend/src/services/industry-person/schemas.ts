@@ -8,6 +8,14 @@ const imageUrl = requiredText(2_048).refine(
   (value) => /^https?:\/\//i.test(value) || value.startsWith("/"),
   "Use uma URL http(s) ou um caminho interno iniciado por /",
 );
+const optionalUrl = z.string().trim().max(2_048).url("Link inválido").nullish().transform((value) => value || undefined);
+const externalLinks = z.object({
+  website: optionalUrl,
+  x: optionalUrl,
+  instagram: optionalUrl,
+  pixiv: optionalUrl,
+  youtube: optionalUrl,
+}).nullish().transform((value) => value ?? {});
 
 export const industryPersonSlugSchema = z.object({ slug });
 
@@ -21,6 +29,7 @@ export const createIndustryPersonSchema = z.object({
     hometown: optionalText(200),
     activityPeriod: optionalText(200),
     occupations: z.array(requiredText(120)).max(20).default([]),
+    externalLinks,
     publicationStatus: z.enum(["DRAFT", "PUBLISHED"]).default("DRAFT"),
   }),
 });

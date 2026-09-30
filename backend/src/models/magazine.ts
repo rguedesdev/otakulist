@@ -13,6 +13,8 @@ export interface MagazineDocument {
   publisherId: mongoose.Types.ObjectId;
   demography: string | null;
   frequency: string | null;
+  externalLinks: Record<string, string | undefined>;
+  storeLinks: Record<string, string | undefined>;
   publicationStatus: (typeof ANIME_PUBLICATION_STATUSES)[number];
   createdAt: Date;
   updatedAt: Date;
@@ -27,6 +29,26 @@ const magazineSchema = new Schema<MagazineDocument>({
   publisherId: { type: Schema.Types.ObjectId, ref: "Publisher", required: true },
   demography: { type: String, trim: true, default: null, maxlength: 100 },
   frequency: { type: String, trim: true, default: null, maxlength: 100 },
+  externalLinks: {
+    website: { type: String, trim: true, default: undefined },
+    x: { type: String, trim: true, default: undefined },
+    instagram: { type: String, trim: true, default: undefined },
+    pixiv: { type: String, trim: true, default: undefined },
+    youtube: { type: String, trim: true, default: undefined },
+  },
+  storeLinks: {
+    amazon: { type: String, trim: true, default: undefined },
+    cdJapan: { type: String, trim: true, default: undefined },
+    mercadoLivre: { type: String, trim: true, default: undefined },
+    rakuten: { type: String, trim: true, default: undefined },
+    shopee: { type: String, trim: true, default: undefined },
+    ebay: { type: String, trim: true, default: undefined },
+    otakuyasan: { type: String, trim: true, default: undefined },
+    hmv: { type: String, trim: true, default: undefined },
+    honto: { type: String, trim: true, default: undefined },
+    toranoana: { type: String, trim: true, default: undefined },
+    animate: { type: String, trim: true, default: undefined },
+  },
   publicationStatus: { type: String, enum: ANIME_PUBLICATION_STATUSES, default: "DRAFT", required: true },
 }, { timestamps: true, versionKey: false });
 

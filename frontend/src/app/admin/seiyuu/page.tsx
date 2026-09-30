@@ -88,7 +88,7 @@ export default function SeiyuuAdminPage() {
       <section className={styles.catalog}>
         <div className={styles.toolbar}>
           <div><h2>Gerenciar seiyuus</h2><p>Edite identidade, biografia, agência, imagem e publicação.</p></div>
-          <form className={styles.search} onSubmit={submitSearch}><FiSearch /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar seiyuu" aria-label="Buscar seiyuu" /><button type="submit">Buscar</button></form>
+          <form className={styles.search} autoComplete="off" onSubmit={submitSearch}><FiSearch /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar seiyuu" aria-label="Buscar seiyuu" /><button type="submit">Buscar</button></form>
         </div>
 
         {error && <p className={styles.error}>{error}</p>}

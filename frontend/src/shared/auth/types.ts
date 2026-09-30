@@ -8,6 +8,8 @@ export interface AuthUser {
   email: string;
   role: UserRole;
   avatarUrl: string | null;
+  showAdultContent: boolean;
+  hideAdultContentFromVisitors: boolean;
   createdAt: string;
   updatedAt: string;
 }

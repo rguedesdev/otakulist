@@ -5,7 +5,7 @@
 }
 
 .completedMangaSectionTitle {
-  color: var(--title-color);
+  color: var(--color-text-primary);
   font-size: 16px;
   font-weight: 700;
   margin-bottom: 12px;

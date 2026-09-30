@@ -20,7 +20,7 @@
     "seed:madhouse": "tsx --env-file-if-exists=.env src/scripts/seed-madhouse.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
-    "test:integration": "vitest run tests/auth.integration.test.ts"
+    "test:integration": "vitest run src/tests/auth.integration.test.ts"
   },
   "dependencies": {
     "@fastify/cookie": "11.1.2",

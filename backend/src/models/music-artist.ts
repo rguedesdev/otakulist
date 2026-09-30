@@ -17,6 +17,13 @@ export interface MusicArtistDocument {
   activityPeriod: string | null;
   recordLabel: string | null;
   genres: string[];
+  discography: Array<{
+    title: string;
+    releaseType: string;
+    year: string;
+    tracks: number;
+    cover: string;
+  }>;
   platformLinks: Record<string, string | undefined>;
   publicationStatus: (typeof MUSIC_ARTIST_PUBLICATION_STATUSES)[number];
   createdAt: Date;
@@ -38,6 +45,14 @@ const musicArtistSchema = new Schema<MusicArtistDocument>(
     activityPeriod: { type: String, trim: true, default: null, maxlength: 100 },
     recordLabel: { type: String, trim: true, default: null, maxlength: 200 },
     genres: [{ type: String, trim: true, maxlength: 100 }],
+    discography: [{
+      title: { type: String, required: true, trim: true, maxlength: 200 },
+      releaseType: { type: String, required: true, trim: true, maxlength: 100 },
+      year: { type: String, required: true, trim: true, maxlength: 20 },
+      tracks: { type: Number, required: true, min: 0, max: 10_000 },
+      cover: { type: String, required: true, trim: true, maxlength: 2_048 },
+      _id: false,
+    }],
     platformLinks: {
       spotify: optionalUrl,
       tidal: optionalUrl,
@@ -59,4 +74,3 @@ musicArtistSchema.index({ publicationStatus: 1, displayName: 1 });
 export const MusicArtist =
   (models.MusicArtist as Model<MusicArtistDocument> | undefined) ??
   model<MusicArtistDocument>("MusicArtist", musicArtistSchema);
-

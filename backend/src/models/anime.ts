@@ -4,6 +4,7 @@ const { Schema, model, models } = mongoose;
 
 export const ANIME_RELEASE_FORMATS = ["TV", "MOVIE", "OVA", "ONA", "SPECIAL"] as const;
 export const ANIME_STATUSES = ["ANNOUNCED", "AIRING", "FINISHED", "CANCELLED"] as const;
+export const ANIME_BROADCAST_DAYS = ["SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"] as const;
 export const ANIME_PUBLICATION_STATUSES = ["DRAFT", "PUBLISHED"] as const;
 export const ANIME_SONG_TYPES = ["OPENING", "ENDING", "INSERT"] as const;
 export const ALTERNATIVE_TITLE_TYPES = [
@@ -35,6 +36,7 @@ export interface AnimeDocument {
   producers: string[];
   demography: string | null;
   rating: string | null;
+  adultContent: boolean;
   publicationStatus: (typeof ANIME_PUBLICATION_STATUSES)[number];
   installments: Array<{
     order: number;
@@ -46,9 +48,12 @@ export interface AnimeDocument {
     episodes: number;
     durationMinutes: number | null;
     status: (typeof ANIME_STATUSES)[number];
+    statusOverride: (typeof ANIME_STATUSES)[number] | null;
     startDate: Date | null;
     endDate: Date | null;
     broadcastSeason: string | null;
+    broadcastDay: (typeof ANIME_BROADCAST_DAYS)[number] | null;
+    broadcastTime: string | null;
     studio: string | null;
     studioId: mongoose.Types.ObjectId | null;
   }>;
@@ -97,6 +102,7 @@ const animeSchema = new Schema<AnimeDocument>(
     producers: [{ type: String, trim: true }],
     demography: { type: String, trim: true, default: null },
     rating: { type: String, trim: true, default: null },
+    adultContent: { type: Boolean, default: false, required: true },
     publicationStatus: { type: String, enum: ANIME_PUBLICATION_STATUSES, default: "DRAFT", required: true },
     installments: [
       new Schema(
@@ -107,12 +113,15 @@ const animeSchema = new Schema<AnimeDocument>(
           format: { type: String, enum: ANIME_RELEASE_FORMATS, required: true },
           synopsis: { type: String, required: true, trim: true, maxlength: 10_000 },
           coverUrl: { type: String, trim: true, default: null },
-          episodes: { type: Number, required: true, min: 1 },
+          episodes: { type: Number, required: true, min: 0 },
           durationMinutes: { type: Number, min: 1, default: null },
           status: { type: String, enum: ANIME_STATUSES, required: true },
+          statusOverride: { type: String, enum: ANIME_STATUSES, default: null },
           startDate: { type: Date, default: null },
           endDate: { type: Date, default: null },
           broadcastSeason: { type: String, trim: true, default: null },
+          broadcastDay: { type: String, enum: ANIME_BROADCAST_DAYS, default: null },
+          broadcastTime: { type: String, match: /^(?:[01]\d|2[0-3]):[0-5]\d$/, default: null },
           studio: { type: String, trim: true, default: null },
           studioId: { type: Schema.Types.ObjectId, ref: "Studio", default: null },
         },
@@ -191,6 +200,8 @@ const animeSchema = new Schema<AnimeDocument>(
 );
 
 animeSchema.index({ publicationStatus: 1, title: 1 });
+animeSchema.index({ publicationStatus: 1, "installments.startDate": 1 });
+animeSchema.index({ publicationStatus: 1, "installments.broadcastSeason": 1 });
 
 export const Anime =
   (models.Anime as Model<AnimeDocument> | undefined) ?? model<AnimeDocument>("Anime", animeSchema);

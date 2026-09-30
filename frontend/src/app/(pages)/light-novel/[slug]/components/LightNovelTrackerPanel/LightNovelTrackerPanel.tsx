@@ -58,19 +58,28 @@ function LightNovelTrackerPanel({ totalChapters, workKey }: LightNovelTrackerPan
   const [saved, setSaved] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [savingProgress, setSavingProgress] = useState(false);
+  const hasKnownTotal = totalChapters > 0;
 
   useEffect(() => {
-    const hydrateTracker = () => {
-      setReadChapters(0);
-      setStatus("planejado");
-      setIsAdded(false);
-      setSaved(false);
+    const hydrateTracker = (resetBeforeLoading = false) => {
+      if (resetBeforeLoading) {
+        setReadChapters(0);
+        setStatus("planejado");
+        setIsAdded(false);
+        setSaved(false);
+      }
       if (!user || !accessToken) return;
       const storageKey = `otakulist:publication-tracker:${user.id}:LIGHT_NOVEL:${workKey}`;
       void getPublicationListEntry("LIGHT_NOVEL", workKey, accessToken).then((entry) => {
-        if (!entry) return;
+        if (!entry) {
+          setReadChapters(0);
+          setStatus("planejado");
+          setIsAdded(false);
+          setSaved(false);
+          return;
+        }
         const tracker = publicationEntryToLocalTracker(entry);
-        setReadChapters(Math.min(totalChapters, tracker.readChapters));
+        setReadChapters(hasKnownTotal ? Math.min(totalChapters, tracker.readChapters) : Math.max(0, tracker.readChapters));
         setStatus(tracker.status);
         setIsAdded(true);
         setSaved(true);
@@ -78,7 +87,7 @@ function LightNovelTrackerPanel({ totalChapters, workKey }: LightNovelTrackerPan
       }).catch(() => undefined);
     };
 
-    const animationFrame = window.requestAnimationFrame(hydrateTracker);
+    const animationFrame = window.requestAnimationFrame(() => hydrateTracker(true));
     const handleTrackerUpdate = (event: Event) => {
       if (!user) return;
       const storageKey = `otakulist:publication-tracker:${user.id}:LIGHT_NOVEL:${workKey}`;
@@ -90,15 +99,16 @@ function LightNovelTrackerPanel({ totalChapters, workKey }: LightNovelTrackerPan
       window.cancelAnimationFrame(animationFrame);
       window.removeEventListener("otakulist:publication-tracker-updated", handleTrackerUpdate);
     };
-  }, [accessToken, totalChapters, user, workKey]);
+  }, [accessToken, hasKnownTotal, totalChapters, user, workKey]);
 
-  const progress = totalChapters > 0 ? Math.round((readChapters / totalChapters) * 100) : 0;
+  const progress = hasKnownTotal ? Math.round((readChapters / totalChapters) * 100) : null;
+  const visualProgress = progress ?? (readChapters > 0 ? 50 : 0);
 
   const changeChapters = (amount: number) => {
     setSaved(false);
     setReadChapters((current) => {
-      const next = Math.min(totalChapters, Math.max(0, current + amount));
-      if (totalChapters > 0 && next === totalChapters) setStatus("completo");
+      const next = Math.max(0, hasKnownTotal ? Math.min(totalChapters, current + amount) : current + amount);
+      if (hasKnownTotal && next === totalChapters) setStatus("completo");
       else if (status === "completo") setStatus("lendo");
       return next;
     });
@@ -143,15 +153,15 @@ function LightNovelTrackerPanel({ totalChapters, workKey }: LightNovelTrackerPan
 
             <div className={styles.summaryProgress}>
               <div>
-                <span>{progress}% concluído</span>
+                <span>{progress === null ? "Total em aberto" : `${progress}% concluído`}</span>
                 <strong>
-                  {readChapters}/{totalChapters} capítulos
+                  {hasKnownTotal ? `${readChapters}/${totalChapters} capítulos` : `${readChapters} capítulos lidos`}
                 </strong>
               </div>
               <div className={styles.summaryProgressTrack} aria-hidden="true">
                 <span
-                  className={readChapters === totalChapters ? styles.progressComplete : undefined}
-                  style={getProgressStyle(progress)}
+                  className={hasKnownTotal && readChapters === totalChapters ? styles.progressComplete : undefined}
+                  style={getProgressStyle(visualProgress)}
                 />
               </div>
             </div>
@@ -185,24 +195,25 @@ function LightNovelTrackerPanel({ totalChapters, workKey }: LightNovelTrackerPan
             <div className={styles.progressArea}>
               <div className={styles.progressMeta}>
                 <div>
-                  <strong>{progress}% concluído</strong>
+                  <strong>{progress === null ? "Total em aberto" : `${progress}% concluído`}</strong>
                   <span>Continue de onde parou</span>
                 </div>
                 <span className={styles.episodeCount}>
-                  {readChapters} / {totalChapters} caps.
+                  {hasKnownTotal ? `${readChapters} / ${totalChapters} caps.` : `${readChapters} caps. lidos`}
                 </span>
               </div>
               <div
                 className={styles.progressTrack}
                 role="progressbar"
                 aria-label="Progresso dos capítulos"
-                aria-valuemin={0}
-                aria-valuemax={totalChapters}
-                aria-valuenow={readChapters}
+                aria-valuemin={hasKnownTotal ? 0 : undefined}
+                aria-valuemax={hasKnownTotal ? totalChapters : undefined}
+                aria-valuenow={hasKnownTotal ? readChapters : undefined}
+                aria-valuetext={hasKnownTotal ? undefined : "Total em aberto"}
               >
                 <span
-                  className={readChapters === totalChapters ? styles.progressComplete : undefined}
-                  style={getProgressStyle(progress)}
+                  className={hasKnownTotal && readChapters === totalChapters ? styles.progressComplete : undefined}
+                  style={getProgressStyle(visualProgress)}
                 />
               </div>
               <div className={styles.episodeControls}>
@@ -219,7 +230,7 @@ function LightNovelTrackerPanel({ totalChapters, workKey }: LightNovelTrackerPan
                   type="button"
                   onClick={() => changeChapters(1)}
                   aria-label="Adicionar um capítulo"
-                  disabled={readChapters === totalChapters}
+                  disabled={hasKnownTotal && readChapters === totalChapters}
                 >
                   <FiPlus aria-hidden="true" />
                 </button>
@@ -233,7 +244,7 @@ function LightNovelTrackerPanel({ totalChapters, workKey }: LightNovelTrackerPan
                 compact
                 value={status}
                 onChange={(nextStatus) => {
-                  if (nextStatus === "completo") setReadChapters(totalChapters);
+                  if (nextStatus === "completo" && hasKnownTotal) setReadChapters(totalChapters);
                   setStatus(nextStatus);
                   setSaved(false);
                 }}

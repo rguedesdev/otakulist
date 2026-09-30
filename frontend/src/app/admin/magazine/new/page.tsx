@@ -3,18 +3,22 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
-import { FiArrowLeft, FiBookOpen, FiImage, FiUploadCloud, FiX } from "react-icons/fi";
+import { FiBookOpen, FiImage, FiUploadCloud, FiX } from "react-icons/fi";
 
 import { assetUrl, graphqlRequest, uploadCatalogImage } from "@/shared/auth/api";
 import { useAuth } from "@/shared/auth/auth-provider";
 import { CustomSelect } from "@/shared/components/CustomSelect/page";
 import styles from "../../anime/new/page.module.css";
+import { CancelLink } from "@/shared/components/AdminFormActions/CancelLink";
+import { SaveButton } from "@/shared/components/AdminFormActions/SaveButton";
 
 type PublisherOption = { id: string; displayName: string; slug: string; imageUrl: string };
-type MagazineData = { title: string; description: string; imageUrl: string; foundation: string | null; demography: string | null; frequency: string | null; publicationStatus: "DRAFT" | "PUBLISHED"; publisher: PublisherOption };
+type MagazineData = { title: string; description: string; imageUrl: string; foundation: string | null; demography: string | null; frequency: string | null; publicationStatus: "DRAFT" | "PUBLISHED"; publisher: PublisherOption; externalLinks: Record<string, string | null>; storeLinks: Record<string, string | null> };
+const externalLinks = [["website", "Site oficial"], ["x", "X/Twitter"], ["instagram", "Instagram"], ["pixiv", "Pixiv"], ["youtube", "YouTube"]] as const;
+const storeLinks = [["amazon", "Amazon"], ["cdJapan", "CD Japan"], ["mercadoLivre", "Mercado Livre"], ["rakuten", "Rakuten"], ["shopee", "Shopee"], ["ebay", "Ebay"], ["otakuyasan", "Otakuya-san"], ["hmv", "HMV & Books"], ["honto", "Honto"], ["toranoana", "Toranoana"], ["animate", "Animate"]] as const;
 const CREATE_MAGAZINE = `mutation CreateMagazine($input: CreateMagazineInput!) { createMagazine(input: $input) { slug } }`;
 const UPDATE_MAGAZINE = `mutation UpdateMagazine($slug: String!, $input: CreateMagazineInput!) { updateMagazine(slug: $slug, input: $input) { slug } }`;
-const ADMIN_MAGAZINE = `query Magazine($slug: String!) { magazine(slug: $slug) { title description imageUrl foundation demography frequency publicationStatus publisher { id displayName slug imageUrl } } }`;
+const ADMIN_MAGAZINE = `query Magazine($slug: String!) { magazine(slug: $slug) { title description imageUrl foundation demography frequency publicationStatus externalLinks { website x instagram pixiv youtube } storeLinks { amazon cdJapan mercadoLivre rakuten shopee ebay otakuyasan hmv honto toranoana animate } publisher { id displayName slug imageUrl } } }`;
 const SEARCH_PUBLISHERS = `query SearchPublishers($query: String!) { searchPublishers(query: $query) { id displayName slug imageUrl } }`;
 
 function PublisherPicker({ value, accessToken, onChange }: { value: PublisherOption | null; accessToken: string; onChange(value: PublisherOption | null): void }) {
@@ -71,7 +75,19 @@ export function MagazineFormPage({ editSlug }: { editSlug?: string }) {
     try {
       const uploadedImage = imageFile ? await uploadCatalogImage(imageFile, accessToken) : imageUrl;
       if (!uploadedImage) throw new Error("Selecione uma imagem para a magazine");
-      const input = { title: title.trim(), description: String(form.get("description") ?? "").trim(), imageUrl: uploadedImage, foundation: optional("foundation"), publisherId: publisher.id, demography: optional("demography"), frequency: optional("frequency"), publicationStatus: String(form.get("publicationStatus")) };
+      const input = {
+        title: title.trim(), description: String(form.get("description") ?? "").trim(), imageUrl: uploadedImage,
+        foundation: optional("foundation"), publisherId: publisher.id, demography: optional("demography"), frequency: optional("frequency"),
+        publicationStatus: String(form.get("publicationStatus")),
+        externalLinks: Object.fromEntries(externalLinks.flatMap(([key]) => {
+          const value = optional(`external.${key}`);
+          return value ? [[key, value]] : [];
+        })),
+        storeLinks: Object.fromEntries(storeLinks.flatMap(([key]) => {
+          const value = optional(`store.${key}`);
+          return value ? [[key, value]] : [];
+        })),
+      };
       const data = editSlug ? await graphqlRequest<{ updateMagazine: { slug: string } }>(UPDATE_MAGAZINE, { slug: editSlug, input }, accessToken) : await graphqlRequest<{ createMagazine: { slug: string } }>(CREATE_MAGAZINE, { input }, accessToken);
       const slug = "updateMagazine" in data ? data.updateMagazine.slug : data.createMagazine.slug;
       setSavedSlug(slug); setImageUrl(uploadedImage); setImageFile(null);
@@ -82,13 +98,13 @@ export function MagazineFormPage({ editSlug }: { editSlug?: string }) {
   if (authLoading || loadingMagazine) return <main className={styles.accessPage}><div className={styles.spinner} /><p>Preparando editor…</p></main>;
   if (!user || user.role !== "ZEUS" || !accessToken) return <main className={styles.accessPage}><section className={styles.accessCard}><span className={styles.accessIcon}><FiBookOpen /></span><h1>Acesso restrito</h1><p>Entre com uma conta ZEUS para editar magazines.</p><Link className={styles.accessAction} href={user ? "/" : "/login"}>{user ? "Voltar" : "Entrar"}</Link></section></main>;
 
-  return <main className={styles.page}><header className={styles.header}><div><span>Administração · Magazine</span><h1>{editSlug ? "Editar magazine" : "Cadastrar magazine"}</h1></div><p>O vínculo com a editora é definido nesta magazine.</p></header><form className={styles.form} onSubmit={submit}><section className={styles.card}><div className={styles.sectionTitle}><span>01</span><div><h2>Dados da magazine</h2><p>Identidade, publicação e vínculo editorial.</p></div></div><div className={styles.grid}>
+  return <main className={styles.page}><header className={styles.header}><div><span>Administração · Magazine</span><h1>{editSlug ? "Editar magazine" : "Cadastrar magazine"}</h1></div><p>O vínculo com a editora é definido nesta magazine.</p></header><form className={styles.form} autoComplete="off" onSubmit={submit}><section className={styles.card}><div className={styles.sectionTitle}><span>01</span><div><h2>Dados da magazine</h2><p>Identidade, publicação e vínculo editorial.</p></div></div><div className={styles.grid}>
     <label><span>Título *</span><input required value={title} onChange={(event) => setTitle(event.target.value)} /></label>
     <label><span>Editora *</span><PublisherPicker value={publisher} accessToken={accessToken} onChange={setPublisher} /></label>
     <label><span>Ano de criação</span><input name="foundation" defaultValue={initial?.foundation ?? ""} placeholder="Ex.: 1968" /></label><label><span>Demografia</span><input name="demography" defaultValue={initial?.demography ?? ""} /></label><label><span>Periodicidade</span><input name="frequency" defaultValue={initial?.frequency ?? ""} /></label><label><span>Visibilidade</span><CustomSelect name="publicationStatus" defaultValue={initial?.publicationStatus ?? "DRAFT"} options={[{ value: "DRAFT", label: "Rascunho" }, { value: "PUBLISHED", label: "Publicado" }]} /></label>
     <label className={styles.wide}><span>Descrição *</span><textarea required name="description" rows={7} defaultValue={initial?.description ?? ""} /></label>
     <div className={`${styles.wide} ${styles.imagePicker}`}><div className={styles.coverPreview}>{preview ? <Image src={preview} alt="Prévia da magazine" fill sizes="112px" unoptimized /> : <span><FiImage /><small>Nenhuma imagem</small></span>}</div><div className={styles.imagePickerContent}><strong>Imagem da magazine *</strong><p>Envie JPEG, PNG ou WebP.</p><label className={styles.fileButton}><FiUploadCloud />Selecionar imagem<input type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => setImageFile(event.target.files?.[0] ?? null)} /></label></div></div>
-  </div></section>{error && <p className={styles.error}>{error}</p>}{savedSlug && <p className={styles.success}>Magazine salva. <Link href={`/magazine/${savedSlug}`}>Abrir página</Link></p>}<div className={styles.footerActions}><Link className={styles.cancelAction} href="/admin/magazine"><FiArrowLeft /> Cancelar</Link><button type="submit" disabled={saving}>{saving ? "Salvando…" : "Salvar magazine"}</button></div></form></main>;
+  </div></section><section className={styles.card}><div className={styles.sectionTitle}><span>02</span><div><h2>Links da página</h2><p>Campos vazios não serão exibidos ao público.</p></div></div><h3 className={styles.subheading}>Links relacionados</h3><div className={styles.linkGrid}>{externalLinks.map(([key, label]) => <label key={key}><span>{label}</span><input type="url" name={`external.${key}`} placeholder="https://…" defaultValue={initial?.externalLinks[key] ?? ""} /></label>)}</div><hr className={styles.linkDivider} /><h3 className={styles.subheading}>Compre em</h3><div className={styles.linkGrid}>{storeLinks.map(([key, label]) => <label key={key}><span>{label}</span><input type="url" name={`store.${key}`} placeholder="https://…" defaultValue={initial?.storeLinks[key] ?? ""} /></label>)}</div></section>{error && <p className={styles.error}>{error}</p>}{savedSlug && <p className={styles.success}>Magazine salva. <Link href={`/magazine/${savedSlug}`}>Abrir página</Link></p>}<div className={styles.footerActions}><CancelLink className={styles.cancelAction} href="/admin/magazine">Cancelar</CancelLink><SaveButton disabled={saving}>Salvar magazine</SaveButton></div></form></main>;
 }
 
 export default function NewMagazinePage() { return <MagazineFormPage />; }

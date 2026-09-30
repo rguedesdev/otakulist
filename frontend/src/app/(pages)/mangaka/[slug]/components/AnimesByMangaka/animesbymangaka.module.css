@@ -5,7 +5,7 @@
 }
 
 .animesByMangakaSectionTitle {
-  color: var(--title-color);
+  color: var(--color-text-primary);
   font-size: 16px;
   font-weight: 700;
   margin-bottom: 12px;
@@ -18,16 +18,21 @@
 }
 
 .animesByMangakaCard {
+  padding: 0;
   display: grid;
-  grid-template-columns: 90px 1fr;
+  grid-template-columns: 83px 1fr;
   /* background-color removido daqui para evitar o vazamento na imagem */
   border: 1px solid var(--color-border);
   border-radius: var(--radius-medium);
-  height: 130px;
+  height: 120px;
   min-width: 0;
   width: 100%;
   overflow: hidden;
   box-shadow: var(--shadow-card);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  appearance: none;
   cursor: pointer;
 
   /* Movimento aplicado ao card inteiro. */
@@ -47,6 +52,7 @@
 
 /* Container do lado direito que isola o fundo cinza */
 .animesByMangakaTextsContainer {
+  display: block;
   background-color: var(--color-surface-raised);
   width: 100%;
   height: 100%;
@@ -55,10 +61,10 @@
 
 /* --- Imagem --- */
 .animesByMangakaCover {
-  height: 130px;
-  width: 90px;
+  height: 120px;
+  width: 83px;
   object-fit: cover;
-  min-width: 90px;
+  min-width: 83px;
   display: block;
 }
 
@@ -105,14 +111,12 @@
   justify-content: center;
   width: 18px;
   flex-shrink: 0;
+  overflow: visible;
 }
 
-/* Caixa de texto (dd) */
-.infoLine dd {
-  margin: 0;
-  padding: 0;
-  display: flex;
-  align-items: center;
+.infoIcon svg {
+  display: block;
+  overflow: visible;
 }
 
 /* Estilo do texto interno */

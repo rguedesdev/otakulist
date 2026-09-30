@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { FiCheck, FiUpload } from "react-icons/fi";
-import { MdOutlineBadge, MdOutlinePersonOutline } from "react-icons/md";
+import { MdOutlineBadge, MdOutlinePersonOutline, MdOutlineVisibility } from "react-icons/md";
 import { z } from "zod";
 
 import { ApiError, assetUrl, uploadAvatar } from "@/shared/auth/api";
@@ -24,6 +24,8 @@ const profileSchema = z.object({
     .max(24, "Use no máximo 24 caracteres")
     .regex(/^[a-z0-9_]+$/, "Use letras minúsculas, números e underscore"),
   email: z.string().trim().toLowerCase().pipe(z.email("Informe um e-mail válido")),
+  showAdultContent: z.boolean(),
+  hideAdultContentFromVisitors: z.boolean(),
 });
 
 type ProfileData = z.infer<typeof profileSchema>;
@@ -41,7 +43,10 @@ export default function EditProfilePage() {
     reset,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<ProfileData>({ resolver: zodResolver(profileSchema) });
+  } = useForm<ProfileData>({
+    resolver: zodResolver(profileSchema),
+    defaultValues: { showAdultContent: false, hideAdultContentFromVisitors: false },
+  });
 
   useEffect(() => {
     if (loading) return;
@@ -49,7 +54,14 @@ export default function EditProfilePage() {
       router.replace("/login");
       return;
     }
-    reset({ displayName: user.displayName, bio: user.bio ?? "", username: user.username, email: user.email });
+    reset({
+      displayName: user.displayName,
+      bio: user.bio ?? "",
+      username: user.username,
+      email: user.email,
+      showAdultContent: user.showAdultContent,
+      hideAdultContentFromVisitors: user.hideAdultContentFromVisitors,
+    });
   }, [loading, reset, router, user]);
 
   const chooseImage = (file: File | undefined) => {
@@ -108,7 +120,7 @@ export default function EditProfilePage() {
           </div>
         </header>
 
-        <form className={styles.form} onSubmit={onSubmit} noValidate>
+        <form className={styles.form} autoComplete="off" onSubmit={onSubmit} noValidate>
           <section className={styles.avatarCard} aria-labelledby="profile-image-title">
             <div
               className={styles.avatar}
@@ -175,6 +187,30 @@ export default function EditProfilePage() {
                 {errors.email && <p className={styles.fieldError}>{errors.email.message}</p>}
               </div>
             </div>
+          </section>
+
+          <section className={styles.infoCard} aria-labelledby="content-preferences-title">
+            <div className={styles.sectionHeading}>
+              <MdOutlineVisibility aria-hidden="true" />
+              <div>
+                <h2 id="content-preferences-title">Preferências de conteúdo</h2>
+                <p>Controle se obras marcadas como conteúdo adulto podem aparecer no site.</p>
+              </div>
+            </div>
+            <label className={styles.adultPreference}>
+              <span>
+                <strong>Exibir conteúdo +18</strong>
+                <small>Desativado por padrão. Você pode alterar esta preferência quando quiser.</small>
+              </span>
+              <input type="checkbox" {...register("showAdultContent")} />
+            </label>
+            <label className={styles.adultPreference}>
+              <span>
+                <strong>Ocultar conteúdo +18 dos visitantes</strong>
+                <small>Você continuará vendo essas obras nas suas listas, mas elas não aparecerão para quem visitar seu perfil.</small>
+              </span>
+              <input type="checkbox" {...register("hideAdultContentFromVisitors")} />
+            </label>
           </section>
 
           {formError && <p className={styles.formError}>{formError}</p>}

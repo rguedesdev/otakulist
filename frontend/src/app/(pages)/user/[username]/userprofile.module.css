@@ -506,6 +506,103 @@
   font-size: 10px;
 }
 
+.favoritesPanel {
+  grid-column: 1 / -1;
+}
+
+.favoriteGroups {
+  margin-top: 18px;
+  display: grid;
+  gap: 24px;
+}
+
+.favoriteGroup h3 {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-text-primary);
+  font-size: 14px;
+}
+
+.favoriteGroup h3 span {
+  color: var(--color-text-muted);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.favoritesGrid {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 12px;
+}
+
+.favoriteCard {
+  position: relative;
+  translate: 0 0;
+  height: 110px;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 75px minmax(0, 1fr);
+  overflow: hidden;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-medium);
+  box-shadow: var(--shadow-card);
+  transition:
+    translate 0.18s ease-out,
+    border-color 0.2s ease-in-out,
+    box-shadow 0.2s ease-in-out;
+}
+
+.favoriteCard:hover {
+  translate: 0 -4px;
+  border-color: var(--color-accent-border);
+  box-shadow: var(--shadow-card-hover);
+}
+
+.favoriteCard > img {
+  display: block;
+  width: 75px;
+  height: 110px;
+  object-fit: cover;
+}
+
+.favoriteDetails {
+  min-width: 0;
+  height: 100%;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  background: var(--color-surface-raised);
+}
+
+.favoriteCard strong {
+  overflow: hidden;
+  color: var(--color-text-primary);
+  font-size: 13px;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+}
+
+.emptyFavoriteGroup {
+  margin: 10px 0 0;
+  color: var(--color-text-muted);
+  font-size: 12px;
+}
+
+.emptyFavorites {
+  margin-top: 18px;
+  padding: 26px 18px;
+  color: var(--color-text-muted);
+  background: var(--color-surface-raised);
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-medium);
+  font-size: 12px;
+  text-align: center;
+}
+
 .friendsPanel {
   grid-column: 1 / -1;
 }
@@ -608,6 +705,7 @@
 }
 
 .statusFilters {
+  position: relative;
   display: flex;
   gap: 5px;
   overflow-x: auto;
@@ -618,9 +716,11 @@
   display: none;
 }
 
-.statusFilters button {
+.statusFilters a {
   min-height: 31px;
   padding: 6px 9px;
+  display: inline-flex;
+  align-items: center;
   flex: 0 0 auto;
   color: var(--color-text-muted);
   background: transparent;
@@ -629,18 +729,26 @@
   font-size: 11px;
   font-weight: 700;
   cursor: pointer;
+  text-decoration: none;
 }
 
-.statusFilters button:hover {
+.statusFilters a:hover {
   color: var(--color-text-primary);
   background: var(--color-surface-hover);
+}
+
+.emptyFilteredList {
+  padding: 34px 18px;
+  color: var(--color-text-muted);
+  font-size: 12px;
+  text-align: center;
 }
 
 .statusFilters .filterActive,
 .statusFilters .filterActive:hover {
   color: var(--color-accent-highlight);
-  background: var(--color-accent-soft);
-  border-color: var(--color-accent-border);
+  background: transparent;
+  border-color: transparent;
 }
 
 .searchField {

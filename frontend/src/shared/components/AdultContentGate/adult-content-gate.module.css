@@ -1,0 +1,102 @@
+.gate {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+.restrictedContent {
+  min-height: 100vh;
+  filter: blur(18px);
+  pointer-events: none;
+  user-select: none;
+  transform: scale(1.025);
+}
+
+.overlay {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  padding: 24px;
+  display: grid;
+  place-items: center;
+  background: rgba(9, 9, 14, 0.62);
+  backdrop-filter: blur(2px);
+}
+
+.warning {
+  width: min(100%, 470px);
+  padding: clamp(25px, 5vw, 38px);
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  color: var(--color-text-primary);
+  background: color-mix(in srgb, var(--color-surface) 96%, #000);
+  border: 1px solid var(--color-accent-border);
+  border-radius: var(--radius-large);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.52);
+  text-align: center;
+}
+
+.ageBadge {
+  width: 64px;
+  height: 64px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  background: linear-gradient(135deg, var(--color-accent), var(--color-accent-deep));
+  border: 1px solid var(--color-accent-highlight);
+  border-radius: 50%;
+  font-size: 20px;
+  font-weight: 850;
+}
+
+.warning h1 {
+  margin-top: 17px;
+  font-size: clamp(24px, 5vw, 32px);
+}
+
+.warning p {
+  max-width: 390px;
+  margin-top: 10px;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.actions {
+  width: 100%;
+  margin-top: 24px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.actions a {
+  min-height: 42px;
+  padding: 9px 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border-radius: var(--radius-small);
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.settingsAction {
+  color: #fff;
+  background: linear-gradient(135deg, var(--color-accent), var(--color-accent-deep));
+  border: 1px solid var(--color-accent);
+}
+
+.backAction {
+  color: var(--color-text-secondary);
+  background: var(--color-bg-subtle);
+  border: 1px solid var(--color-border-strong);
+}
+
+@media (max-width: 500px) {
+  .actions {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,10 +1,9 @@
-import Image from "next/image";
-import Link from "next/link";
 import { FaRegCheckCircle } from "react-icons/fa";
 import { LiaCanadianMapleLeaf } from "react-icons/lia";
 import { RiRestartLine } from "react-icons/ri";
 
 import { assetUrl } from "@/shared/auth/api";
+import { MediaCreditCard } from "@/shared/components/MediaCreditCard/page";
 import styles from "./animesbystudio.module.css";
 
 export type StudioAnimeCredit = {
@@ -28,17 +27,18 @@ function AnimesByStudio({ credits }: { credits: StudioAnimeCredit[] }) {
   return <section className={styles.animesByStudioContainer}>
     <h2 className={styles.animesByStudioSectionTitle}>Animes</h2>
     {credits.length === 0 ? <p className={styles.empty}>Nenhum anime vinculado a este estúdio.</p> : <div className={styles.animesByStudioCardsContainer}>
-      {credits.map(({ anime }) => <Link className={styles.animesByStudioCard} href={`/anime/${anime.slug}`} key={anime.id}>
-        <Image className={styles.animesByStudioCover} src={assetUrl(anime.coverUrl) ?? anime.coverUrl} alt={`Capa de ${anime.title}`} width={90} height={130} unoptimized />
-        <div className={styles.animesByStudioTextsContainer}><div className={styles.animesByStudioTexts}>
-          <h3 className={styles.animesByStudioTitle}>{anime.title}</h3>
-          <dl className={styles.infoGroup}>
-            <div className={styles.infoLine}><dt className={styles.infoIcon}><LiaCanadianMapleLeaf size={18} aria-hidden="true" /></dt><dd className={styles.animesByStudioInfo}>Temporada: {anime.broadcastSeason ?? "Não informada"}</dd></div>
-            <div className={styles.infoLine}><dt className={styles.infoIcon}><RiRestartLine size={14} aria-hidden="true" /></dt><dd className={styles.animesByStudioInfo}>Início: {displayDate(anime.startDate)}</dd></div>
-            <div className={styles.infoLine}><dt className={styles.infoIcon}><FaRegCheckCircle size={13} aria-hidden="true" /></dt><dd className={styles.animesByStudioInfo}>Término: {displayDate(anime.endDate)}</dd></div>
-          </dl>
-        </div></div>
-      </Link>)}
+      {credits.map(({ anime }) => <MediaCreditCard
+        href={`/anime/${anime.slug}`}
+        image={assetUrl(anime.coverUrl) ?? anime.coverUrl}
+        imageAlt={`Capa de ${anime.title}`}
+        title={anime.title}
+        details={[
+          { icon: <LiaCanadianMapleLeaf size={18} aria-hidden="true" />, text: `Temporada: ${anime.broadcastSeason ?? "Não informada"}` },
+          { icon: <RiRestartLine size={14} aria-hidden="true" />, text: `Início: ${displayDate(anime.startDate)}` },
+          { icon: <FaRegCheckCircle size={13} aria-hidden="true" />, text: `Término: ${displayDate(anime.endDate)}` },
+        ]}
+        key={anime.id}
+      />)}
     </div>}
   </section>;
 }

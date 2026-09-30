@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { FiBookOpen, FiMusic, FiTv } from "react-icons/fi";
+import { FiBookOpen, FiEdit3, FiMusic, FiTv } from "react-icons/fi";
 import { RiBuildingLine, RiQuillPenLine } from "react-icons/ri";
 import { GiEvilBook } from "react-icons/gi";
 import { LiaMicrophoneSolid } from "react-icons/lia";
@@ -42,6 +42,11 @@ export default function AdminPage() {
           <span className={styles.icon}><FiTv /></span>
           <div><h2>Animes</h2><p>Gerencie obras, temporadas, vínculos, staff e publicação.</p></div>
           <strong>Acessar →</strong>
+        </Link>
+        <Link href="/admin/collaborations">
+          <span className={styles.icon}><FiEdit3 /></span>
+          <div><h2>Colaborações da comunidade</h2><p>Revise e aprove melhorias sugeridas para as obras do catálogo.</p></div>
+          <strong>Revisar →</strong>
         </Link>
         <Link href="/admin/manga">
           <span className={styles.icon}><GiEvilBook /></span>

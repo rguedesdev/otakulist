@@ -14,6 +14,7 @@ export interface MangaDocument {
   alternativeTitles: Array<{ type: string; title: string }>;
   status: (typeof MANGA_STATUSES)[number];
   publicationStatus: (typeof ANIME_PUBLICATION_STATUSES)[number];
+  adultContent: boolean;
   startDate: Date | null;
   endDate: Date | null;
   magazine: string | null;
@@ -45,6 +46,7 @@ const mangaSchema = new Schema<MangaDocument>(
     alternativeTitles: [new Schema({ type: { type: String, enum: ALTERNATIVE_TITLE_TYPES, required: true }, title: { type: String, required: true, trim: true, maxlength: 200 } }, { _id: false })],
     status: { type: String, enum: MANGA_STATUSES, required: true },
     publicationStatus: { type: String, enum: ANIME_PUBLICATION_STATUSES, required: true, default: "DRAFT" },
+    adultContent: { type: Boolean, default: false, required: true },
     startDate: { type: Date, default: null },
     endDate: { type: Date, default: null },
     magazine: { type: String, trim: true, default: null },

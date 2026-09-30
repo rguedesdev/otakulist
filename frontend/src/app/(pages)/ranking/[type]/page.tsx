@@ -156,7 +156,7 @@ async function RankingByTypePage({ params }: { params: Promise<{ type: string }>
         <section className={styles.rankingSection} aria-labelledby="full-ranking-title">
           <div className={styles.rankingHeading}>
             <div><span className={styles.sectionKicker}>Top 100</span><h2 id="full-ranking-title">Ranking de {config.label}</h2></div>
-            <label className={styles.searchBox}><FiSearch aria-hidden="true" /><span className={styles.srOnly}>Buscar no ranking</span><input type="search" placeholder="Buscar no ranking..." /></label>
+            <label className={styles.searchBox}><FiSearch aria-hidden="true" /><span className={styles.srOnly}>Buscar no ranking</span><input type="search" autoComplete="off" placeholder="Buscar no ranking..." /></label>
           </div>
 
           <div className={styles.filterBar}>

@@ -1,5 +1,4 @@
 import Image from "next/image";
-import Link from "next/link";
 
 import { FiCalendar, FiDisc } from "react-icons/fi";
 import { MdOutlineLibraryMusic } from "react-icons/md";
@@ -12,7 +11,6 @@ type DiscographyRelease = {
   year: string;
   tracks: number;
   cover: string;
-  href: string;
 };
 
 type DiscographySectionProps = {
@@ -26,10 +24,9 @@ function DiscographySection({ releases, title = "Discografia" }: DiscographySect
       <h2 className={styles.sectionTitle}>{title}</h2>
       <div className={styles.cardsContainer}>
         {releases.map((release) => (
-          <Link
+          <article
             className={styles.card}
-            href={release.href}
-            key={`${release.title}-${release.year}`}
+            key={`${release.title}-${release.year}-${release.releaseType}`}
             aria-label={`${release.title}, ${release.releaseType} de ${release.year}`}
           >
             <Image
@@ -57,7 +54,7 @@ function DiscographySection({ releases, title = "Discografia" }: DiscographySect
                 </div>
               </dl>
             </div>
-          </Link>
+          </article>
         ))}
       </div>
     </section>
