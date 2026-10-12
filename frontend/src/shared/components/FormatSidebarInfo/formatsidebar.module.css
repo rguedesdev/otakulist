@@ -324,6 +324,35 @@
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
 }
 
+/* Link TikTok */
+.linkTikTok {
+  background-color: var(--color-surface-raised);
+  padding: 6px;
+  border-radius: 4px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  box-shadow: var(--shadow-card);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: background-color ease 0.2s;
+}
+
+.linkTikTok:hover { background-color: #111111; }
+.iconTikTokContainer {
+  background-color: #111111;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+.iconTikTok { color: #ffffff; display: block; }
+.linkTikTok:hover .iconTikTokContainer { box-shadow: 0 1px 4px rgba(246, 245, 245, 0.25); }
+
 /* Links de plataformas musicais */
 .musicStreamingLinks {
   display: flex;

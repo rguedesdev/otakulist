@@ -27,6 +27,7 @@ type BaseEntity = {
     instagram?: string;
     pixiv?: string;
     youtube?: string;
+    tiktok?: string;
   };
 };
 
@@ -42,7 +43,7 @@ type BaseWork = BaseEntity & {
   publisher?: string;
   publisherLink?: { displayName: string; slug: string };
   alternativeTitles?: Array<{
-    type: "JAPANESE" | "ROMAJI" | "ENGLISH" | "PORTUGUESE" | "LITERAL" | "OTHER";
+    type: "JAPANESE" | "ROMAJI" | "ENGLISH" | "PORTUGUESE" | "LITERAL" | "SYNONYM" | "OTHER";
     title: string;
   }>;
   storeLinks?: {

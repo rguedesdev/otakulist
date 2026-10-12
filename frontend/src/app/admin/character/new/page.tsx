@@ -11,6 +11,7 @@ import { CustomSelect } from "@/shared/components/CustomSelect/page";
 import styles from "../../anime/new/page.module.css";
 import { CancelLink } from "@/shared/components/AdminFormActions/CancelLink";
 import { SaveButton } from "@/shared/components/AdminFormActions/SaveButton";
+import { reorderItems, SortableItem } from "@/shared/components/SortableItem/SortableItem";
 
 const CREATE_CHARACTER = `mutation CreateCharacter($input: CreateCharacterInput!) {
   createCharacter(input: $input) { slug }
@@ -21,11 +22,19 @@ const UPDATE_CHARACTER = `mutation UpdateCharacter($slug: String!, $input: Creat
 const ADMIN_CHARACTER = `query AdminCharacter($slug: String!) {
   character(slug: $slug) {
     nameRomaji nameKanji description imageUrl dateOfBirth hometown publicationStatus
-    voiceCredits { seiyuuSlug animeTitle }
+    voiceCredits { seiyuuSlug animeTitle seiyuu { id displayName slug nameKanji imageUrl } }
   }
 }`;
 
-type VoiceCredit = { seiyuuSlug: string; animeTitle: string };
+const SEARCH_SEIYUUS = `query SearchSeiyuus($query: String) {
+  adminSeiyuus(query: $query) { id displayName slug nameKanji imageUrl }
+}`;
+const SEARCH_ANIMES = `query SearchAnimes($query: String) {
+  adminAnimes(query: $query) { id title slug coverUrl }
+}`;
+
+type PersonOption = { id: string; displayName: string; slug: string; nameKanji: string | null; imageUrl: string | null };
+type VoiceCredit = { seiyuuSlug: string; seiyuu: PersonOption | null; animeTitle: string };
 type CharacterData = {
   nameRomaji: string;
   nameKanji: string | null;
@@ -69,8 +78,13 @@ export function CharacterFormPage({ editSlug }: { editSlug?: string }) {
     return () => { active = false; };
   }, [accessToken, editSlug, user?.role]);
 
-  const updateCredit = (index: number, field: keyof VoiceCredit, value: string) => {
-    setVoiceCredits((items) => items.map((item, itemIndex) => itemIndex === index ? { ...item, [field]: value } : item));
+  const updateAnimeTitle = (index: number, animeTitle: string) => {
+    setVoiceCredits((items) => items.map((item, itemIndex) => itemIndex === index ? { ...item, animeTitle } : item));
+  };
+  const updateSeiyuu = (index: number, seiyuu: PersonOption | null) => {
+    setVoiceCredits((items) => items.map((item, itemIndex) => itemIndex === index
+      ? { ...item, seiyuu, seiyuuSlug: seiyuu?.slug ?? "" }
+      : item));
   };
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
@@ -79,6 +93,11 @@ export function CharacterFormPage({ editSlug }: { editSlug?: string }) {
     setSaving(true);
     setError("");
     setSavedSlug("");
+    if (voiceCredits.some((credit) => !credit.seiyuu?.slug && !credit.seiyuuSlug.trim())) {
+      setError("Selecione um seiyuu para cada trabalho de voz");
+      setSaving(false);
+      return;
+    }
     const form = new FormData(event.currentTarget);
 
     try {
@@ -93,7 +112,7 @@ export function CharacterFormPage({ editSlug }: { editSlug?: string }) {
         hometown: String(form.get("hometown") ?? "").trim() || null,
         publicationStatus: String(form.get("publicationStatus")),
         voiceCredits: voiceCredits.map((credit) => ({
-          seiyuuSlug: credit.seiyuuSlug.trim(),
+          seiyuuSlug: credit.seiyuu?.slug ?? credit.seiyuuSlug.trim(),
           animeTitle: credit.animeTitle.trim(),
         })),
       };
@@ -136,7 +155,7 @@ export function CharacterFormPage({ editSlug }: { editSlug?: string }) {
           <div className={styles.sectionTitle}><span>01</span><div><h2>Identidade</h2><p>Informações principais do personagem.</p></div></div>
           <div className={styles.grid}>
             <label><span>Nome em Romaji *</span><input required value={nameRomaji} onChange={(event) => setNameRomaji(event.target.value)} /></label>
-            <label><span>Nome em Kanji</span><input name="nameKanji" defaultValue={initial?.nameKanji ?? ""} /></label>
+            <label><span>Nome em Japonês</span><input name="nameKanji" defaultValue={initial?.nameKanji ?? ""} /></label>
             <label><span>Data de nascimento</span><input name="dateOfBirth" defaultValue={initial?.dateOfBirth ?? ""} /></label>
             <label><span>Cidade natal</span><input name="hometown" defaultValue={initial?.hometown ?? ""} /></label>
             <label><span>Visibilidade</span><CustomSelect name="publicationStatus" defaultValue={initial?.publicationStatus ?? "DRAFT"} options={[{ value: "DRAFT", label: "Rascunho" }, { value: "PUBLISHED", label: "Publicado" }]} /></label>
@@ -154,13 +173,13 @@ export function CharacterFormPage({ editSlug }: { editSlug?: string }) {
         <section className={styles.card}>
           <div className={styles.sectionTitle}><span>02</span><div><h2>Trabalhos de voz</h2><p>Vincule o personagem ao perfil do seiyuu e informe o anime.</p></div></div>
           {voiceCredits.map((credit, index) => (
-            <div className={styles.row} key={index}>
-              <input required value={credit.seiyuuSlug} placeholder="Slug do seiyuu (ex.: kitou-akari)" onChange={(event) => updateCredit(index, "seiyuuSlug", event.target.value)} />
-              <input required value={credit.animeTitle} placeholder="Anime (ex.: Ranma 1⁄2)" onChange={(event) => updateCredit(index, "animeTitle", event.target.value)} />
+            <SortableItem key={`voice-${index}`} listId="character-voice-credits" index={index} count={voiceCredits.length} onMove={(from, to) => setVoiceCredits((items) => reorderItems(items, from, to))}><div className={styles.row}>
+              <SeiyuuPicker value={credit.seiyuu} accessToken={accessToken!} onChange={(seiyuu) => updateSeiyuu(index, seiyuu)} />
+              <AnimePicker value={credit.animeTitle} accessToken={accessToken!} onChange={(title) => updateAnimeTitle(index, title)} />
               <button className={styles.remove} type="button" onClick={() => setVoiceCredits((items) => items.filter((_, itemIndex) => itemIndex !== index))}><FiTrash2 /> Remover</button>
-            </div>
+            </div></SortableItem>
           ))}
-          <button className={styles.add} type="button" onClick={() => setVoiceCredits((items) => [...items, { seiyuuSlug: "", animeTitle: "" }])}><FiPlus /> Vincular seiyuu</button>
+          <button className={styles.add} type="button" onClick={() => setVoiceCredits((items) => [...items, { seiyuuSlug: "", seiyuu: null, animeTitle: "" }])}><FiPlus /> Vincular seiyuu</button>
         </section>
 
         {error && <p className={styles.error}>{error}</p>}
@@ -169,6 +188,106 @@ export function CharacterFormPage({ editSlug }: { editSlug?: string }) {
       </form>
     </main>
   );
+}
+
+function SeiyuuPicker({ value, accessToken, onChange }: {
+  value: PersonOption | null;
+  accessToken: string;
+  onChange(seiyuu: PersonOption | null): void;
+}) {
+  const [search, setSearch] = useState("");
+  const [results, setResults] = useState<PersonOption[]>([]);
+  const [resultsFor, setResultsFor] = useState("");
+  const [searching, setSearching] = useState(false);
+
+  useEffect(() => {
+    const query = search.trim();
+    if (value || query.length < 2) return;
+    let active = true;
+    const timeout = window.setTimeout(() => {
+      setSearching(true);
+      void graphqlRequest<{ adminSeiyuus: PersonOption[] }>(SEARCH_SEIYUUS, { query }, accessToken)
+        .then((data) => { if (active) { setResults(data.adminSeiyuus); setResultsFor(query); } })
+        .catch(() => { if (active) { setResults([]); setResultsFor(query); } })
+        .finally(() => { if (active) setSearching(false); });
+    }, 250);
+    return () => { active = false; window.clearTimeout(timeout); };
+  }, [accessToken, search, value]);
+
+  const visibleResults = resultsFor === search.trim() ? results : [];
+  return <div className={styles.workPicker}>
+    <label>
+      <span className={styles.voicePickerLabel}>Seiyuu *</span>
+      {value ? <div className={styles.selectedWork}>
+        {value.imageUrl ? <Image src={assetUrl(value.imageUrl) ?? value.imageUrl} alt="" width={48} height={68} unoptimized /> : <span className={styles.personFallback}><FiUser /></span>}
+        <span><strong>{value.displayName}</strong></span>
+        <button type="button" onClick={() => { onChange(null); setSearch(""); }}>Trocar</button>
+      </div> : <input value={search} placeholder="Buscar pelo nome" onChange={(event) => setSearch(event.target.value)} />}
+    </label>
+    {searching && <small className={styles.searchHint}>Buscando seiyuus…</small>}
+    {!searching && search.trim().length >= 2 && resultsFor === search.trim() && visibleResults.length === 0 && <small className={styles.searchHint}>Nenhum seiyuu encontrado.</small>}
+    {!value && visibleResults.length > 0 && <div className={styles.workResults}>{visibleResults.map((seiyuu) => <button type="button" key={seiyuu.id} onClick={() => {
+      onChange(seiyuu);
+      setSearch("");
+      setResults([]);
+      setResultsFor("");
+    }}>
+      {seiyuu.imageUrl ? <Image src={assetUrl(seiyuu.imageUrl) ?? seiyuu.imageUrl} alt="" width={38} height={54} unoptimized /> : <span className={styles.personFallback}><FiUser /></span>}
+      <span><strong>{seiyuu.displayName}</strong><small>{seiyuu.nameKanji || "Seiyuu"}</small></span>
+    </button>)}</div>}
+  </div>;
+}
+
+function AnimePicker({ value, accessToken, onChange }: {
+  value: string;
+  accessToken: string;
+  onChange(title: string): void;
+}) {
+  const [search, setSearch] = useState("");
+  const [selectedAnime, setSelectedAnime] = useState<{ id: string; title: string; slug: string; coverUrl: string } | null>(null);
+  const [results, setResults] = useState<Array<{ id: string; title: string; slug: string; coverUrl: string }>>([]);
+  const [resultsFor, setResultsFor] = useState("");
+  const [searching, setSearching] = useState(false);
+
+  useEffect(() => {
+    const query = search.trim();
+    if (query.length < 2) return;
+    let active = true;
+    const timeout = window.setTimeout(() => {
+      setSearching(true);
+      void graphqlRequest<{ adminAnimes: typeof results }>(SEARCH_ANIMES, { query }, accessToken)
+        .then((data) => { if (active) { setResults(data.adminAnimes); setResultsFor(query); } })
+        .catch(() => { if (active) { setResults([]); setResultsFor(query); } })
+        .finally(() => { if (active) setSearching(false); });
+    }, 250);
+    return () => { active = false; window.clearTimeout(timeout); };
+  }, [accessToken, search]);
+
+  const visibleResults = resultsFor === search.trim() ? results : [];
+  return <label className={styles.voiceAnimeField}>
+    <span>Anime *</span>
+    {selectedAnime ? <div className={styles.selectedWork}>
+      <Image src={assetUrl(selectedAnime.coverUrl) ?? selectedAnime.coverUrl} alt="" width={38} height={54} unoptimized />
+      <span><strong>{selectedAnime.title}</strong></span>
+      <button type="button" onClick={() => { setSelectedAnime(null); onChange(""); setSearch(""); }}>Trocar</button>
+    </div> : <input required value={value} placeholder="Buscar pelo título" onChange={(event) => {
+      onChange(event.target.value);
+      setSelectedAnime(null);
+      setSearch(event.target.value);
+    }} />}
+    {searching && <small className={styles.searchHint}>Buscando animes…</small>}
+    {!searching && search.trim().length >= 2 && resultsFor === search.trim() && visibleResults.length === 0 && <small className={styles.searchHint}>Nenhum anime encontrado.</small>}
+    {visibleResults.length > 0 && <div className={styles.workResults}>{visibleResults.map((anime) => <button type="button" key={anime.id} onClick={() => {
+      setSelectedAnime(anime);
+      onChange(anime.title);
+      setSearch("");
+      setResults([]);
+      setResultsFor("");
+    }}>
+      <Image src={assetUrl(anime.coverUrl) ?? anime.coverUrl} alt="" width={38} height={54} unoptimized />
+      <span><strong>{anime.title}</strong><small>Anime</small></span>
+    </button>)}</div>}
+  </label>;
 }
 
 export default function NewCharacterPage() {

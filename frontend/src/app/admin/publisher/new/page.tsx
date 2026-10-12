@@ -14,9 +14,9 @@ import { SaveButton } from "@/shared/components/AdminFormActions/SaveButton";
 
 const CREATE_PUBLISHER = `mutation CreatePublisher($input: CreatePublisherInput!) { createPublisher(input: $input) { slug } }`;
 const UPDATE_PUBLISHER = `mutation UpdatePublisher($slug: String!, $input: CreatePublisherInput!) { updatePublisher(slug: $slug, input: $input) { slug } }`;
-const ADMIN_PUBLISHER = `query Publisher($slug: String!) { publisher(slug: $slug) { displayName imageUrl description foundation headquarters publicationStatus externalLinks { website x instagram pixiv youtube } } }`;
+const ADMIN_PUBLISHER = `query Publisher($slug: String!) { publisher(slug: $slug) { displayName imageUrl description foundation headquarters publicationStatus externalLinks { website x instagram pixiv youtube tiktok } } }`;
 type PublisherData = { displayName: string; imageUrl: string; description: string | null; foundation: string | null; headquarters: string | null; publicationStatus: "DRAFT" | "PUBLISHED"; externalLinks: Record<string, string | null> };
-const externalLinks = [["website", "Site oficial"], ["x", "X/Twitter"], ["instagram", "Instagram"], ["pixiv", "Pixiv"], ["youtube", "YouTube"]] as const;
+const externalLinks = [["website", "Site oficial"], ["x", "X/Twitter"], ["instagram", "Instagram"], ["pixiv", "Pixiv"], ["youtube", "YouTube"], ["tiktok", "TikTok"]] as const;
 
 export function PublisherFormPage({ editSlug }: { editSlug?: string }) {
   const { user, accessToken, loading: authLoading } = useAuth();

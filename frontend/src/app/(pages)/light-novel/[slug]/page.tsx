@@ -26,25 +26,31 @@ type NovelData = {
   externalLinks: NonNullable<LightNovelEntity["externalLinks"]>; storeLinks: NonNullable<LightNovelEntity["storeLinks"]>;
   reviewSummary: { average: number; count: number }; characters: PublicationCharacter[];
   staffCredits: Array<{ role: string; contribution: string | null; person: { id: string; displayName: string; slug: string; imageUrl: string | null; roles: string[] } }>;
-  relatedWorks: Array<{ id: string; title: string; href: string; coverUrl: string | null; medium: string; status: string | null }>;
+  relatedWorks: Array<{ id: string; relationType: string | null; title: string; href: string; coverUrl: string | null; medium: string; status: string | null }>;
 };
 
 const query = `query LightNovel($slug: String!, $includeAdult: Boolean!) {
   lightNovel(slug: $slug, includeAdult: $includeAdult) {
     title synopsis coverUrl alternativeTitles { type title } status adultContent startDate endDate publisher publisherEntity { displayName slug } source genres chapters volumes
-    externalLinks { website x instagram pixiv youtube }
+    externalLinks { website x instagram pixiv youtube tiktok }
     storeLinks { amazon cdJapan mercadoLivre rakuten shopee ebay otakuyasan hmv honto toranoana animate }
     reviewSummary { average count }
     characters { id nameRomaji slug imageUrl }
     staffCredits { role contribution person { id displayName slug imageUrl roles } }
-    relatedWorks { id title href coverUrl medium status }
+    relatedWorks { id relationType title href coverUrl medium status }
   }
   workReviewComments(medium: LIGHT_NOVEL, slug: $slug) { id score comment updatedAt author { username displayName avatarUrl } }
 }`;
 const statuses: Record<string, string> = { ANNOUNCED: "Anunciada", PUBLISHING: "Em publicação", HIATUS: "Em hiato", FINISHED: "Finalizada", CANCELLED: "Cancelada" };
 
 function displayDate(value: string | null) {
-  return value ? new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "short", year: "numeric", timeZone: "UTC" }).format(new Date(`${value}T00:00:00Z`)) : "—";
+  if (!value) return "—";
+  const date = new Date(`${value}T00:00:00Z`);
+  if (Number.isNaN(date.getTime())) return "—";
+  const day = new Intl.DateTimeFormat("pt-BR", { day: "2-digit", timeZone: "UTC" }).format(date);
+  const month = ["Jan", "Fev", "Mar", "Abril", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"][date.getUTCMonth()];
+  const year = new Intl.DateTimeFormat("pt-BR", { year: "numeric", timeZone: "UTC" }).format(date);
+  return `${day} ${month} ${year}`;
 }
 
 export default async function LightNovelBySlug({ params }: { params: Promise<{ slug: string }> }) {
@@ -69,7 +75,7 @@ export default async function LightNovelBySlug({ params }: { params: Promise<{ s
     publisher: novel.publisherEntity?.displayName ?? novel.publisher ?? undefined,
     publisherLink: novel.publisherEntity ?? undefined,
     source: novel.source ?? undefined, genders: novel.genres, chapters: novel.chapters, volumes: novel.volumes,
-    publicationPeriod: `${displayDate(novel.startDate)} – ${publicationEnd}`,
+    publicationPeriod: `${displayDate(novel.startDate)} ~ ${publicationEnd}`,
     externalLinks: novel.externalLinks, storeLinks: novel.storeLinks,
   };
   return <AdultContentGate blocked={novel.adultContent && !includeAdult}><div className={styles.page}>

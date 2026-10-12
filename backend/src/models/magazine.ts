@@ -35,6 +35,7 @@ const magazineSchema = new Schema<MagazineDocument>({
     instagram: { type: String, trim: true, default: undefined },
     pixiv: { type: String, trim: true, default: undefined },
     youtube: { type: String, trim: true, default: undefined },
+      tiktok: { type: String, trim: true, default: undefined },
   },
   storeLinks: {
     amazon: { type: String, trim: true, default: undefined },

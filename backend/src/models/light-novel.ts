@@ -16,7 +16,7 @@ export interface LightNovelDocument {
   externalLinks: Record<string, string | undefined>; storeLinks: Record<string, string | undefined>;
   characterIds: mongoose.Types.ObjectId[];
   staffCredits: Array<{ personId: mongoose.Types.ObjectId; role: string; contribution: string | null }>;
-  relatedWorks: Array<{ relationType: (typeof RELATED_WORK_TYPES)[number]; workId: mongoose.Types.ObjectId }>;
+  relatedWorks: Array<{ relationType: (typeof RELATED_WORK_TYPES)[number] | null; workId: mongoose.Types.ObjectId }>;
   createdBy: mongoose.Types.ObjectId | null; createdAt: Date; updatedAt: Date;
 }
 
@@ -33,11 +33,11 @@ const lightNovelSchema = new Schema<LightNovelDocument>({
   publisherId: { type: Schema.Types.ObjectId, ref: "Publisher", default: null },
   publisher: { type: String, trim: true, default: null }, source: { type: String, trim: true, default: null },
   genres: [{ type: String, trim: true }], chapters: { type: Number, required: true, min: 0 }, volumes: { type: Number, required: true, min: 0 },
-  externalLinks: { website: optionalUrl, x: optionalUrl, instagram: optionalUrl, pixiv: optionalUrl, youtube: optionalUrl },
+  externalLinks: { website: optionalUrl, x: optionalUrl, instagram: optionalUrl, pixiv: optionalUrl, youtube: optionalUrl, tiktok: optionalUrl },
   storeLinks: { amazon: optionalUrl, cdJapan: optionalUrl, mercadoLivre: optionalUrl, rakuten: optionalUrl, shopee: optionalUrl, ebay: optionalUrl, otakuyasan: optionalUrl, hmv: optionalUrl, honto: optionalUrl, toranoana: optionalUrl, animate: optionalUrl },
   characterIds: [{ type: Schema.Types.ObjectId, ref: "Character" }],
   staffCredits: [new Schema({ personId: { type: Schema.Types.ObjectId, ref: "Person", required: true }, role: { type: String, required: true, trim: true }, contribution: { type: String, trim: true, default: null } }, { _id: false })],
-  relatedWorks: [new Schema({ relationType: { type: String, enum: RELATED_WORK_TYPES, required: true }, workId: { type: Schema.Types.ObjectId, ref: "CatalogWork", required: true } }, { _id: false })],
+  relatedWorks: [new Schema({ relationType: { type: String, enum: RELATED_WORK_TYPES, default: null }, workId: { type: Schema.Types.ObjectId, ref: "CatalogWork", required: true } }, { _id: false })],
   createdBy: { type: Schema.Types.ObjectId, ref: "User", default: null },
 }, { timestamps: true, versionKey: false });
 

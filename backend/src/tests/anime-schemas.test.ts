@@ -86,7 +86,7 @@ describe("createAnimeSchema", () => {
   it.each([
     ["PG-13", "PG13"],
     ["R-17+", "R17"],
-    ["R+", "R18"],
+    ["R+", "RPLUS"],
     ["Rx", "R18"],
   ])("normaliza a classificação legada %s como %s", (legacy, normalized) => {
     const input = { ...validInput, input: { ...validInput.input, rating: legacy } };

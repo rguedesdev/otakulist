@@ -15,7 +15,7 @@ const charactersQuery = `query CharactersBySeiyuu($slug: String!) {
 const seiyuuQuery = `query Seiyuu($slug: String!) {
   seiyuu(slug: $slug) {
     displayName nameKanji imageUrl description dateOfBirth hometown agency
-    externalLinks { website x instagram pixiv youtube }
+    externalLinks { website x instagram pixiv youtube tiktok }
   }
 }`;
 

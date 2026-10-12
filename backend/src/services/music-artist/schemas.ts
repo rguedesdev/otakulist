@@ -42,6 +42,14 @@ export const createMusicArtistSchema = z.object({
       deezer: optionalUrl,
       amazonMusic: optionalUrl,
     }).optional(),
+    externalLinks: z.object({
+      website: optionalUrl,
+      x: optionalUrl,
+      instagram: optionalUrl,
+      pixiv: optionalUrl,
+      youtube: optionalUrl,
+  tiktok: optionalUrl,
+    }).optional(),
     publicationStatus: z.enum(MUSIC_ARTIST_PUBLICATION_STATUSES).default("DRAFT"),
   }),
 });

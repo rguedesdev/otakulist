@@ -23,7 +23,7 @@ type PublisherData = {
 const query = `query Publisher($slug: String!) {
   publisher(slug: $slug) {
     displayName imageUrl description foundation headquarters
-    externalLinks { website x instagram pixiv youtube }
+    externalLinks { website x instagram pixiv youtube tiktok }
     magazines { id title slug imageUrl demography frequency }
     lightNovels { id title slug coverUrl status volumes }
   }

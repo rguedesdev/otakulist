@@ -217,6 +217,7 @@
   padding-block: 8px 4px;
   display: flex;
   flex-direction: column;
+  gap: 16px;
 }
 
 .texts {
@@ -257,16 +258,6 @@
   margin: 0;
   overflow-wrap: anywhere;
   white-space: pre-wrap;
-}
-
-.hrFaded {
-  display: block;
-  width: 100%;
-  height: 0;
-  margin: 20px 0 16px;
-  background: none;
-  border: 0;
-  border-top: 1px solid var(--color-border);
 }
 
 .synonymsContainer {

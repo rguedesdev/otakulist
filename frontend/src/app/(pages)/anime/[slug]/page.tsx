@@ -53,14 +53,14 @@ type AnimeData = {
   characterCredits: AnimeCharacterCredit[];
   songCredits: AnimeSongCredit[];
   reviewSummary: { average: number; count: number };
-  relatedWorks: Array<{ id: string; relationType: string; title: string; href: string; coverUrl: string | null; medium: string; status: string | null }>;
+  relatedWorks: Array<{ id: string; relationType: string | null; title: string; href: string; coverUrl: string | null; medium: string; status: string | null }>;
 };
 type AnimeQueryData = { anime: AnimeData | null; workReviewComments: PublicWorkReview[] };
 
 const query = `query Anime($slug: String!, $includeAdult: Boolean!) {
   anime(slug: $slug, includeAdult: $includeAdult) {
   title synopsis coverUrl alternativeTitles { type title } genres producers demography rating adultContent
-  externalLinks { website x instagram pixiv youtube }
+  externalLinks { website x instagram pixiv youtube tiktok }
   streamingLinks { crunchyroll netflix primeVideo bilibili retrocrush hulu hidive uNext abemaTv adn museAsia laftel tver iqiyi tubi dAnimeStore }
   installments { id order title label format synopsis coverUrl episodes durationMinutes status startDate endDate broadcastSeason broadcastDay broadcastTime studio { id displayName slug imageUrl } studioName }
   characterCredits {
@@ -90,12 +90,20 @@ const broadcastDayLabels = { SUNDAY: "Domingo", MONDAY: "Segunda-feira", TUESDAY
 
 function displayDate(value: string | null) {
   if (!value) return "—";
-  return new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "short", year: "numeric", timeZone: "UTC" }).format(new Date(`${value}T00:00:00Z`));
+  const date = new Date(`${value}T00:00:00Z`);
+  if (Number.isNaN(date.getTime())) return "—";
+  const day = new Intl.DateTimeFormat("pt-BR", { day: "2-digit", timeZone: "UTC" }).format(date);
+  const month = ["Jan", "Fev", "Mar", "Abril", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"][date.getUTCMonth()];
+  const year = new Intl.DateTimeFormat("pt-BR", { year: "numeric", timeZone: "UTC" }).format(date);
+  return `${day} ${month} ${year}`;
 }
 
 function episodeRangeLabel(value: string | null) {
   const normalized = value?.replace(/^(?:eps?\.?|episódios?)\s*/i, "").trim();
-  return normalized ? ` (Episódios ${normalized})` : "";
+  if (!normalized) return "";
+  const isSingleEpisode = /^\d+$/.test(normalized);
+  const label = isSingleEpisode ? "Episódio" : "Episódios";
+  return ` (${label} ${normalized})`;
 }
 
 async function getAnime(slug: string, includeAdult: boolean) {
@@ -144,7 +152,7 @@ export default async function AnimeBySlug({ params }: { params: Promise<{ slug: 
     studio: studioNames.join(", ") || "Não informado", studioLinks,
     producers: anime.producers, demography: anime.demography ?? undefined, genders: anime.genres,
     duration: duration ? `${duration} min por episódio` : "Não informada", score: anime.reviewSummary.average,
-    rating: anime.rating || "Não informada", externalLinks: anime.externalLinks,
+    rating: anime.rating === "RPLUS" ? "R+" : anime.rating || "Não informada", externalLinks: anime.externalLinks,
     streamingLinks: anime.streamingLinks,
   };
   const formats = getUniqueAnimeReleaseFormats(seasons.map((season) => season.releaseFormat));
@@ -156,7 +164,6 @@ export default async function AnimeBySlug({ params }: { params: Promise<{ slug: 
     href: `/artist/${credit.artist.slug}`,
     image: assetUrl(credit.artist.imageUrl) ?? credit.artist.imageUrl,
     imageAlt: credit.artist.displayName,
-    imageLayout: credit.artist.kind === "BAND" ? "landscape" as const : "portrait" as const,
     details: [
       { icon: "song" as const, text: credit.songTitle },
       {
@@ -166,7 +173,7 @@ export default async function AnimeBySlug({ params }: { params: Promise<{ slug: 
     ],
   }));
 
-  const isAdultContent = anime.adultContent || anime.rating === "R18" || anime.rating === "R+" || anime.rating === "Rx";
+  const isAdultContent = anime.adultContent || anime.rating === "R18" || anime.rating === "RPLUS" || anime.rating === "R+" || anime.rating === "Rx";
 
   return <AdultContentGate blocked={isAdultContent && !includeAdult}><div className={styles.page}>
     <HeroSection

@@ -25,6 +25,7 @@ export interface MusicArtistDocument {
     cover: string;
   }>;
   platformLinks: Record<string, string | undefined>;
+  externalLinks: Record<string, string | undefined>;
   publicationStatus: (typeof MUSIC_ARTIST_PUBLICATION_STATUSES)[number];
   createdAt: Date;
   updatedAt: Date;
@@ -58,6 +59,14 @@ const musicArtistSchema = new Schema<MusicArtistDocument>(
       tidal: optionalUrl,
       deezer: optionalUrl,
       amazonMusic: optionalUrl,
+    },
+    externalLinks: {
+      website: optionalUrl,
+      x: optionalUrl,
+      instagram: optionalUrl,
+      pixiv: optionalUrl,
+      youtube: optionalUrl,
+      tiktok: optionalUrl,
     },
     publicationStatus: {
       type: String,

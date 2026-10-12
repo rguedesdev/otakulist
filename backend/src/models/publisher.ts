@@ -28,6 +28,7 @@ const publisherSchema = new Schema<PublisherDocument>({
     instagram: { type: String, trim: true, default: undefined },
     pixiv: { type: String, trim: true, default: undefined },
     youtube: { type: String, trim: true, default: undefined },
+      tiktok: { type: String, trim: true, default: undefined },
   },
   publicationStatus: { type: String, enum: ["DRAFT", "PUBLISHED"], default: "DRAFT", required: true },
 }, { timestamps: true, versionKey: false });

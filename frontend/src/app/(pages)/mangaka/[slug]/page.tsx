@@ -12,7 +12,7 @@ import styles from "./mangakaslug.module.css";
 export const dynamic = "force-dynamic";
 const query = `query Mangaka($slug: String!) { mangaka(slug: $slug) {
   displayName nameKanji imageUrl description roles dateOfBirth hometown activityPeriod occupations
-  externalLinks { website x instagram pixiv youtube }
+  externalLinks { website x instagram pixiv youtube tiktok }
   animeCredits { role contribution anime { title slug coverUrl startDate endDate } }
   mangaCredits { role contribution manga { title slug coverUrl startDate endDate } }
 } }`;

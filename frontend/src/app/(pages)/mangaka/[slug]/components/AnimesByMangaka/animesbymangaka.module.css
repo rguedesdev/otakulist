@@ -81,6 +81,7 @@
   font-size: 14px;
   font-weight: 600;
   margin: 0 0 10px 0;
+  line-height: 14px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -100,6 +101,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
+  height: 14px;
 }
 
 /* Caixa do Ícone Opcional (dt) */
@@ -117,12 +119,15 @@
 .infoIcon svg {
   display: block;
   overflow: visible;
+  width: 14px;
+  height: 14px;
 }
 
 /* Estilo do texto interno */
 .animesByMangakaInfo {
   color: var(--color-text-secondary);
   font-size: 12px;
+  line-height: 14px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

@@ -13,6 +13,7 @@ export const ALTERNATIVE_TITLE_TYPES = [
   "ENGLISH",
   "PORTUGUESE",
   "LITERAL",
+  "SYNONYM",
   "OTHER",
 ] as const;
 export const RELATED_WORK_TYPES = [
@@ -21,6 +22,7 @@ export const RELATED_WORK_TYPES = [
   "CHARACTER",
   "OTHER",
   "PARENT_STORY",
+  "REMAKE",
   "SOURCE_MATERIAL",
   "SIDE_STORY",
   "SPIN_OFF",
@@ -71,7 +73,7 @@ export interface AnimeDocument {
   }>;
   staffCredits: Array<{ personId: mongoose.Types.ObjectId; role: string; contribution: string | null }>;
   relatedWorks: Array<{
-    relationType: (typeof RELATED_WORK_TYPES)[number];
+    relationType: (typeof RELATED_WORK_TYPES)[number] | null;
     workId: mongoose.Types.ObjectId;
   }>;
   externalLinks: Record<string, string | undefined>;
@@ -163,7 +165,7 @@ const animeSchema = new Schema<AnimeDocument>(
     relatedWorks: [
       new Schema(
         {
-          relationType: { type: String, enum: RELATED_WORK_TYPES, required: true },
+          relationType: { type: String, enum: RELATED_WORK_TYPES, default: null },
           workId: { type: Schema.Types.ObjectId, ref: "CatalogWork", required: true },
         },
         { _id: true },
@@ -175,6 +177,7 @@ const animeSchema = new Schema<AnimeDocument>(
       instagram: optionalUrl,
       pixiv: optionalUrl,
       youtube: optionalUrl,
+      tiktok: optionalUrl,
     },
     streamingLinks: {
       crunchyroll: optionalUrl,

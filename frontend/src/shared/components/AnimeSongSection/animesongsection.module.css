@@ -23,7 +23,7 @@
   min-width: 0;
   overflow: hidden;
   display: grid;
-  grid-template-columns: 60px minmax(0, 1fr);
+  grid-template-columns: max-content minmax(0, 1fr);
   color: inherit;
   background: var(--color-surface-raised);
   border: 1px solid var(--color-border);
@@ -44,28 +44,22 @@
   box-shadow: var(--shadow-card-hover);
 }
 
-.landscapeCard {
-  grid-template-columns: 120px minmax(0, 1fr);
-}
-
 .cover,
 .coverFallback {
-  width: 60px;
   height: 90px;
-  min-width: 60px;
   display: block;
 }
 
-.cover { object-fit: cover; }
-
-.landscapeCover {
-  width: 120px;
-  min-width: 120px;
+.cover {
+  width: auto;
+  max-width: 120px;
+  min-width: 0;
   object-fit: contain;
-  background: var(--color-bg-subtle);
 }
 
 .coverFallback {
+  width: 60px;
+  min-width: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -90,6 +84,7 @@
   overflow: hidden;
   color: var(--color-text-primary);
   font-size: 13px;
+  line-height: 14px;
   font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -109,6 +104,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
+  height: 14px;
 }
 
 .infoIcon {
@@ -126,6 +122,8 @@
 .infoIcon svg {
   display: block;
   overflow: visible;
+  width: 14px;
+  height: 14px;
 }
 
 .infoLine dd {
@@ -135,6 +133,7 @@
   overflow: hidden;
   color: var(--color-text-secondary);
   font-size: 12px;
+  line-height: 14px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }

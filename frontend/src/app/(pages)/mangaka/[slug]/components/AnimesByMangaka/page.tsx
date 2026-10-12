@@ -11,7 +11,15 @@ import { normalizeStaffCredit } from "@/shared/catalog/staff-roles";
 import { StaffRoleIcon } from "@/shared/components/StaffSection/page";
 import styles from "./animesbymangaka.module.css";
 
-const date = (value: string | null) => value ? new Intl.DateTimeFormat("pt-BR", { dateStyle: "medium", timeZone: "UTC" }).format(new Date(`${value}T00:00:00Z`)) : "—";
+const date = (value: string | null) => {
+  if (!value) return "—";
+  const parsed = new Date(`${value}T00:00:00Z`);
+  if (Number.isNaN(parsed.getTime())) return "—";
+  const day = new Intl.DateTimeFormat("pt-BR", { day: "2-digit", timeZone: "UTC" }).format(parsed);
+  const month = ["Jan", "Fev", "Mar", "Abril", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"][parsed.getUTCMonth()];
+  const year = new Intl.DateTimeFormat("pt-BR", { year: "numeric", timeZone: "UTC" }).format(parsed);
+  return `${day} ${month} ${year}`;
+};
 
 function AnimesByMangaka({ credits }: { credits: StaffAnimeCredit[] }) {
   const router = useRouter();

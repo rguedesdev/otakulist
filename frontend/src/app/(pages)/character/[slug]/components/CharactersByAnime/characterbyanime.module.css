@@ -69,6 +69,7 @@
 .characterBySeiyuuTitle {
   font-size: 13px;
   font-weight: 600;
+  line-height: 14px;
   margin: 0;
   white-space: nowrap;
   overflow: hidden;
@@ -86,6 +87,7 @@
   display: flex;
   align-items: center;
   gap: 4px;
+  height: 14px;
 }
 
 .infoIcon {
@@ -98,6 +100,12 @@
   flex-shrink: 0;
 }
 
+.infoIcon svg {
+  display: block;
+  width: 14px;
+  height: 14px;
+}
+
 .infoLine dd {
   margin: 0;
   padding: 0;
@@ -108,6 +116,7 @@
 .characterBySeiyuuInfo {
   color: var(--color-text-secondary);
   font-size: 11px;
+  line-height: 14px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

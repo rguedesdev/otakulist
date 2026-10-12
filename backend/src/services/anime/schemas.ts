@@ -31,7 +31,10 @@ const linkMap = <T extends z.ZodRawShape>(shape: T) => z.object(shape).optional(
 const legacyAnimeRatings: Record<string, string> = {
   "PG-13": "PG13",
   "R-17+": "R17",
-  "R+": "R18",
+  "R+": "RPLUS",
+  "R+ - Mild Nudity": "RPLUS",
+  "R+ — Mild Nudity": "RPLUS",
+  "R+ – Mild Nudity": "RPLUS",
   Rx: "R18",
 };
 
@@ -122,7 +125,7 @@ export const createAnimeSchema = z.object({
     relatedWorks: z
       .array(
         z.object({
-          relationType: z.enum(RELATED_WORK_TYPES),
+          relationType: z.enum(RELATED_WORK_TYPES).nullish().transform((value) => value ?? null),
           workId: z.string().regex(/^[0-9a-f]{24}$/i, "Obra relacionada inválida"),
         }),
       )
@@ -134,6 +137,7 @@ export const createAnimeSchema = z.object({
       instagram: optionalUrl,
       pixiv: optionalUrl,
       youtube: optionalUrl,
+      tiktok: optionalUrl,
     }),
     streamingLinks: linkMap({
       crunchyroll: optionalUrl,

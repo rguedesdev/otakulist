@@ -47,7 +47,7 @@
 .clearImage:hover { color: var(--color-danger); border-color: color-mix(in srgb, var(--color-danger) 40%, transparent); }
 .fileName { max-width: 420px; overflow: hidden; color: var(--color-text-secondary); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
 .workPicker { position: relative; display: grid; gap: 8px; }
-.workPicker > label { display: grid; gap: 7px; }
+.workPicker > label { min-width: 0; display: grid; gap: 8px; }
 .workPicker > label > span { color: var(--color-text-secondary); font-size: 12px; font-weight: 750; }
 .searchHint { color: var(--color-text-muted); font-size: 11px; }
 .studioPicker { position: relative; align-self: start; align-content: start; display: grid; gap: 7px; }
@@ -80,7 +80,18 @@
 .originHeading { display: grid; gap: 6px; }
 .originHeading strong { font-size: 13px; }
 .originHeading p { color: var(--color-text-muted); font-size: 12px; line-height: 1.55; }
-.row { display: grid; grid-template-columns: 180px 1fr auto; gap: 10px; margin-bottom: 10px; }
+.row { display: grid; grid-template-columns: minmax(260px, 0.8fr) minmax(220px, 1fr) auto; align-items: start; gap: 10px; margin-bottom: 10px; }
+.row > .workPicker { min-width: 0; align-self: start; }
+.row .workPicker .workResults { position: absolute; z-index: 30; top: 100%; right: 0; left: 0; }
+.row .workPicker > label > input { height: 43px; min-height: 43px; }
+.voiceAnimeField { position: relative; min-width: 0; display: grid; align-content: start; gap: 8px; }
+.voiceAnimeField > span { color: var(--color-text-secondary); font-size: 12px; font-weight: 750; }
+.voiceAnimeField > input { height: 43px; min-height: 43px; }
+.row .voiceAnimeField .workResults { position: absolute; z-index: 30; top: 100%; right: 0; left: 0; }
+.row .selectedWork { width: 100%; min-width: 0; min-height: 43px; height: 43px; padding: 4px 7px; gap: 8px; }
+.row .selectedWork img, .row .selectedWork > .personFallback { width: 24px; height: 34px; }
+.row .selectedWork > span { min-width: 0; overflow: hidden; }
+.row .selectedWork > button { flex: 0 0 auto; padding: 6px 8px; }
 .add, .relationshipActions button { padding: 10px 14px; color: var(--color-accent-highlight); background: var(--color-accent-soft); border: 1px solid var(--color-accent-border); border-radius: var(--radius-small); cursor: pointer; font-weight: 750; }
 .add { margin-top: 16px; }
 .addParticipation { margin-top: 0; }

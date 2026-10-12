@@ -8,12 +8,12 @@ const optionalText = (max: number) => z.string().trim().max(max).nullish().trans
 const optionalUrl = z.string().trim().max(2_048).nullish().transform((value) => value || undefined)
   .refine((value) => !value || /^https?:\/\//i.test(value) || value.startsWith("/"), "Use uma URL http(s) ou um caminho interno iniciado por /");
 const links = <T extends z.ZodRawShape>(shape: T) => z.object(shape).optional();
-const externalLinks = links({ website: optionalUrl, x: optionalUrl, instagram: optionalUrl, pixiv: optionalUrl, youtube: optionalUrl });
+const externalLinks = links({ website: optionalUrl, x: optionalUrl, instagram: optionalUrl, pixiv: optionalUrl, youtube: optionalUrl, tiktok: optionalUrl });
 const storeLinks = links({ amazon: optionalUrl, cdJapan: optionalUrl, mercadoLivre: optionalUrl, rakuten: optionalUrl, shopee: optionalUrl, ebay: optionalUrl, otakuyasan: optionalUrl, hmv: optionalUrl, honto: optionalUrl, toranoana: optionalUrl, animate: optionalUrl });
 const credits = {
   characterIds: z.array(z.string().regex(/^[0-9a-f]{24}$/i, "Personagem inválido")).max(500).default([]),
   staffCredits: z.array(z.object({ personId: z.string().regex(/^[0-9a-f]{24}$/i, "Pessoa inválida"), role: requiredText(200), contribution: optionalText(200) })).max(300).default([]),
-  relatedWorks: z.array(z.object({ relationType: z.enum(RELATED_WORK_TYPES), workId: z.string().regex(/^[0-9a-f]{24}$/i, "Obra relacionada inválida") })).max(100).default([]),
+  relatedWorks: z.array(z.object({ relationType: z.enum(RELATED_WORK_TYPES).nullish().transform((value) => value ?? null), workId: z.string().regex(/^[0-9a-f]{24}$/i, "Obra relacionada inválida") })).max(100).default([]),
 };
 const base = {
   title: requiredText(200), synopsis: requiredText(10_000), coverUrl: requiredText(2_048),

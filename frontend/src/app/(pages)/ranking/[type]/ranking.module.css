@@ -199,6 +199,10 @@
   box-shadow: inset 0 0 0 1px var(--color-accent-soft);
 }
 
+.podiumThird {
+  min-height: 160px;
+}
+
 .podiumPosition {
   position: absolute;
   top: 8px;
@@ -666,6 +670,10 @@
 
   .podiumFirst {
     order: -1;
+  }
+
+  .podiumThird {
+    min-height: 126px;
   }
 
   .rankingSection {

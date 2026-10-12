@@ -9,6 +9,7 @@ const externalLinks = z.object({
   instagram: optionalUrl,
   pixiv: optionalUrl,
   youtube: optionalUrl,
+  tiktok: optionalUrl,
 }).nullish().transform((value) => value ?? {});
 const slug = requiredText(220).toLowerCase().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Slug inválido");
 const imageUrl = requiredText(2_048).refine((value) => /^https?:\/\//i.test(value) || value.startsWith("/"), "Use uma URL http(s) ou um caminho interno iniciado por /");

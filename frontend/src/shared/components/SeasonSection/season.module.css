@@ -84,7 +84,8 @@
 .seasonTitle {
   font-size: 14px;
   font-weight: 600;
-  margin: 0 0 10px 0;
+  line-height: 14px;
+  margin: 0 0 12px 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -104,6 +105,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
+  height: 14px;
 }
 
 /* Caixa do Ícone Opcional (dt) */
@@ -117,7 +119,7 @@
   flex-shrink: 0;
 }
 
-.infoIcon svg { display: block; }
+.infoIcon svg { display: block; width: 14px; height: 14px; }
 
 /* Caixa de texto (dd) */
 .infoLine dd {
@@ -130,6 +132,7 @@
 /* Estilo do texto interno */
 .seasonInfo {
   font-size: 12px;
+  line-height: 14px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

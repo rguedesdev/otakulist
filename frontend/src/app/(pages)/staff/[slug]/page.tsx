@@ -10,7 +10,7 @@ import styles from "./staffslug.module.css";
 export const dynamic = "force-dynamic";
 const query = `query Staff($slug: String!) { staff(slug: $slug) {
   displayName nameKanji imageUrl description roles dateOfBirth hometown activityPeriod occupations
-  externalLinks { website x instagram pixiv youtube }
+  externalLinks { website x instagram pixiv youtube tiktok }
   animeCredits { role contribution anime { title slug coverUrl startDate endDate } }
 } }`;
 type StoredPerson = { displayName: string; nameKanji: string | null; imageUrl: string | null; description: string | null; roles: string[]; dateOfBirth: string | null; hometown: string | null; activityPeriod: string | null; occupations: string[]; externalLinks: Record<string, string | undefined>; animeCredits: StaffAnimeCredit[] };

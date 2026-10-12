@@ -93,7 +93,7 @@
   padding: 8px 10px;
   margin: 0;
   height: 100%;
-  box-sizing: border-radius;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -105,6 +105,7 @@
   display: flex;
   align-items: center;
   gap: 4px;
+  height: 14px;
 }
 
 /* Caixa do Ícone (dt) */
@@ -118,6 +119,12 @@
   flex-shrink: 0;
 }
 
+.infoLine dt svg {
+  display: block;
+  width: 14px;
+  height: 14px;
+}
+
 /* Caixa do Texto (dd) */
 .infoLine dd {
   margin: 0;
@@ -125,12 +132,14 @@
   display: flex;
   align-items: center;
   overflow: hidden;
+  line-height: 14px;
 }
 
 /* --- Estilo dos nomes --- */
 .characterName {
   font-size: 13px;
   font-weight: 600;
+  line-height: 14px;
   margin: 0;
   white-space: nowrap;
   overflow: hidden;
@@ -141,6 +150,7 @@
 .seiyuuName {
   color: var(--color-text-secondary);
   font-size: 11px;
+  line-height: 14px;
   margin: 0;
   white-space: nowrap;
   overflow: hidden;

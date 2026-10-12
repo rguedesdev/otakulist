@@ -60,6 +60,7 @@ function HeroSection({ entity, animeTracker, publicationTracker }: HeroSectionPr
     ENGLISH: "Inglês",
     PORTUGUESE: "Português",
     LITERAL: "Literal",
+    SYNONYM: "Sinônimo",
     OTHER: "Outro",
   } as const;
 
@@ -316,8 +317,6 @@ function HeroSection({ entity, animeTracker, publicationTracker }: HeroSectionPr
 
           {entityIsWork ? (
             <>
-              <hr className={styles.hrFaded} />
-
               <div className={styles.synonymsContainer}>
                 <h2 className={styles.synonymsTitle}>Títulos Alternativos</h2>
                 <div className={styles.synonymsList}>

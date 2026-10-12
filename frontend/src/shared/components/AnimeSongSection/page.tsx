@@ -18,7 +18,6 @@ type AnimeSong = {
   href: string;
   image?: string;
   imageAlt?: string;
-  imageLayout?: "portrait" | "landscape";
   details: SongDetail[];
 };
 
@@ -41,17 +40,17 @@ function AnimeSongSection({ title, songs }: AnimeSongSectionProps) {
       <div className={styles.cardsContainer}>
         {songs.map((song) => (
           <Link
-            className={`${styles.card} ${song.imageLayout === "landscape" ? styles.landscapeCard : ""}`}
+            className={styles.card}
             href={song.href}
             key={`${song.href}-${song.title}`}
             aria-label={song.title}
           >
             {song.image ? (
               <Image
-                className={`${styles.cover} ${song.imageLayout === "landscape" ? styles.landscapeCover : ""}`}
+                className={styles.cover}
                 src={song.image}
                 alt={song.imageAlt ?? song.title}
-                width={song.imageLayout === "landscape" ? 120 : 60}
+                width={120}
                 height={90}
                 unoptimized
               />

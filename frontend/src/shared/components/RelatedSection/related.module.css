@@ -94,6 +94,7 @@
   display: flex;
   align-items: center;
   min-width: 0;
+  height: 14px;
 }
 
 /* Caixa de texto (dd) */
@@ -110,6 +111,7 @@
 .relatedTitle {
   font-size: 14px;
   font-weight: 600;
+  line-height: 14px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -120,6 +122,7 @@
 .info {
   color: var(--color-text-secondary);
   font-size: 12px;
+  line-height: 14px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

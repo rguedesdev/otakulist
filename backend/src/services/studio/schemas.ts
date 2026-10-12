@@ -12,6 +12,7 @@ const externalLinks = z.object({
   instagram: optionalUrl,
   pixiv: optionalUrl,
   youtube: optionalUrl,
+  tiktok: optionalUrl,
 }).nullish().transform((value) => value ?? {});
 
 export const studioSlugSchema = z.object({ slug });

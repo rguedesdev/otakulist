@@ -25,7 +25,7 @@ type MagazineData = {
 const query = `query Magazine($slug: String!) {
   magazine(slug: $slug) {
     title description imageUrl foundation demography frequency
-    externalLinks { website x instagram pixiv youtube }
+    externalLinks { website x instagram pixiv youtube tiktok }
     storeLinks { amazon cdJapan mercadoLivre rakuten shopee ebay otakuyasan hmv honto toranoana animate }
     publisher { displayName slug }
     mangas {

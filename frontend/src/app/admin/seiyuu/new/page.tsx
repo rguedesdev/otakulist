@@ -15,9 +15,9 @@ import { SaveButton } from "@/shared/components/AdminFormActions/SaveButton";
 const CREATE_SEIYUU = `mutation CreateSeiyuu($input: CreateSeiyuuInput!) { createSeiyuu(input: $input) { slug } }`;
 const UPDATE_SEIYUU = `mutation UpdateSeiyuu($slug: String!, $input: CreateSeiyuuInput!) { updateSeiyuu(slug: $slug, input: $input) { slug } }`;
 const ADMIN_SEIYUU = `query AdminSeiyuu($slug: String!) {
-  seiyuu(slug: $slug) { displayName nameKanji imageUrl description dateOfBirth hometown agency publicationStatus externalLinks { website x instagram pixiv youtube } }
+  seiyuu(slug: $slug) { displayName nameKanji imageUrl description dateOfBirth hometown agency publicationStatus externalLinks { website x instagram pixiv youtube tiktok } }
 }`;
-const externalLinks = [["website", "Site oficial"], ["x", "X/Twitter"], ["instagram", "Instagram"], ["pixiv", "Pixiv"], ["youtube", "YouTube"]] as const;
+const externalLinks = [["website", "Site oficial"], ["x", "X/Twitter"], ["instagram", "Instagram"], ["pixiv", "Pixiv"], ["youtube", "YouTube"], ["tiktok", "TikTok"]] as const;
 
 type SeiyuuData = {
   displayName: string;
@@ -113,7 +113,7 @@ export function SeiyuuFormPage({ editSlug }: { editSlug?: string }) {
           <div className={styles.sectionTitle}><span>01</span><div><h2>Perfil</h2><p>Identidade e informações profissionais.</p></div></div>
           <div className={styles.grid}>
             <label><span>Nome em Romaji *</span><input required value={displayName} onChange={(event) => setDisplayName(event.target.value)} /></label>
-            <label><span>Nome em Kanji</span><input name="nameKanji" defaultValue={initial?.nameKanji ?? ""} /></label>
+            <label><span>Nome em Japonês</span><input name="nameKanji" defaultValue={initial?.nameKanji ?? ""} /></label>
             <label><span>Data de nascimento</span><input name="dateOfBirth" defaultValue={initial?.dateOfBirth ?? ""} /></label>
             <label><span>Cidade natal</span><input name="hometown" defaultValue={initial?.hometown ?? ""} /></label>
             <label><span>Agência</span><input name="agency" defaultValue={initial?.agency ?? ""} /></label>

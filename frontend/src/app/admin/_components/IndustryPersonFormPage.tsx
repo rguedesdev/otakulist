@@ -14,7 +14,7 @@ import { SaveButton } from "@/shared/components/AdminFormActions/SaveButton";
 
 type Kind = "staff" | "mangaka";
 type PersonData = { displayName: string; nameKanji: string | null; imageUrl: string; description: string | null; dateOfBirth: string | null; hometown: string | null; activityPeriod: string | null; occupations: string[]; publicationStatus: "DRAFT" | "PUBLISHED"; externalLinks: Record<string, string | null> };
-const externalLinks = [["website", "Site oficial"], ["x", "X/Twitter"], ["instagram", "Instagram"], ["pixiv", "Pixiv"], ["youtube", "YouTube"]] as const;
+const externalLinks = [["website", "Site oficial"], ["x", "X/Twitter"], ["instagram", "Instagram"], ["pixiv", "Pixiv"], ["youtube", "YouTube"], ["tiktok", "TikTok"]] as const;
 const settings = {
   staff: { label: "profissional", title: "Staff", query: "staff", create: "createStaff", update: "updateStaff" },
   mangaka: { label: "mangaka", title: "Mangaka", query: "mangaka", create: "createMangaka", update: "updateMangaka" },
@@ -37,7 +37,7 @@ export function IndustryPersonFormPage({ kind, editSlug }: { kind: Kind; editSlu
   useEffect(() => {
     if (!editSlug || !accessToken || user?.role !== "ZEUS") return;
     let active = true;
-    const query = `query IndustryPerson($slug: String!) { ${config.query}(slug: $slug) { displayName nameKanji imageUrl description dateOfBirth hometown activityPeriod occupations publicationStatus externalLinks { website x instagram pixiv youtube } } }`;
+    const query = `query IndustryPerson($slug: String!) { ${config.query}(slug: $slug) { displayName nameKanji imageUrl description dateOfBirth hometown activityPeriod occupations publicationStatus externalLinks { website x instagram pixiv youtube tiktok } } }`;
     void graphqlRequest<Record<string, PersonData | null>>(query, { slug: editSlug }, accessToken).then((data) => {
       const person = data[config.query];
       if (!person) throw new Error("Perfil não encontrado");
@@ -81,7 +81,7 @@ export function IndustryPersonFormPage({ kind, editSlug }: { kind: Kind; editSlu
   return <main className={styles.page}><header className={styles.header}><div><span>Administração · {config.title}</span><h1>{editSlug ? `Editar ${config.label}` : `Cadastrar ${config.label}`}</h1></div><p>Gerencie os dados exibidos no perfil público.</p></header>
     <form className={styles.form} autoComplete="off" onSubmit={submit}><section className={styles.card}><div className={styles.sectionTitle}><span>01</span><div><h2>Perfil profissional</h2><p>Identidade, biografia e área de atuação.</p></div></div><div className={styles.grid}>
       <label><span>Nome em Romaji *</span><input required value={displayName} onChange={(event) => setDisplayName(event.target.value)} /></label>
-      <label><span>Nome em Kanji</span><input name="nameKanji" defaultValue={initial?.nameKanji ?? ""} /></label>
+      <label><span>Nome em Japonês</span><input name="nameKanji" defaultValue={initial?.nameKanji ?? ""} /></label>
       <label><span>Data de nascimento</span><input name="dateOfBirth" defaultValue={initial?.dateOfBirth ?? ""} /></label>
       <label><span>Cidade natal</span><input name="hometown" defaultValue={initial?.hometown ?? ""} /></label>
       <label><span>Período de atividade</span><input name="activityPeriod" defaultValue={initial?.activityPeriod ?? ""} /></label>

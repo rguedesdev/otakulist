@@ -22,6 +22,7 @@ import { HiOutlineLink } from "react-icons/hi";
 import { FaXTwitter } from "react-icons/fa6";
 import { FaInstagram } from "react-icons/fa";
 import { FaYoutube } from "react-icons/fa";
+import { FaTiktok } from "react-icons/fa6";
 import { FaSpotify } from "react-icons/fa6";
 import { PiTidalLogoFill } from "react-icons/pi";
 import { SiDeezer } from "react-icons/si";
@@ -48,7 +49,7 @@ function MusicPlatformLinks({ spotify, tidal, deezer, amazonMusic }: MusicPlatfo
     <div className={styles.musicStreamingLinks}>
       <h3 className={styles.musicStreamingLinksTitle}>Ouça em</h3>
       {spotify && (
-        <Link className={styles.linkSpotify} href={spotify}>
+        <Link className={styles.linkSpotify} href={spotify} target="_blank" rel="noopener noreferrer">
           <span className={styles.iconSpotifyContainer}>
             <FaSpotify className={styles.iconSpotify} size={16} />
           </span>
@@ -57,7 +58,7 @@ function MusicPlatformLinks({ spotify, tidal, deezer, amazonMusic }: MusicPlatfo
       )}
 
       {tidal && (
-        <Link className={styles.linkTidal} href={tidal}>
+        <Link className={styles.linkTidal} href={tidal} target="_blank" rel="noopener noreferrer">
           <span className={styles.iconTidalContainer}>
             <PiTidalLogoFill className={styles.iconTidal} size={16} />
           </span>
@@ -66,7 +67,7 @@ function MusicPlatformLinks({ spotify, tidal, deezer, amazonMusic }: MusicPlatfo
       )}
 
       {deezer && (
-        <Link className={styles.linkDeezer} href={deezer}>
+        <Link className={styles.linkDeezer} href={deezer} target="_blank" rel="noopener noreferrer">
           <span className={styles.iconDeezerContainer}>
             <SiDeezer className={styles.iconDeezer} size={14} />
           </span>
@@ -75,7 +76,7 @@ function MusicPlatformLinks({ spotify, tidal, deezer, amazonMusic }: MusicPlatfo
       )}
 
       {amazonMusic && (
-        <Link className={styles.linkAmazonMusic} href={amazonMusic}>
+        <Link className={styles.linkAmazonMusic} href={amazonMusic} target="_blank" rel="noopener noreferrer">
           <span className={styles.iconAmazonMusicContainer}>
             <GrAmazon className={styles.iconAmazonMusic} size={16} />
           </span>
@@ -103,6 +104,7 @@ function FormatSidebarInfo({
     { href: entity.externalLinks?.instagram, label: "Instagram", className: styles.linkInstagram, iconClassName: styles.iconInstagramContainer, icon: <FaInstagram className={styles.iconInstagram} size={18} /> },
     { href: entity.externalLinks?.pixiv, label: "Pixiv", className: styles.linkPixiv, iconClassName: styles.iconPixivContainer, icon: <Image src="/social-medias/pixiv.jpg" alt="" width={20} height={20} /> },
     { href: entity.externalLinks?.youtube, label: "YouTube", className: styles.linkYoutube, iconClassName: styles.iconYoutubeContainer, icon: <FaYoutube className={styles.iconYoutube} size={16} /> },
+    { href: entity.externalLinks?.tiktok, label: "TikTok", className: styles.linkTikTok, iconClassName: styles.iconTikTokContainer, icon: <FaTiktok className={styles.iconTikTok} size={16} /> },
   ].filter((item): item is typeof item & { href: string } => Boolean(item.href));
 
   const streamingLinkItems = isAnime(entity)
@@ -170,7 +172,7 @@ function FormatSidebarInfo({
           {hasVisiblePersonalDetails(entity) ? (
             <>
               <>
-                <dt className={styles.animeDescriptionTerm}>Nome em Kanji</dt>
+                <dt className={styles.animeDescriptionTerm}>Nome em Japonês</dt>
                 <dd className={styles.animeDescriptionDetail}>
                   {entity.name_kanji}
                 </dd>
@@ -247,7 +249,7 @@ function FormatSidebarInfo({
             <>
               <dt className={styles.animeDescriptionTerm}>Tipo</dt>
               <dd className={styles.animeDescriptionDetail}>{entity.artist_kind === "band" ? "Banda" : "Artista solo"}</dd>
-              {entity.name_kanji && <><dt className={styles.animeDescriptionTerm}>Nome em Kanji</dt><dd className={styles.animeDescriptionDetail}>{entity.name_kanji}</dd></>}
+              {entity.name_kanji && <><dt className={styles.animeDescriptionTerm}>Nome em Japonês</dt><dd className={styles.animeDescriptionDetail}>{entity.name_kanji}</dd></>}
               {entity.date_of_birth && <><dt className={styles.animeDescriptionTerm}>Data de Nascimento</dt><dd className={styles.animeDescriptionDetail}>{entity.date_of_birth}</dd></>}
               {entity.origin && <><dt className={styles.animeDescriptionTerm}>Origem</dt><dd className={styles.animeDescriptionDetail}>{entity.origin}</dd></>}
               {entity.activity_period && <><dt className={styles.animeDescriptionTerm}>Período de atividade</dt><dd className={styles.animeDescriptionDetail}>{entity.activity_period}</dd></>}
@@ -343,7 +345,7 @@ function FormatSidebarInfo({
           )}
 
           {entity.entityType === "organization" && entity.name_kanji ? (
-            <><dt className={styles.animeDescriptionTerm}>Nome em Kanji</dt><dd className={styles.animeDescriptionDetail}>{entity.name_kanji}</dd></>
+            <><dt className={styles.animeDescriptionTerm}>Nome em Japonês</dt><dd className={styles.animeDescriptionDetail}>{entity.name_kanji}</dd></>
           ) : <></>}
 
           {entity.entityType === "organization" && entity.headquarters ? (
@@ -440,7 +442,7 @@ function FormatSidebarInfo({
         <div className={styles.relatedLinks}>
           <h3 className={styles.relatedLinksTitle}>Links Relacionados</h3>
           {externalLinkItems.map((item) => (
-            <Link className={item.className} href={item.href} key={item.label} target="_blank" rel="noreferrer">
+            <Link className={item.className} href={item.href} key={item.label} target="_blank" rel="noopener noreferrer">
               <span className={item.iconClassName}>{item.icon}</span>
               <span className={styles.linkText}>{item.label}</span>
             </Link>
@@ -454,7 +456,7 @@ function FormatSidebarInfo({
         <div className={styles.streamingsLinks}>
           <h3 className={styles.streamingsLinksTitle}>Assista em</h3>
           {streamingLinkItems.map((item) => (
-            <Link className={item.className} href={item.href} key={item.label} target="_blank" rel="noreferrer">
+            <Link className={item.className} href={item.href} key={item.label} target="_blank" rel="noopener noreferrer">
               <span className={item.iconClassName}>{item.icon}</span>
               <span className={styles.linkText}>{item.label}</span>
             </Link>
@@ -466,7 +468,7 @@ function FormatSidebarInfo({
         <div className={styles.storeLinks}>
           <h3 className={styles.storeLinksTitle}>Compre em</h3>
           {storeLinkItems.map((item) => (
-            <Link className={item.className} href={item.href} key={item.label} target="_blank" rel="noreferrer">
+            <Link className={item.className} href={item.href} key={item.label} target="_blank" rel="noopener noreferrer">
               <span className={item.iconClassName}>{item.icon}</span>
               <span className={styles.linkText}>{item.label}</span>
             </Link>

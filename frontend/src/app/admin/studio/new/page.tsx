@@ -14,10 +14,10 @@ import { SaveButton } from "@/shared/components/AdminFormActions/SaveButton";
 
 const CREATE_STUDIO = `mutation CreateStudio($input: CreateStudioInput!) { createStudio(input: $input) { slug } }`;
 const UPDATE_STUDIO = `mutation UpdateStudio($slug: String!, $input: CreateStudioInput!) { updateStudio(slug: $slug, input: $input) { slug } }`;
-const ADMIN_STUDIO = `query Studio($slug: String!) { studio(slug: $slug) { displayName nameKanji imageUrl description foundation headquarters publicationStatus externalLinks { website x instagram pixiv youtube } } }`;
+const ADMIN_STUDIO = `query Studio($slug: String!) { studio(slug: $slug) { displayName nameKanji imageUrl description foundation headquarters publicationStatus externalLinks { website x instagram pixiv youtube tiktok } } }`;
 
 type StudioData = { displayName: string; nameKanji: string | null; imageUrl: string; description: string | null; foundation: string | null; headquarters: string | null; publicationStatus: "DRAFT" | "PUBLISHED"; externalLinks: Record<string, string | null> };
-const externalLinks = [["website", "Site oficial"], ["x", "X/Twitter"], ["instagram", "Instagram"], ["pixiv", "Pixiv"], ["youtube", "YouTube"]] as const;
+const externalLinks = [["website", "Site oficial"], ["x", "X/Twitter"], ["instagram", "Instagram"], ["pixiv", "Pixiv"], ["youtube", "YouTube"], ["tiktok", "TikTok"]] as const;
 
 export function StudioFormPage({ editSlug }: { editSlug?: string }) {
   const { user, accessToken, loading: authLoading } = useAuth();
@@ -76,7 +76,7 @@ export function StudioFormPage({ editSlug }: { editSlug?: string }) {
   return <main className={styles.page}><header className={styles.header}><div><span>Administração · Estúdio</span><h1>{editSlug ? "Editar estúdio" : "Cadastrar estúdio"}</h1></div><p>Este perfil poderá ser vinculado diretamente aos lançamentos de animes.</p></header>
     <form className={styles.form} autoComplete="off" onSubmit={submit}><section className={styles.card}><div className={styles.sectionTitle}><span>01</span><div><h2>Perfil do estúdio</h2><p>Identidade, localização e informações institucionais.</p></div></div><div className={styles.grid}>
       <label><span>Nome *</span><input required value={displayName} onChange={(event) => setDisplayName(event.target.value)} /></label>
-      <label><span>Nome em Kanji</span><input name="nameKanji" defaultValue={initial?.nameKanji ?? ""} /></label>
+      <label><span>Nome em Japonês</span><input name="nameKanji" defaultValue={initial?.nameKanji ?? ""} /></label>
       <label><span>Fundação</span><input name="foundation" defaultValue={initial?.foundation ?? ""} placeholder="Ex.: 1998" /></label>
       <label><span>Sede</span><input name="headquarters" defaultValue={initial?.headquarters ?? ""} placeholder="Cidade, província, país" /></label>
       <label><span>Visibilidade</span><CustomSelect name="publicationStatus" defaultValue={initial?.publicationStatus ?? "DRAFT"} options={[{ value: "DRAFT", label: "Rascunho" }, { value: "PUBLISHED", label: "Publicado" }]} /></label>

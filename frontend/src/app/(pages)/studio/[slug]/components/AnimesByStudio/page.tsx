@@ -18,9 +18,14 @@ export type StudioAnimeCredit = {
   };
 };
 
-function displayDate(value: string | null) {
-  if (!value) return "Não informado";
-  return new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "short", year: "numeric", timeZone: "UTC" }).format(new Date(`${value}T00:00:00Z`));
+function displayDate(value: string | null, fallback = "Não informado") {
+  if (!value) return fallback;
+  const date = new Date(`${value}T00:00:00Z`);
+  if (Number.isNaN(date.getTime())) return fallback;
+  const day = new Intl.DateTimeFormat("pt-BR", { day: "2-digit", timeZone: "UTC" }).format(date);
+  const month = ["Jan", "Fev", "Mar", "Abril", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"][date.getUTCMonth()];
+  const year = new Intl.DateTimeFormat("pt-BR", { year: "numeric", timeZone: "UTC" }).format(date);
+  return `${day} ${month} ${year}`;
 }
 
 function AnimesByStudio({ credits }: { credits: StudioAnimeCredit[] }) {
@@ -35,7 +40,7 @@ function AnimesByStudio({ credits }: { credits: StudioAnimeCredit[] }) {
         details={[
           { icon: <LiaCanadianMapleLeaf size={18} aria-hidden="true" />, text: `Temporada: ${anime.broadcastSeason ?? "Não informada"}` },
           { icon: <RiRestartLine size={14} aria-hidden="true" />, text: `Início: ${displayDate(anime.startDate)}` },
-          { icon: <FaRegCheckCircle size={13} aria-hidden="true" />, text: `Término: ${displayDate(anime.endDate)}` },
+          { icon: <FaRegCheckCircle size={13} aria-hidden="true" />, text: `Término: ${displayDate(anime.endDate, "—")}` },
         ]}
         key={anime.id}
       />)}

@@ -24,9 +24,11 @@ function formatDate(value: string | null) {
   const parsed = /^\d{4}-\d{2}-\d{2}$/.test(value)
     ? new Date(`${value}T00:00:00Z`)
     : new Date(value);
-  return Number.isNaN(parsed.getTime())
-    ? "—"
-    : new Intl.DateTimeFormat("pt-BR", { dateStyle: "medium", timeZone: "UTC" }).format(parsed);
+  if (Number.isNaN(parsed.getTime())) return "—";
+  const day = new Intl.DateTimeFormat("pt-BR", { day: "2-digit", timeZone: "UTC" }).format(parsed);
+  const month = ["Jan", "Fev", "Mar", "Abril", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"][parsed.getUTCMonth()];
+  const year = new Intl.DateTimeFormat("pt-BR", { year: "numeric", timeZone: "UTC" }).format(parsed);
+  return `${day} ${month} ${year}`;
 }
 
 function creators(manga: MagazineManga) {

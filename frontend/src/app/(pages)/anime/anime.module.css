@@ -624,7 +624,7 @@
   right: 10px;
   left: 10px;
   height: 1px;
-  background: var(--color-border);
+  background: linear-gradient(to right, transparent, var(--color-border-strong), transparent);
   transition: opacity 0.2s ease;
 }
 

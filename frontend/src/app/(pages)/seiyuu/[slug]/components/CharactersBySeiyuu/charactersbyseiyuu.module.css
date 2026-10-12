@@ -17,10 +17,17 @@
   gap: 16px;
 }
 
+.characterBySeiyuuLink {
+  display: block;
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+}
+
 .characterBySeiyuuCard {
   display: grid;
-  grid-template-columns: 90px minmax(0, 1fr);
-  height: 130px;
+  grid-template-columns: 75px 1fr;
+  height: 110px;
   min-width: 0;
   width: 100%;
   border: 1px solid var(--color-border);
@@ -32,8 +39,8 @@
   translate: 0 0;
   transition:
     translate 0.18s ease-out,
-    border-color 0.2s ease-in-out,
-    box-shadow 0.2s ease-in-out;
+    border-color 0.18s ease-out,
+    box-shadow 0.18s ease-out;
 }
 
 .characterBySeiyuuCard:hover {
@@ -50,27 +57,27 @@
 }
 
 .characterBySeiyuuCover {
-  height: 130px;
-  width: 90px;
-  min-width: 90px;
+  height: 110px;
+  width: 75px;
+  min-width: 75px;
   object-fit: cover;
   display: block;
 }
 
 .characterBySeiyuuTexts {
+  height: 100%;
   min-width: 0;
   padding: 8px 12px 8px 10px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  height: 100%;
 }
 
 .characterBySeiyuuTitle {
-  color: var(--color-text-primary);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
-  margin: 0 0 10px 0;
+  line-height: 14px;
+  margin: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -81,17 +88,16 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 4px;
 }
 
 .infoLine {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
+  height: 14px;
 }
 
 .infoIcon {
-  color: var(--color-accent);
   margin: 0;
   padding: 0;
   display: flex;
@@ -101,16 +107,22 @@
   flex-shrink: 0;
 }
 
+.infoIcon svg {
+  display: block;
+}
+
 .infoLine dd {
   margin: 0;
   padding: 0;
   display: flex;
   align-items: center;
+  line-height: 14px;
 }
 
 .characterBySeiyuuInfo {
   color: var(--color-text-secondary);
-  font-size: 12px;
+  font-size: 11px;
+  line-height: 14px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

@@ -1,0 +1,113 @@
+.item {
+  position: relative;
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  align-items: start;
+  gap: 8px;
+  min-width: 0;
+}
+
+.item + .item {
+  margin-top: 16px;
+}
+
+.item:has(> .content > .row) + .item:has(> .content > .row) {
+  margin-top: 34px;
+}
+
+.content > fieldset {
+  margin-top: 0;
+}
+
+.content > .row {
+  margin-bottom: 0;
+}
+
+.item[data-sortable-index="0"] .content > fieldset {
+  margin-top: 18px;
+}
+
+.item[data-dragging="true"] {
+  z-index: 2;
+  opacity: 0.7;
+}
+
+.item[data-drop-target="true"] .content {
+  outline: 2px dashed var(--color-accent-border);
+  outline-offset: 3px;
+  border-radius: var(--radius-small);
+}
+
+.controls {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.dragHandle,
+.moveButton {
+  display: grid;
+  place-items: center;
+  flex: 0 0 28px;
+  width: 28px;
+  min-width: 28px;
+  height: 28px;
+  min-height: 28px;
+  padding: 0;
+  color: var(--color-text-secondary);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-small);
+  cursor: pointer;
+}
+
+.moveButton {
+  flex-basis: 22px;
+  width: 22px;
+  min-width: 22px;
+  height: 22px;
+  min-height: 22px;
+}
+
+.dragHandle {
+  cursor: grab;
+  touch-action: none;
+  background: var(--color-surface);
+  border-color: var(--color-border);
+}
+
+.dragHandle:active {
+  cursor: grabbing;
+}
+
+.dragHandle:hover,
+.moveButton:not(:disabled):hover {
+  color: var(--color-text-primary);
+  background: var(--color-surface-raised);
+  border-color: var(--color-border);
+}
+
+.moveButton:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.dragHandle svg {
+  width: 16px;
+  height: 16px;
+}
+
+.moveButton svg {
+  width: 14px;
+  height: 14px;
+}
+
+.content {
+  min-width: 0;
+  grid-column: 2;
+}

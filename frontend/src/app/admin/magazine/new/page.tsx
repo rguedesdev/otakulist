@@ -14,11 +14,11 @@ import { SaveButton } from "@/shared/components/AdminFormActions/SaveButton";
 
 type PublisherOption = { id: string; displayName: string; slug: string; imageUrl: string };
 type MagazineData = { title: string; description: string; imageUrl: string; foundation: string | null; demography: string | null; frequency: string | null; publicationStatus: "DRAFT" | "PUBLISHED"; publisher: PublisherOption; externalLinks: Record<string, string | null>; storeLinks: Record<string, string | null> };
-const externalLinks = [["website", "Site oficial"], ["x", "X/Twitter"], ["instagram", "Instagram"], ["pixiv", "Pixiv"], ["youtube", "YouTube"]] as const;
+const externalLinks = [["website", "Site oficial"], ["x", "X/Twitter"], ["instagram", "Instagram"], ["pixiv", "Pixiv"], ["youtube", "YouTube"], ["tiktok", "TikTok"]] as const;
 const storeLinks = [["amazon", "Amazon"], ["cdJapan", "CD Japan"], ["mercadoLivre", "Mercado Livre"], ["rakuten", "Rakuten"], ["shopee", "Shopee"], ["ebay", "Ebay"], ["otakuyasan", "Otakuya-san"], ["hmv", "HMV & Books"], ["honto", "Honto"], ["toranoana", "Toranoana"], ["animate", "Animate"]] as const;
 const CREATE_MAGAZINE = `mutation CreateMagazine($input: CreateMagazineInput!) { createMagazine(input: $input) { slug } }`;
 const UPDATE_MAGAZINE = `mutation UpdateMagazine($slug: String!, $input: CreateMagazineInput!) { updateMagazine(slug: $slug, input: $input) { slug } }`;
-const ADMIN_MAGAZINE = `query Magazine($slug: String!) { magazine(slug: $slug) { title description imageUrl foundation demography frequency publicationStatus externalLinks { website x instagram pixiv youtube } storeLinks { amazon cdJapan mercadoLivre rakuten shopee ebay otakuyasan hmv honto toranoana animate } publisher { id displayName slug imageUrl } } }`;
+const ADMIN_MAGAZINE = `query Magazine($slug: String!) { magazine(slug: $slug) { title description imageUrl foundation demography frequency publicationStatus externalLinks { website x instagram pixiv youtube tiktok } storeLinks { amazon cdJapan mercadoLivre rakuten shopee ebay otakuyasan hmv honto toranoana animate } publisher { id displayName slug imageUrl } } }`;
 const SEARCH_PUBLISHERS = `query SearchPublishers($query: String!) { searchPublishers(query: $query) { id displayName slug imageUrl } }`;
 
 function PublisherPicker({ value, accessToken, onChange }: { value: PublisherOption | null; accessToken: string; onChange(value: PublisherOption | null): void }) {

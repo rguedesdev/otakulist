@@ -29,19 +29,19 @@ type MangaData = {
   reviewSummary: { average: number; count: number };
   characters: PublicationCharacter[];
   staffCredits: Array<{ role: string; contribution: string | null; person: { id: string; displayName: string; slug: string; imageUrl: string | null; roles: string[] } }>;
-  relatedWorks: Array<{ id: string; title: string; href: string; coverUrl: string | null; medium: string; status: string | null }>;
+  relatedWorks: Array<{ id: string; relationType: string | null; title: string; href: string; coverUrl: string | null; medium: string; status: string | null }>;
 };
 type MangaQueryData = { manga: MangaData | null; workReviewComments: PublicWorkReview[] };
 
 const query = `query Manga($slug: String!, $includeAdult: Boolean!) {
   manga(slug: $slug, includeAdult: $includeAdult) {
     title synopsis coverUrl alternativeTitles { type title } status adultContent startDate endDate magazine magazineEntity { title slug } publisher publisherEntity { displayName slug }
-    demography genres chapters volumes externalLinks { website x instagram pixiv youtube }
+    demography genres chapters volumes externalLinks { website x instagram pixiv youtube tiktok }
     storeLinks { amazon cdJapan mercadoLivre rakuten shopee ebay otakuyasan hmv honto toranoana animate }
     reviewSummary { average count }
     characters { id nameRomaji slug imageUrl }
     staffCredits { role contribution person { id displayName slug imageUrl roles } }
-    relatedWorks { id title href coverUrl medium status }
+    relatedWorks { id relationType title href coverUrl medium status }
   }
   workReviewComments(medium: MANGA, slug: $slug) {
     id score comment updatedAt
@@ -55,7 +55,12 @@ const statuses: Record<string, string> = {
 
 function displayDate(value: string | null) {
   if (!value) return "—";
-  return new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "short", year: "numeric", timeZone: "UTC" }).format(new Date(`${value}T00:00:00Z`));
+  const date = new Date(`${value}T00:00:00Z`);
+  if (Number.isNaN(date.getTime())) return "—";
+  const day = new Intl.DateTimeFormat("pt-BR", { day: "2-digit", timeZone: "UTC" }).format(date);
+  const month = ["Jan", "Fev", "Mar", "Abril", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"][date.getUTCMonth()];
+  const year = new Intl.DateTimeFormat("pt-BR", { year: "numeric", timeZone: "UTC" }).format(date);
+  return `${day} ${month} ${year}`;
 }
 
 async function getManga(slug: string, includeAdult: boolean) {
@@ -88,7 +93,7 @@ export default async function MangaBySlug({ params }: { params: Promise<{ slug: 
     publisherLink: manga.publisherEntity ?? undefined,
     demography: manga.demography ?? "Não informada", genders: manga.genres,
     chapters: manga.chapters, volumes: manga.volumes,
-    publicationPeriod: `${displayDate(manga.startDate)} – ${publicationEnd}`,
+    publicationPeriod: `${displayDate(manga.startDate)} ~ ${publicationEnd}`,
     externalLinks: manga.externalLinks, storeLinks: manga.storeLinks,
   };
 

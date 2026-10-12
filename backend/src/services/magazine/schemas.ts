@@ -9,6 +9,7 @@ const externalLinks = z.object({
   instagram: optionalUrl,
   pixiv: optionalUrl,
   youtube: optionalUrl,
+  tiktok: optionalUrl,
 }).nullish().transform((value) => value ?? {});
 const storeLinks = z.object({
   amazon: optionalUrl,

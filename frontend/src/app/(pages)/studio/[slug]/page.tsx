@@ -22,7 +22,7 @@ type StudioData = {
 
 const query = `query Studio($slug: String!) { studio(slug: $slug) {
   displayName nameKanji imageUrl description foundation headquarters
-  externalLinks { website x instagram pixiv youtube }
+  externalLinks { website x instagram pixiv youtube tiktok }
   animeCredits { anime { id title slug coverUrl startDate endDate broadcastSeason } }
 } }`;
 

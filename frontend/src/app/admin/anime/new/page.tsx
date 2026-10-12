@@ -14,6 +14,7 @@ import { CustomSelect as AdminSelect } from "@/shared/components/CustomSelect/pa
 import styles from "./page.module.css";
 import { CancelLink } from "@/shared/components/AdminFormActions/CancelLink";
 import { SaveButton } from "@/shared/components/AdminFormActions/SaveButton";
+import { reorderItems, SortableItem } from "@/shared/components/SortableItem/SortableItem";
 
 const CREATE_ANIME = `
   mutation CreateAnime($input: CreateAnimeInput!) {
@@ -40,7 +41,7 @@ const ADMIN_ANIME = `query AdminAnime($slug: String!) {
     }
     staffCredits { role contribution person { id displayName slug nameKanji imageUrl } }
     relatedWorks { id relationType title slug href coverUrl medium status }
-    externalLinks { website x instagram pixiv youtube }
+    externalLinks { website x instagram pixiv youtube tiktok }
     streamingLinks { crunchyroll netflix primeVideo bilibili retrocrush hulu hidive uNext abemaTv adn museAsia laftel tver iqiyi tubi dAnimeStore }
   }
 }`;
@@ -65,7 +66,7 @@ const SEARCH_STUDIOS = `query SearchStudios($query: String!) {
 
 const externalLinks = [
   ["website", "Site oficial"], ["x", "X/Twitter"], ["instagram", "Instagram"],
-  ["pixiv", "Pixiv"], ["youtube", "YouTube"],
+  ["pixiv", "Pixiv"], ["youtube", "YouTube"], ["tiktok", "TikTok"],
 ] as const;
 
 const streamingLinks = [
@@ -82,6 +83,7 @@ const animeRatingOptions = [
   { value: "PG", label: "PG — Recomendado para crianças" },
   { value: "PG13", label: "PG13 — 13 anos ou mais" },
   { value: "R17", label: "R17 — Violência e linguagem" },
+  { value: "RPLUS", label: "R+ — Nudez leve" },
   { value: "R18", label: "R18 — Conteúdo adulto" },
 ] as const;
 
@@ -89,7 +91,10 @@ function normalizeAnimeRating(value: string | null | undefined) {
   const legacyRatings: Record<string, string> = {
     "PG-13": "PG13",
     "R-17+": "R17",
-    "R+": "R18",
+    "R+": "RPLUS",
+    "R+ - Mild Nudity": "RPLUS",
+    "R+ — Mild Nudity": "RPLUS",
+    "R+ – Mild Nudity": "RPLUS",
     Rx: "R18",
   };
   return value ? legacyRatings[value] ?? value : "";
@@ -115,7 +120,7 @@ type Installment = {
   broadcastSeason: string; broadcastDay: AnimeBroadcastDay | null; broadcastTime: string; studio: StudioOption | null; studioName?: string | null;
 };
 type RelatedWork = {
-  relationType: string; work: WorkOption | null;
+  relationType: string | null; work: WorkOption | null;
 };
 type StaffCredit = { role: string; contribution: string | null; person: PersonOption | null };
 type CharacterCredit = { character: CharacterOption | null; seiyuu: PersonOption | null };
@@ -174,7 +179,7 @@ function automaticAnimeStatus(item: Pick<Installment, "startDate" | "endDate">):
 }
 
 const emptyRelatedWork = (): RelatedWork => ({
-  relationType: "OTHER", work: null,
+  relationType: null, work: null,
 });
 
 function optionalObject(form: FormData, prefix: string, fields: readonly (readonly [string, string])[]) {
@@ -585,7 +590,7 @@ export function AnimeFormPage({ editSlug }: { editSlug?: string }) {
         setRelatedWorks(
           anime.relatedWorks
             .filter((work) => work.relationType !== "SOURCE_MATERIAL")
-            .map((work) => ({ relationType: work.relationType, work })),
+            .map((work) => ({ relationType: work.relationType === "REMAKE" || work.relationType === "SPIN_OFF" ? work.relationType : null, work })),
         );
         setCharacterCredits(anime.characterCredits.length > 0
           ? anime.characterCredits.map((credit) => ({ character: credit.character, seiyuu: credit.seiyuu }))
@@ -763,7 +768,7 @@ export function AnimeFormPage({ editSlug }: { editSlug?: string }) {
               <span>Conteúdo +18</span>
               <div className={styles.adultControl}>
                 <span><strong>Obra adulta</strong><small>Ocultar para usuários que não ativaram conteúdo adulto.</small></span>
-                <input type="checkbox" name="adultContent" defaultChecked={Boolean(initialAnime?.adultContent || normalizeAnimeRating(initialAnime?.rating) === "R18")} />
+                <input type="checkbox" name="adultContent" defaultChecked={Boolean(initialAnime?.adultContent || ["R18", "RPLUS"].includes(normalizeAnimeRating(initialAnime?.rating)))} />
               </div>
             </label>
             <div className={`${styles.wide} ${styles.originField}`}>
@@ -779,11 +784,11 @@ export function AnimeFormPage({ editSlug }: { editSlug?: string }) {
         <section className={styles.card}>
           <div className={styles.sectionTitle}><span>02</span><div><h2>Títulos alternativos</h2><p>Cadastre apenas as versões conhecidas.</p></div></div>
           {alternativeTitles.map((item, index) => (
-            <div className={styles.row} key={index}>
-              <AdminSelect value={item.type} onChange={(type) => setAlternativeTitles((items) => items.map((value, i) => i === index ? { ...value, type } : value))} options={[{ value: "JAPANESE", label: "Japonês" }, { value: "ROMAJI", label: "Romaji" }, { value: "ENGLISH", label: "Inglês" }, { value: "PORTUGUESE", label: "Português" }, { value: "LITERAL", label: "Literal" }, { value: "OTHER", label: "Outro" }]} />
+            <SortableItem key={`alternative-${index}`} listId="anime-alternatives" index={index} count={alternativeTitles.length} onMove={(from, to) => setAlternativeTitles((items) => reorderItems(items, from, to))}><div className={styles.row}>
+              <AdminSelect value={item.type} onChange={(type) => setAlternativeTitles((items) => items.map((value, i) => i === index ? { ...value, type } : value))} options={[{ value: "JAPANESE", label: "Japonês" }, { value: "ROMAJI", label: "Romaji" }, { value: "ENGLISH", label: "Inglês" }, { value: "PORTUGUESE", label: "Português" }, { value: "LITERAL", label: "Literal" }, { value: "SYNONYM", label: "Sinônimo" }, { value: "OTHER", label: "Outro" }]} />
               <input value={item.title} placeholder="Título alternativo" onChange={(event) => setAlternativeTitles((items) => items.map((value, i) => i === index ? { ...value, title: event.target.value } : value))} />
               <button type="button" className={styles.remove} onClick={() => setAlternativeTitles((items) => items.filter((_, i) => i !== index))}>Remover</button>
-            </div>
+            </div></SortableItem>
           ))}
           <button type="button" className={styles.add} onClick={() => setAlternativeTitles((items) => [...items, { type: "ROMAJI", title: "" }])}>+ Adicionar título</button>
         </section>
@@ -796,7 +801,7 @@ export function AnimeFormPage({ editSlug }: { editSlug?: string }) {
           </div>
 
           {installments.map((item, index) => (
-            <fieldset className={styles.nestedCard} key={`installment-${index}`}>
+            <SortableItem key={`installment-${index}`} listId="anime-installments" index={index} count={installments.length} onMove={(from, to) => setInstallments((items) => reorderItems(items, from, to))}><fieldset className={styles.nestedCard}>
               <legend><span className={styles.sequenceBadge}>SEQUENCIAL</span> {index + 1}º lançamento</legend>
               <div className={styles.grid}>
                 <label><span>Título *</span><input required value={item.title} onChange={(e) => updateInstallment(index, "title", e.target.value)} /></label>
@@ -826,32 +831,32 @@ export function AnimeFormPage({ editSlug }: { editSlug?: string }) {
                 <div className={styles.wide}><ImagePicker file={item.coverFile} currentUrl={item.coverUrl} onChange={(file) => updateInstallment(index, "coverFile", file)} label="Capa específica do lançamento" /></div>
               </div>
               {installments.length > 1 && <button type="button" className={styles.remove} onClick={() => setInstallments((items) => items.filter((_, i) => i !== index))}>Remover lançamento</button>}
-            </fieldset>
+            </fieldset></SortableItem>
           ))}
 
           {relatedWorks.map((item, index) => (
-            <fieldset className={styles.nestedCard} key={`related-${index}`}>
+            <SortableItem key={`related-${index}`} listId="anime-related" index={index} count={relatedWorks.length} onMove={(from, to) => setRelatedWorks((items) => reorderItems(items, from, to))}><fieldset className={styles.nestedCard}>
               <legend><span className={styles.relatedBadge}>VÍNCULO ENTRE OBRAS</span></legend>
               <div className={styles.grid}>
-                <label><span>Tipo da relação *</span><AdminSelect value={item.relationType} onChange={(relationType) => updateRelated(index, "relationType", relationType)} options={[{ value: "ADAPTATION", label: "Adaptação" }, { value: "PARENT_STORY", label: "Obra principal" }, { value: "SIDE_STORY", label: "História paralela" }, { value: "SPIN_OFF", label: "Spin-off" }, { value: "ALTERNATIVE_VERSION", label: "Versão alternativa" }, { value: "CHARACTER", label: "Personagens" }, { value: "OTHER", label: "Outro" }]} /></label>
+                <label><span>Tipo da relação</span><AdminSelect value={item.relationType ?? ""} onChange={(relationType) => updateRelated(index, "relationType", relationType || null)} options={[{ value: "", label: "Sem tipo específico" }, { value: "ADAPTATION", label: "Adaptação" }, { value: "REMAKE", label: "Remake" }, { value: "SPIN_OFF", label: "Spin-off" }]} /></label>
                 <div className={styles.wide}><WorkPicker value={item.work} onChange={(work) => updateRelated(index, "work", work)} /></div>
               </div>
               <button type="button" className={styles.remove} onClick={() => setRelatedWorks((items) => items.filter((_, i) => i !== index))}>Remover relacionado</button>
-            </fieldset>
+            </fieldset></SortableItem>
           ))}
         </section>
 
         <section className={styles.card}>
           <div className={styles.sectionTitle}><span>04</span><div><h2>Personagens &amp; Seiyuus</h2><p>Selecione um personagem da obra e o seiyuu responsável por sua voz.</p></div></div>
           {characterCredits.map((credit, index) => (
-            <fieldset className={styles.nestedCard} key={`character-credit-${index}`}>
+            <SortableItem key={`character-credit-${index}`} listId="anime-character-credits" index={index} count={characterCredits.length} onMove={(from, to) => setCharacterCredits((items) => reorderItems(items, from, to))}><fieldset className={styles.nestedCard}>
               <legend><span className={styles.staffBadge}>VÍNCULO DE VOZ</span></legend>
               <div className={styles.grid}>
                 <div><CharacterPicker value={credit.character} accessToken={accessToken!} onChange={(character) => setCharacterCredits((credits) => credits.map((item, itemIndex) => itemIndex === index ? { ...item, character } : item))} /></div>
                 <div><SeiyuuPicker value={credit.seiyuu} accessToken={accessToken!} onChange={(seiyuu) => setCharacterCredits((credits) => credits.map((item, itemIndex) => itemIndex === index ? { ...item, seiyuu } : item))} /></div>
               </div>
               <button type="button" className={styles.remove} onClick={() => setCharacterCredits((credits) => credits.length === 1 ? [emptyCharacterCredit()] : credits.filter((_, itemIndex) => itemIndex !== index))}>Limpar vínculo</button>
-            </fieldset>
+            </fieldset></SortableItem>
           ))}
           <button type="button" className={styles.add} onClick={() => setCharacterCredits((credits) => [...credits, emptyCharacterCredit()])}>+ Adicionar outro vínculo</button>
         </section>
@@ -859,19 +864,19 @@ export function AnimeFormPage({ editSlug }: { editSlug?: string }) {
         <section className={styles.card}>
           <div className={styles.sectionTitle}><span>05</span><div><h2>Canções</h2><p>Vincule openings, endings e insert songs a um cantor ou banda já cadastrados.</p></div></div>
           {songCredits.map((credit, index) => (
-            <fieldset className={styles.nestedCard} key={`song-credit-${index}`}>
+            <SortableItem key={`song-credit-${index}`} listId="anime-songs" index={index} count={songCredits.length} onMove={(from, to) => setSongCredits((items) => reorderItems(items, from, to))}><fieldset className={styles.nestedCard}>
               <legend><span className={styles.staffBadge}>VÍNCULO MUSICAL</span></legend>
               <div className={styles.grid}>
                 <div className={styles.wide}><MusicArtistPicker value={credit.artist} accessToken={accessToken!} onChange={(artist) => updateSongCredit(index, "artist", artist)} /></div>
                 <label className={styles.wide}><span>Título da canção *</span><input value={credit.songTitle} placeholder="Ex.: Scramble" onChange={(event) => updateSongCredit(index, "songTitle", event.target.value)} /></label>
                 <div className={styles.wide}>
-                  {credit.featuredArtists.map((artist, featuredIndex) => <fieldset className={styles.nestedCard} key={`${artist?.id ?? "new"}-${featuredIndex}`}>
+                  {credit.featuredArtists.map((artist, featuredIndex) => <SortableItem key={`${artist?.id ?? "new"}-${featuredIndex}`} listId={`anime-song-${index}-featured`} index={featuredIndex} count={credit.featuredArtists.length} onMove={(from, to) => updateSongCredit(index, "featuredArtists", reorderItems(credit.featuredArtists, from, to))}><fieldset className={styles.nestedCard}>
                     <legend>Participação {featuredIndex + 1} (feat.)</legend>
                     <MusicArtistPicker value={artist} accessToken={accessToken!} onChange={(nextArtist) => {
                       updateSongCredit(index, "featuredArtists", credit.featuredArtists.map((item, itemIndex) => itemIndex === featuredIndex ? nextArtist : item));
                     }} />
                     <button type="button" className={styles.remove} onClick={() => updateSongCredit(index, "featuredArtists", credit.featuredArtists.filter((_, itemIndex) => itemIndex !== featuredIndex))}>Remover participação</button>
-                  </fieldset>)}
+                  </fieldset></SortableItem>)}
                   <button type="button" className={`${styles.add} ${styles.addParticipation}`} onClick={() => updateSongCredit(index, "featuredArtists", [...credit.featuredArtists, null])}>+ Adicionar participação</button>
                 </div>
                 <label><span>Uso *</span><AdminSelect value={credit.type} onChange={(type) => updateSongCredit(index, "type", type as SongCredit["type"])} options={[{ value: "OPENING", label: "Opening" }, { value: "ENDING", label: "Ending" }, { value: "INSERT", label: "Insert song" }]} /></label>
@@ -879,14 +884,14 @@ export function AnimeFormPage({ editSlug }: { editSlug?: string }) {
                 <label className={styles.wide}><span>Episódios</span><input value={credit.episodeRange} placeholder="Ex.: 1–12" onChange={(event) => updateSongCredit(index, "episodeRange", event.target.value)} /><small>Informe somente o número ou intervalo; “Episódios” será acrescentado no card.</small></label>
               </div>
               <button type="button" className={styles.remove} onClick={() => setSongCredits((credits) => credits.length === 1 ? [emptySongCredit()] : credits.filter((_, itemIndex) => itemIndex !== index))}>Limpar canção</button>
-            </fieldset>
+            </fieldset></SortableItem>
           ))}
           <button type="button" className={styles.add} onClick={() => setSongCredits((credits) => [...credits, emptySongCredit()])}>+ Adicionar outra canção</button>
         </section>
 
         <section className={styles.card}>
           <div className={styles.sectionTitle}><span>06</span><div><h2>Staff</h2><p>Vincule pessoas já cadastradas e informe a função exercida nesta obra.</p></div></div>
-          {staffCredits.map((credit, index) => <fieldset className={styles.nestedCard} key={`staff-${index}`}>
+          {staffCredits.map((credit, index) => <SortableItem key={`staff-${index}`} listId="anime-staff" index={index} count={staffCredits.length} onMove={(from, to) => setStaffCredits((items) => reorderItems(items, from, to))}><fieldset className={styles.nestedCard}>
             <legend><span className={styles.staffBadge}>VÍNCULO DE STAFF</span></legend>
             <div className={styles.grid}>
               <label><span>Função na obra *</span><AdminSelect required value={staffRoleValue(credit.role, credit.contribution)} onChange={(roleValue) => {
@@ -896,7 +901,7 @@ export function AnimeFormPage({ editSlug }: { editSlug?: string }) {
               <div className={styles.wide}><PersonPicker value={credit.person} accessToken={accessToken!} subtitle={credit.role} onChange={(person) => setStaffCredits((credits) => credits.map((item, itemIndex) => itemIndex === index ? { ...item, person } : item))} /></div>
             </div>
             <button type="button" className={styles.remove} onClick={() => setStaffCredits((credits) => credits.filter((_, itemIndex) => itemIndex !== index))}>Remover vínculo</button>
-          </fieldset>)}
+          </fieldset></SortableItem>)}
           <button type="button" className={styles.add} onClick={() => setStaffCredits((credits) => [...credits, { role: "", contribution: null, person: null }])}>+ Vincular pessoa da staff</button>
         </section>
 

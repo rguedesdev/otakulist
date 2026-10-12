@@ -22,6 +22,7 @@ type MusicArtistData = {
   genres: string[];
   discography: Array<{ title: string; releaseType: string; year: string; tracks: number; cover: string }>;
   platformLinks: { spotify?: string; tidal?: string; deezer?: string; amazonMusic?: string };
+  externalLinks: { website?: string; x?: string; instagram?: string; pixiv?: string; youtube?: string; tiktok?: string };
   animeSongs: Array<{
     anime: { title: string; slug: string; coverUrl: string };
     songTitle: string;
@@ -35,6 +36,7 @@ const query = `query MusicArtist($slug: String!) {
   musicArtist(slug: $slug) {
     displayName kind nameKanji imageUrl description origin dateOfBirth activityPeriod recordLabel genres
     platformLinks { spotify tidal deezer amazonMusic }
+    externalLinks { website x instagram pixiv youtube tiktok }
     discography { title releaseType year tracks cover }
     animeSongs { anime { title slug coverUrl } songTitle type sequence episodeRange }
   }
@@ -77,6 +79,7 @@ export default async function ArtistBySlug({ params }: { params: Promise<{ slug:
     activity_period: artist.activityPeriod ?? undefined,
     record_label: artist.recordLabel ?? undefined,
     musical_genres: artist.genres,
+    externalLinks: artist.externalLinks,
   };
   const animeSongs: AnimeSong[] = artist.animeSongs.map((song) => ({
     title: song.anime.title,
