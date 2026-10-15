@@ -7,6 +7,7 @@ import { GiEvilBook } from "react-icons/gi";
 import { LiaMicrophoneSolid } from "react-icons/lia";
 import { LuBookHeart, LuLayoutDashboard } from "react-icons/lu";
 import { MdOutlineHomeWork, MdOutlinePeopleAlt, MdOutlinePersonOutline } from "react-icons/md";
+import { FiDownloadCloud } from "react-icons/fi";
 
 import { useAuth } from "@/shared/auth/auth-provider";
 import styles from "./page.module.css";
@@ -38,6 +39,11 @@ export default function AdminPage() {
       </header>
 
       <section className={styles.sections} aria-label="Áreas administrativas">
+        <Link href="/admin/import">
+          <span className={styles.icon}><FiDownloadCloud /></span>
+          <div><h2>Importar dados</h2><p>Busque anime, temporadas relacionadas, personagens, seiyuus, mangakas e staff.</p></div>
+          <strong>Importar →</strong>
+        </Link>
         <Link href="/admin/anime">
           <span className={styles.icon}><FiTv /></span>
           <div><h2>Animes</h2><p>Gerencie obras, temporadas, vínculos, staff e publicação.</p></div>

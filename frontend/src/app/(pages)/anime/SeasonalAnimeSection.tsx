@@ -8,6 +8,7 @@ import { FiArrowRight, FiCalendar } from "react-icons/fi";
 
 import styles from "./anime.module.css";
 import { assetUrl } from "@/shared/auth/api";
+import { formatSiteDate } from "@/shared/utils/date-format";
 import { animeReleaseFormatLabels, type AnimeReleaseFormat } from "@/shared/types/entities";
 import { getNextAnimeSeason, getPreviousAnimeSeason, type AnimeSeason } from "@/shared/utils/anime-season";
 
@@ -58,13 +59,7 @@ function formatEpisodeCount(episodes: number) {
 }
 
 function formatReleaseDate(value: string | null) {
-  if (!value) return "Data não informada";
-  return new Intl.DateTimeFormat("pt-BR", {
-    day: "2-digit",
-    month: "short",
-    timeZone: "UTC",
-    year: "numeric",
-  }).format(new Date(`${value}T00:00:00.000Z`));
+  return formatSiteDate(value, "Data não informada");
 }
 
 export function SeasonalAnimeSection({

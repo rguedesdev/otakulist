@@ -14,6 +14,7 @@ import { badInput } from "../../errors.js";
 import { currentUser, requireZeus } from "../auth/authorization.js";
 import { reviewSummaryFor, workHref } from "../catalog/helpers.js";
 import { animeSlugFromTitle } from "../../../services/anime/slug.js";
+import { cleanupReplacedUploadImages } from "../../../services/upload-cleanup.js";
 
 async function publicationWorkRelations(references: any[] = []) {
   const works = await CatalogWork.find({ _id: { $in: references.map((item) => item.workId) } });
@@ -84,11 +85,13 @@ async function createPublicationWork(Model: any, medium: "MANGA" | "LIGHT_NOVEL"
 async function updatePublicationWork(Model: any, medium: "MANGA" | "LIGHT_NOVEL", label: string, slug: string, input: any) {
   const work = await Model.findOne({ slug });
   if (!work) throw new GraphQLError(`${label} não encontrado`, { extensions: { code: "NOT_FOUND" } });
+  const previousImages = work.toObject();
   await validatePublicationWorkLinks(input);
   try {
     work.set({ ...publicationWorkValues(input), slug: animeSlugFromTitle(input.title) });
     await work.save();
     await syncCatalogWork(medium, work);
+    await cleanupReplacedUploadImages(previousImages, work.toObject());
     return work;
   } catch (error: any) {
     if (error?.code === 11000) {

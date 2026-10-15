@@ -7,6 +7,7 @@ import { LuCalendarRange } from "react-icons/lu";
 import { VscLibrary } from "react-icons/vsc";
 
 import styles from "./mangaslug.module.css";
+import { formatSiteDate } from "@/shared/utils/date-format";
 import { MangaTrackerPanel } from "./components/MangaTrackerPanel/MangaTrackerPanel";
 import { PublicationCharacterSection, type PublicationCharacter } from "@/shared/components/PublicationCharacterSection/page";
 import { AdultContentGate } from "@/shared/components/AdultContentGate/page";
@@ -54,13 +55,7 @@ const statuses: Record<string, string> = {
 };
 
 function displayDate(value: string | null) {
-  if (!value) return "—";
-  const date = new Date(`${value}T00:00:00Z`);
-  if (Number.isNaN(date.getTime())) return "—";
-  const day = new Intl.DateTimeFormat("pt-BR", { day: "2-digit", timeZone: "UTC" }).format(date);
-  const month = ["Jan", "Fev", "Mar", "Abril", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"][date.getUTCMonth()];
-  const year = new Intl.DateTimeFormat("pt-BR", { year: "numeric", timeZone: "UTC" }).format(date);
-  return `${day} ${month} ${year}`;
+  return formatSiteDate(value);
 }
 
 async function getManga(slug: string, includeAdult: boolean) {
@@ -112,9 +107,9 @@ export default async function MangaBySlug({ params }: { params: Promise<{ slug: 
         sidebar={<FormatSidebarInfo entity={entity} reviewTarget={{ medium: "MANGA", slug, title: manga.title }} />}
         tracker={<MangaTrackerPanel totalChapters={entity.chapters} workKey={slug} />}
         sections={[
-          ...(manga.characters.length ? [{ id: "personagens", label: "Personagens", content: <PublicationCharacterSection characters={manga.characters} /> }] : []),
-          ...(manga.staffCredits.length ? [{ id: "staff", label: "Staff", content: <StaffSection credits={manga.staffCredits} /> }] : []),
-          ...(manga.relatedWorks.length ? [{ id: "relacionados", label: "Relacionados", content: <RelatedSection works={manga.relatedWorks} /> }] : []),
+          ...(manga.characters.length ? [{ id: "personagens", label: "Personagens", content: <PublicationCharacterSection characters={manga.characters} />, generalContent: <PublicationCharacterSection characters={manga.characters} limit={6} /> }] : []),
+          ...(manga.staffCredits.length ? [{ id: "staff", label: "Staff", content: <StaffSection credits={manga.staffCredits} />, generalContent: <StaffSection credits={manga.staffCredits} limit={3} /> }] : []),
+          ...(manga.relatedWorks.length ? [{ id: "relacionados", label: "Relacionados", content: <RelatedSection works={manga.relatedWorks} />, generalContent: <RelatedSection works={manga.relatedWorks} limit={3} /> }] : []),
           { id: "comentarios", label: "Reviews", content: <ReviewCommentsSection comments={workReviewComments} /> },
         ]}
       />

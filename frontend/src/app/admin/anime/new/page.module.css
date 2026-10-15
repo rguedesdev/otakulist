@@ -92,12 +92,10 @@
 .row .selectedWork img, .row .selectedWork > .personFallback { width: 24px; height: 34px; }
 .row .selectedWork > span { min-width: 0; overflow: hidden; }
 .row .selectedWork > button { flex: 0 0 auto; padding: 6px 8px; }
-.add, .relationshipActions button { padding: 10px 14px; color: var(--color-accent-highlight); background: var(--color-accent-soft); border: 1px solid var(--color-accent-border); border-radius: var(--radius-small); cursor: pointer; font-weight: 750; }
-.add { margin-top: 16px; }
+.add { display: inline-flex; align-items: center; gap: 8px; margin-top: 16px; margin-right: 12px; padding: 10px 14px; color: var(--color-accent-highlight); background: var(--color-accent-soft); border: 1px solid var(--color-accent-border); border-radius: var(--radius-small); cursor: pointer; font-weight: 750; }
 .addParticipation { margin-top: 0; }
 .nestedCard + .addParticipation { margin-top: 16px; }
 .remove { padding: 8px 11px; color: var(--color-danger); background: transparent; border: 1px solid color-mix(in srgb, var(--color-danger) 35%, transparent); border-radius: var(--radius-small); cursor: pointer; }
-.relationshipActions { display: flex; gap: 12px; margin: -4px 0 22px; }
 .nestedCard { margin-top: 18px; padding: 22px; border: 1px solid var(--color-border-strong); border-radius: var(--radius-medium); }
 .nestedCard legend { padding: 0 8px; color: var(--color-text-secondary); font-size: 13px; font-weight: 800; }
 .nestedCard > .remove { margin-top: 16px; }
@@ -156,7 +154,7 @@
 @keyframes spin { to { transform: rotate(360deg); } }
 @keyframes sealPulse { 50% { color: var(--color-accent-highlight); border-color: var(--color-accent); box-shadow: 0 0 0 6px var(--color-accent-soft); } }
 @media (prefers-reduced-motion: reduce) { .skeleton, .spinner, .loadingSeal { animation: none; } }
-@media (max-width: 760px) { .header { align-items: start; flex-direction: column; } .grid, .linkGrid { grid-template-columns: 1fr; } .wide { grid-column: auto; } .row { grid-template-columns: 1fr; } .relationshipActions { align-items: stretch; flex-direction: column; } .card { padding: 20px; } .imagePicker { align-items: flex-start; flex-direction: column; } .coverPreview { width: 96px; } .originField { grid-template-columns: 1fr; } }
+@media (max-width: 760px) { .header { align-items: start; flex-direction: column; } .grid, .linkGrid { grid-template-columns: 1fr; } .wide { grid-column: auto; } .row { grid-template-columns: 1fr; } .card { padding: 20px; } .imagePicker { align-items: flex-start; flex-direction: column; } .coverPreview { width: 96px; } .originField { grid-template-columns: 1fr; } }
 @media (max-width: 760px) { .accessPage { padding-top: 32px; } .loadingHeader { min-height: 76px; align-items: start; flex-direction: column; gap: 16px; } .loadingHeader > div { width: 100%; } .skeletonDescription { width: 75%; max-width: none; height: 12px; } .loadingFields { grid-template-columns: 1fr; } .loadingFieldWide { grid-column: auto; } .loadingFields > div:nth-child(n + 5) { display: none; } .loadingStatus { position: relative; left: auto; bottom: auto; width: fit-content; margin: -23px auto 0; transform: none; } .accessCard { margin-top: 5vh; padding: 36px 24px 32px; } }
 
 

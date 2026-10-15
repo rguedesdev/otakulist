@@ -55,7 +55,7 @@ function getProgressStyle(progress: number): ProgressStyle {
   };
 }
 
-function SeasonSection({ seasons, workKey }: { seasons: AnimeSeason[]; workKey?: string }) {
+function SeasonSection({ seasons, workKey, limit }: { seasons: AnimeSeason[]; workKey?: string; limit?: number }) {
   const { user } = useAuth();
   const [selectedSeasonId, setSelectedSeasonId] = useState<number | null>(null);
   const [savedProgress, setSavedProgress] = useState<Record<number, number>>({});
@@ -142,7 +142,7 @@ function SeasonSection({ seasons, workKey }: { seasons: AnimeSeason[]; workKey?:
     <section className={styles.seasonsContainer}>
       <h2 className={styles.seasonSectionTitle}>Temporadas</h2>
       <div className={styles.seasonCardsContainer}>
-        {displayedSeasons.map((season) => (
+        {displayedSeasons.slice(0, limit).map((season) => (
           <button
             className={styles.seasonCard}
             type="button"

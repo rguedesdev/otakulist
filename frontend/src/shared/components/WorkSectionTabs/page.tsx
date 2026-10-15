@@ -9,6 +9,7 @@ export type WorkSection = {
   id: string;
   label: string;
   content: ReactNode;
+  generalContent?: ReactNode;
 };
 
 export function WorkSectionTabs({
@@ -115,7 +116,7 @@ export function WorkSectionTabs({
         <div className={classes.sidebarColumn}>{sidebar}</div>
         <div className={`${classes.centralContainer} ${transitionStyles.contentTransition} ${isChanging ? transitionStyles.contentChanging : ""}`} role="tabpanel" aria-live="polite">
           {displayedSection === "geral" && <Fragment key="general-tracker">{tracker}</Fragment>}
-          {visibleSections.map((section) => <div id={section.id} className={classes.contentSection} key={section.id}>{section.content}</div>)}
+          {visibleSections.map((section) => <div id={section.id} className={classes.contentSection} key={section.id}>{displayedSection === "geral" ? section.generalContent ?? section.content : section.content}</div>)}
         </div>
       </div>
     </>

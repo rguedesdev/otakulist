@@ -30,7 +30,7 @@ export type RelatedWork = {
   status?: string | null;
 };
 
-function RelatedSection({ works = [] }: { works?: RelatedWork[] }) {
+function RelatedSection({ works = [], limit }: { works?: RelatedWork[]; limit?: number }) {
   if (works.length === 0) return null;
   const orderedWorks = [...works].sort((a, b) => Number(b.relationType === "SOURCE_MATERIAL") - Number(a.relationType === "SOURCE_MATERIAL"));
 
@@ -38,7 +38,7 @@ function RelatedSection({ works = [] }: { works?: RelatedWork[] }) {
     <section className={styles.relatedContainer}>
       <h2 className={styles.relatedSectionTitle}>Relacionados</h2>
       <div className={styles.relatedCardsContainer}>
-        {orderedWorks.map((work) => (
+        {orderedWorks.slice(0, limit).map((work) => (
           <Link href={work.href} key={work.id}>
             <article className={styles.relatedCard}>
               {work.coverUrl && <Image className={styles.relatedCover} src={assetUrl(work.coverUrl) ?? work.coverUrl} alt={`Capa de ${work.title}`} width={75} height={110} unoptimized />}

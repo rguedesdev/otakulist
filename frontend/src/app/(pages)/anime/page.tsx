@@ -16,6 +16,7 @@ import { AnimeSeasonFilters } from "./AnimeSeasonFilters";
 import { AnimeBroadcastCalendar, type AnimeBroadcastItem } from "./AnimeBroadcastCalendar";
 import { SeasonalAnimeSection } from "./SeasonalAnimeSection";
 import { assetUrl } from "@/shared/auth/api";
+import { formatSiteDate } from "@/shared/utils/date-format";
 import { MediaSearch } from "@/shared/components/MediaSearch/page";
 import { animeReleaseFormatLabels, type AnimeReleaseFormat } from "@/shared/types/entities";
 import {
@@ -134,13 +135,7 @@ function formatEpisodeCount(episodes: number) {
 }
 
 function formatReleaseDate(value: string | null) {
-  if (!value) return "Data não informada";
-  return new Intl.DateTimeFormat("pt-BR", {
-    day: "2-digit",
-    month: "short",
-    timeZone: "UTC",
-    year: "numeric",
-  }).format(new Date(`${value}T00:00:00.000Z`));
+  return formatSiteDate(value, "Data não informada");
 }
 
 function currentDateInJapan() {

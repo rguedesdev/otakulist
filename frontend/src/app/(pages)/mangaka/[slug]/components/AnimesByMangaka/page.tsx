@@ -7,18 +7,13 @@ import { RiRestartLine } from "react-icons/ri";
 
 import type { StaffAnimeCredit } from "@/app/(pages)/staff/[slug]/components/AnimesByStaff/page";
 import { assetUrl } from "@/shared/auth/api";
+import { formatSiteDate } from "@/shared/utils/date-format";
 import { normalizeStaffCredit } from "@/shared/catalog/staff-roles";
 import { StaffRoleIcon } from "@/shared/components/StaffSection/page";
 import styles from "./animesbymangaka.module.css";
 
 const date = (value: string | null) => {
-  if (!value) return "—";
-  const parsed = new Date(`${value}T00:00:00Z`);
-  if (Number.isNaN(parsed.getTime())) return "—";
-  const day = new Intl.DateTimeFormat("pt-BR", { day: "2-digit", timeZone: "UTC" }).format(parsed);
-  const month = ["Jan", "Fev", "Mar", "Abril", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"][parsed.getUTCMonth()];
-  const year = new Intl.DateTimeFormat("pt-BR", { year: "numeric", timeZone: "UTC" }).format(parsed);
-  return `${day} ${month} ${year}`;
+  return formatSiteDate(value);
 };
 
 function AnimesByMangaka({ credits }: { credits: StaffAnimeCredit[] }) {

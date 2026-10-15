@@ -795,11 +795,6 @@ export function AnimeFormPage({ editSlug }: { editSlug?: string }) {
 
         <section className={styles.card}>
           <div className={styles.sectionTitle}><span>03</span><div><h2>Sequência e relacionados</h2><p><strong>Sequenciais</strong> entram no tracker; outras obras aparecem apenas em Relacionados.</p></div></div>
-          <div className={styles.relationshipActions}>
-            <button type="button" onClick={() => setInstallments((items) => [...items, emptyInstallment()])}>+ Lançamento sequencial</button>
-            <button type="button" onClick={() => setRelatedWorks((items) => [...items, emptyRelatedWork()])}>+ Vincular obra cadastrada</button>
-          </div>
-
           {installments.map((item, index) => (
             <SortableItem key={`installment-${index}`} listId="anime-installments" index={index} count={installments.length} onMove={(from, to) => setInstallments((items) => reorderItems(items, from, to))}><fieldset className={styles.nestedCard}>
               <legend><span className={styles.sequenceBadge}>SEQUENCIAL</span> {index + 1}º lançamento</legend>
@@ -833,6 +828,7 @@ export function AnimeFormPage({ editSlug }: { editSlug?: string }) {
               {installments.length > 1 && <button type="button" className={styles.remove} onClick={() => setInstallments((items) => items.filter((_, i) => i !== index))}>Remover lançamento</button>}
             </fieldset></SortableItem>
           ))}
+          <button type="button" className={styles.add} onClick={() => setInstallments((items) => [...items, emptyInstallment()])}>+ Lançamento sequencial</button>
 
           {relatedWorks.map((item, index) => (
             <SortableItem key={`related-${index}`} listId="anime-related" index={index} count={relatedWorks.length} onMove={(from, to) => setRelatedWorks((items) => reorderItems(items, from, to))}><fieldset className={styles.nestedCard}>
@@ -844,6 +840,7 @@ export function AnimeFormPage({ editSlug }: { editSlug?: string }) {
               <button type="button" className={styles.remove} onClick={() => setRelatedWorks((items) => items.filter((_, i) => i !== index))}>Remover relacionado</button>
             </fieldset></SortableItem>
           ))}
+          <button type="button" className={styles.add} onClick={() => setRelatedWorks((items) => [...items, emptyRelatedWork()])}>+ Vincular obra cadastrada</button>
         </section>
 
         <section className={styles.card}>

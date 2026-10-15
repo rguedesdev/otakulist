@@ -230,6 +230,7 @@ function AnimeTrackerPanel({ seasons, workKey }: AnimeTrackerPanelProps) {
       );
 
       if (hasKnownTotal && nextTotal === totalEpisodes) setStatus("completo");
+      else if (amount > 0) setStatus("assistindo");
       if (amount > 0 && selectedHasKnownTotal && nextSeasonProgress === selectedSeason.episodes) {
         const nextIncompleteSeason = seasons.find(
           (season) => isSeasonIncomplete(season, nextProgress[season.id] ?? 0),

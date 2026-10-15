@@ -2,20 +2,13 @@ import { FaRegCheckCircle } from "react-icons/fa";
 import { RiQuillPenLine, RiRestartLine } from "react-icons/ri";
 
 import { assetUrl } from "@/shared/auth/api";
+import { formatSiteDate } from "@/shared/utils/date-format";
 import { MediaCreditCard } from "@/shared/components/MediaCreditCard/page";
 import type { MagazineManga } from "../CurrentPublishingManga/page";
 import styles from "./completedmanga.module.css";
 
 function formatDate(value: string | null) {
-  if (!value) return "—";
-  const parsed = /^\d{4}-\d{2}-\d{2}$/.test(value)
-    ? new Date(`${value}T00:00:00Z`)
-    : new Date(value);
-  if (Number.isNaN(parsed.getTime())) return "—";
-  const day = new Intl.DateTimeFormat("pt-BR", { day: "2-digit", timeZone: "UTC" }).format(parsed);
-  const month = ["Jan", "Fev", "Mar", "Abril", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"][parsed.getUTCMonth()];
-  const year = new Intl.DateTimeFormat("pt-BR", { year: "numeric", timeZone: "UTC" }).format(parsed);
-  return `${day} ${month} ${year}`;
+  return formatSiteDate(value);
 }
 
 function creators(manga: MagazineManga) {

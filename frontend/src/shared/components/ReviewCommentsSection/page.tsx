@@ -2,6 +2,7 @@ import Link from "next/link";
 import { FaStar } from "react-icons/fa";
 
 import { assetUrl } from "@/shared/auth/api";
+import { formatSiteDate } from "@/shared/utils/date-format";
 import styles from "./reviewcomments.module.css";
 
 export type PublicWorkReview = {
@@ -13,7 +14,7 @@ export type PublicWorkReview = {
 };
 
 function formatReviewDate(value: string) {
-  return new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "long", year: "numeric" }).format(new Date(value));
+  return formatSiteDate(value);
 }
 
 export function ReviewCommentsSection({ comments }: { comments: PublicWorkReview[] }) {

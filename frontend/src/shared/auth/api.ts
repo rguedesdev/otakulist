@@ -107,6 +107,34 @@ export async function graphqlRequest<T>(
   }
 }
 
+export async function catalogSourceRequest<T>(params: URLSearchParams, accessToken: string): Promise<T> {
+  const send = (token: string) => fetch(`${API_URL}/catalog-import/catalog?${params.toString()}`, {
+    headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
+    credentials: "include",
+    cache: "no-store",
+  });
+  let response: Response;
+  try {
+    response = await send(accessToken);
+  } catch {
+    throw new ApiError("Não foi possível conectar ao servidor do catálogo. Verifique se o backend está disponível.", "NETWORK_ERROR");
+  }
+  if (response.status === 401) {
+    const session = await refreshAuthSession();
+    if (session) {
+      try {
+        response = await send(session.accessToken);
+      } catch {
+        throw new ApiError("Não foi possível conectar ao servidor do catálogo. Verifique se o backend está disponível.", "NETWORK_ERROR");
+      }
+    }
+  }
+  const body = await response.json().catch(() => null) as (T & { message?: string }) | null;
+  if (!response.ok) throw new ApiError(body?.message || `Falha ao consultar catálogo (HTTP ${response.status}).`, `HTTP_${response.status}`);
+  if (!body) throw new ApiError("O servidor retornou uma resposta vazia.");
+  return body;
+}
+
 export function assetUrl(path: string | null) {
   if (!path) return null;
   if (/^https?:\/\//.test(path)) return path;

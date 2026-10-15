@@ -7,6 +7,7 @@ import { FiEdit3, FiEye, FiMic, FiPlus, FiSearch } from "react-icons/fi";
 
 import { assetUrl, graphqlRequest } from "@/shared/auth/api";
 import { useAuth } from "@/shared/auth/auth-provider";
+import { formatSiteDate } from "@/shared/utils/date-format";
 import styles from "../anime/page.module.css";
 
 const ADMIN_SEIYUUS = `query AdminSeiyuus($query: String) {
@@ -102,7 +103,7 @@ export default function SeiyuuAdminPage() {
               {seiyuu.imageUrl ? <Image src={assetUrl(seiyuu.imageUrl) ?? seiyuu.imageUrl} alt={seiyuu.displayName} width={58} height={82} unoptimized /> : <span />}
               <div className={styles.identity}><strong>{seiyuu.displayName}</strong><span>/{seiyuu.slug}</span><small>{seiyuu.agency || "Agência não informada"}</small></div>
               <span className={`${styles.status} ${seiyuu.publicationStatus === "PUBLISHED" ? styles.published : styles.draft}`}>{statusLabels[seiyuu.publicationStatus]}</span>
-              <time dateTime={seiyuu.updatedAt}>Atualizado em {new Intl.DateTimeFormat("pt-BR", { dateStyle: "short" }).format(new Date(seiyuu.updatedAt))}</time>
+              <time dateTime={seiyuu.updatedAt}>Atualizado em {formatSiteDate(seiyuu.updatedAt)}</time>
               <div className={styles.actions}><Link href={`/seiyuu/${seiyuu.slug}`}><FiEye /><span>Visualizar</span></Link><Link className={styles.editButton} href={`/admin/seiyuu/${seiyuu.slug}/edit`}><FiEdit3 /><span>Editar</span></Link></div>
             </article>
           ))}</div>

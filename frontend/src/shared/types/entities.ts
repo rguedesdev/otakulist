@@ -130,6 +130,7 @@ export type MusicArtistEntity = BaseEntity & {
   name_kanji?: string;
   origin?: string;
   date_of_birth?: string;
+  date_of_creation?: string;
   activity_period?: string;
   record_label?: string;
   musical_genres?: string[];

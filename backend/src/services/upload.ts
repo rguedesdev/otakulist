@@ -9,6 +9,7 @@ import sharp from "sharp";
 import { env } from "../config/env.js";
 import { User } from "../models/user.js";
 import type { AccessTokenPayload } from "./auth/tokens.js";
+import { deleteUploadIfUnreferenced } from "./upload-cleanup.js";
 
 const acceptedTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
 
@@ -74,12 +75,7 @@ export function registerUploadRoutes(app: FastifyInstance) {
       return reply.code(404).send({ error: "Usuário não encontrado" });
     }
 
-    if (user.avatarUrl?.startsWith("/uploads/")) {
-      const oldName = user.avatarUrl.slice("/uploads/".length);
-      if (/^[0-9a-f-]+\.webp$/i.test(oldName)) {
-        await unlink(join(env.UPLOAD_DIR, oldName)).catch(() => undefined);
-      }
-    }
+    if (user.avatarUrl) await deleteUploadIfUnreferenced(user.avatarUrl);
 
     return reply.code(200).send({ avatarUrl });
   });

@@ -7,6 +7,7 @@ import { FiEdit3, FiEye, FiFilm, FiPlus, FiSearch } from "react-icons/fi";
 
 import { assetUrl, graphqlRequest } from "@/shared/auth/api";
 import { useAuth } from "@/shared/auth/auth-provider";
+import { formatSiteDate } from "@/shared/utils/date-format";
 import styles from "./page.module.css";
 
 const ADMIN_ANIMES = `query AdminAnimes($query: String) {
@@ -117,7 +118,7 @@ export default function AnimeAdminPage() {
                 <Image src={assetUrl(anime.coverUrl) ?? anime.coverUrl} alt={`Capa de ${anime.title}`} width={58} height={82} unoptimized />
                 <div className={styles.identity}><strong>{anime.title}</strong><span>/{anime.slug}</span><small>{anime.installments.length} lançamento(s) · {episodes} episódios · {formats}</small></div>
                 <span className={`${styles.status} ${anime.publicationStatus === "PUBLISHED" ? styles.published : styles.draft}`}>{statusLabels[anime.publicationStatus]}</span>
-                <time dateTime={anime.updatedAt}>Atualizado em {new Intl.DateTimeFormat("pt-BR", { dateStyle: "short" }).format(new Date(anime.updatedAt))}</time>
+                <time dateTime={anime.updatedAt}>Atualizado em {formatSiteDate(anime.updatedAt)}</time>
                 <div className={styles.actions}>
                   <Link href={`/anime/${anime.slug}`} title="Abrir página pública"><FiEye /><span>Visualizar</span></Link>
                   <Link className={styles.editButton} href={`/admin/anime/${anime.slug}/edit`}><FiEdit3 /><span>Editar</span></Link>

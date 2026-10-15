@@ -11,6 +11,7 @@
     "build": "tsc -p tsconfig.json",
     "start": "node --env-file-if-exists=.env dist/server.js",
     "user:role": "tsx --env-file-if-exists=.env src/scripts/set-user-role.ts",
+    "uploads:clean": "tsx --env-file-if-exists=.env src/scripts/clean-orphan-uploads.ts",
     "seed:frieren": "tsx --env-file-if-exists=.env src/scripts/seed-frieren.ts",
     "seed:kitou-akari": "tsx --env-file-if-exists=.env src/scripts/seed-kitou-akari.ts",
     "seed:yui-horie": "tsx --env-file-if-exists=.env src/scripts/seed-yui-horie.ts",

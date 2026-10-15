@@ -3,11 +3,12 @@ import { PiFilmSlate } from "react-icons/pi";
 import { RiRestartLine } from "react-icons/ri";
 
 import { assetUrl } from "@/shared/auth/api";
+import { formatSiteDate } from "@/shared/utils/date-format";
 import { MediaCreditCard } from "@/shared/components/MediaCreditCard/page";
 import styles from "./animesbystaff.module.css";
 
 export type StaffAnimeCredit = { role: string; contribution: string | null; anime: { title: string; slug: string; coverUrl: string; startDate: string | null; endDate: string | null } };
-const date = (value: string | null) => value ? new Intl.DateTimeFormat("pt-BR", { dateStyle: "medium", timeZone: "UTC" }).format(new Date(`${value}T00:00:00Z`)) : "—";
+const date = (value: string | null) => formatSiteDate(value);
 
 function AnimesByStaff({ credits }: { credits: StaffAnimeCredit[] }) {
   if (credits.length === 0) return null;

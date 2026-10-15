@@ -250,7 +250,8 @@ function FormatSidebarInfo({
               <dt className={styles.animeDescriptionTerm}>Tipo</dt>
               <dd className={styles.animeDescriptionDetail}>{entity.artist_kind === "band" ? "Banda" : "Artista solo"}</dd>
               {entity.name_kanji && <><dt className={styles.animeDescriptionTerm}>Nome em Japonês</dt><dd className={styles.animeDescriptionDetail}>{entity.name_kanji}</dd></>}
-              {entity.date_of_birth && <><dt className={styles.animeDescriptionTerm}>Data de Nascimento</dt><dd className={styles.animeDescriptionDetail}>{entity.date_of_birth}</dd></>}
+              {entity.date_of_birth && <><dt className={styles.animeDescriptionTerm}>Data de nascimento</dt><dd className={styles.animeDescriptionDetail}>{entity.date_of_birth}</dd></>}
+              {entity.date_of_creation && <><dt className={styles.animeDescriptionTerm}>Data de criação</dt><dd className={styles.animeDescriptionDetail}>{entity.date_of_creation}</dd></>}
               {entity.origin && <><dt className={styles.animeDescriptionTerm}>Origem</dt><dd className={styles.animeDescriptionDetail}>{entity.origin}</dd></>}
               {entity.activity_period && <><dt className={styles.animeDescriptionTerm}>Período de atividade</dt><dd className={styles.animeDescriptionDetail}>{entity.activity_period}</dd></>}
               {entity.record_label && <><dt className={styles.animeDescriptionTerm}>Gravadora</dt><dd className={styles.animeDescriptionDetail}>{entity.record_label}</dd></>}

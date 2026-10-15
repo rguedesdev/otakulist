@@ -109,6 +109,7 @@ function LightNovelTrackerPanel({ totalChapters, workKey }: LightNovelTrackerPan
     setReadChapters((current) => {
       const next = Math.max(0, hasKnownTotal ? Math.min(totalChapters, current + amount) : current + amount);
       if (hasKnownTotal && next === totalChapters) setStatus("completo");
+      else if (amount > 0) setStatus("lendo");
       else if (status === "completo") setStatus("lendo");
       return next;
     });

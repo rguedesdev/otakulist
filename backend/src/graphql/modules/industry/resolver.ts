@@ -19,6 +19,7 @@ import { createMusicArtistSchema, musicArtistSlugSchema, updateMusicArtistSchema
 import type { IResolvers, MercuriusContext } from "mercurius";
 import { badInput } from "../../errors.js";
 import { currentUser, requireZeus } from "../auth/authorization.js";
+import { cleanupReplacedUploadImages } from "../../../services/upload-cleanup.js";
 
 export const industryResolvers: IResolvers<any, MercuriusContext> = {
   PersonManga: {
@@ -410,8 +411,10 @@ export const industryResolvers: IResolvers<any, MercuriusContext> = {
       if (!artist) {
         throw new GraphQLError("Artista não encontrado", { extensions: { code: "NOT_FOUND" } });
       }
+      const previousImages = artist.toObject();
       artist.set({ ...input, platformLinks: input.platformLinks ?? {}, externalLinks: input.externalLinks ?? {} });
       await artist.save();
+      await cleanupReplacedUploadImages(previousImages, artist.toObject());
       return artist;
     },
     createStudio: async (_root, args, context: MercuriusContext) => {
@@ -431,8 +434,10 @@ export const industryResolvers: IResolvers<any, MercuriusContext> = {
       if (!result.success) badInput(result.error.issues[0]?.message);
       const studio = await Studio.findOne({ slug: result.data.slug });
       if (!studio) throw new GraphQLError("Estúdio não encontrado", { extensions: { code: "NOT_FOUND" } });
+      const previousImages = studio.toObject();
       studio.set(result.data.input);
       await studio.save();
+      await cleanupReplacedUploadImages(previousImages, studio.toObject());
       return studio;
     },
     createPublisher: async (_root, args, context: MercuriusContext) => {
@@ -452,8 +457,10 @@ export const industryResolvers: IResolvers<any, MercuriusContext> = {
       if (!result.success) badInput(result.error.issues[0]?.message);
       const publisher = await Publisher.findOne({ slug: result.data.slug });
       if (!publisher) throw new GraphQLError("Editora não encontrada", { extensions: { code: "NOT_FOUND" } });
+      const previousImages = publisher.toObject();
       publisher.set(result.data.input);
       await publisher.save();
+      await cleanupReplacedUploadImages(previousImages, publisher.toObject());
       return publisher;
     },
     createMagazine: async (_root, args, context: MercuriusContext) => {
@@ -475,8 +482,10 @@ export const industryResolvers: IResolvers<any, MercuriusContext> = {
       if (!await Publisher.exists({ _id: result.data.input.publisherId })) badInput("A editora vinculada não existe mais");
       const magazine = await Magazine.findOne({ slug: result.data.slug });
       if (!magazine) throw new GraphQLError("Magazine não encontrada", { extensions: { code: "NOT_FOUND" } });
+      const previousImages = magazine.toObject();
       magazine.set({ ...result.data.input, slug: animeSlugFromTitle(result.data.input.title) });
       await magazine.save();
+      await cleanupReplacedUploadImages(previousImages, magazine.toObject());
       return magazine;
     },
     createSeiyuu: async (_root, args, context: MercuriusContext) => {
@@ -513,8 +522,10 @@ export const industryResolvers: IResolvers<any, MercuriusContext> = {
         });
       }
 
+      const previousImages = person.toObject();
       person.set({ ...input, roles: [...new Set([...(person.roles ?? []), "SEIYUU"])] });
       await person.save();
+      await cleanupReplacedUploadImages(previousImages, person.toObject());
       return person;
     },
     createStaff: async (_root, args, context: MercuriusContext) => {
@@ -540,8 +551,10 @@ export const industryResolvers: IResolvers<any, MercuriusContext> = {
       if (!result.success) badInput(result.error.issues[0]?.message);
       const person = await Person.findOne({ slug: result.data.slug, roles: "STAFF" });
       if (!person) throw new GraphQLError("Profissional não encontrado", { extensions: { code: "NOT_FOUND" } });
+      const previousImages = person.toObject();
       person.set({ ...result.data.input, roles: [...new Set([...(person.roles ?? []), "STAFF"])] });
       await person.save();
+      await cleanupReplacedUploadImages(previousImages, person.toObject());
       return person;
     },
     createMangaka: async (_root, args, context: MercuriusContext) => {
@@ -567,11 +580,13 @@ export const industryResolvers: IResolvers<any, MercuriusContext> = {
       if (!result.success) badInput(result.error.issues[0]?.message);
       const person = await Person.findOne({ slug: result.data.slug, roles: "MANGAKA" });
       if (!person) throw new GraphQLError("Mangaka não encontrado", { extensions: { code: "NOT_FOUND" } });
+      const previousImages = person.toObject();
       person.set({
         ...result.data.input,
         roles: [...new Set([...(person.roles ?? []).filter((role) => role !== "STAFF"), "MANGAKA"])],
       });
       await person.save();
+      await cleanupReplacedUploadImages(previousImages, person.toObject());
       return person;
     },
     createCharacter: async (_root, args, context: MercuriusContext) => {
@@ -608,8 +623,10 @@ export const industryResolvers: IResolvers<any, MercuriusContext> = {
       }
 
       try {
+        const previousImages = character.toObject();
         character.set({ ...input, slug: animeSlugFromTitle(input.nameRomaji) });
         await character.save();
+        await cleanupReplacedUploadImages(previousImages, character.toObject());
         return character;
       } catch (error: any) {
         if (error?.code === 11000) {

@@ -38,14 +38,14 @@ export function StaffRoleIcon({ role, size = 14 }: { role: string; size?: number
   return <RoleIcon size={size} aria-hidden="true" />;
 }
 
-function StaffSection({ credits = [] }: { credits?: StaffCredit[] }) {
+function StaffSection({ credits = [], limit }: { credits?: StaffCredit[]; limit?: number }) {
   if (credits.length === 0) return null;
 
   return (
     <section className={styles.staffContainer}>
       <h2 className={styles.staffSectionTitle}>Staff</h2>
       <div className={styles.staffCardsContainer}>
-        {credits.map((credit) => {
+        {credits.slice(0, limit).map((credit) => {
           const normalizedCredit = normalizeStaffCredit(credit);
           const path = credit.person.roles?.includes("MANGAKA")
             ? "mangaka"

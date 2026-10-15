@@ -55,6 +55,7 @@ type SeasonalHomeAnime = {
     id: string;
     format: "TV" | "MOVIE" | "OVA" | "ONA" | "SPECIAL";
     status: "ANNOUNCED" | "AIRING" | "FINISHED" | "CANCELLED";
+    coverUrl: string | null;
   };
 };
 
@@ -66,7 +67,7 @@ const homeContentQuery = `query HomeContent($season: AnimeSeason!, $year: Int!, 
   }
   seasonalAnime(season: $season, year: $year, includeAdult: $includeAdult) {
     anime { id title slug coverUrl reviewSummary { average count } }
-    installment { id format status }
+    installment { id format status coverUrl }
   }
   topRatedWorks(includeAdult: $includeAdult) { title slug medium coverUrl score ratingCount }
   discoveryWorks(includeAdult: $includeAdult) { title slug medium coverUrl description }
@@ -266,12 +267,13 @@ async function HomePage() {
               const reviewCount = anime.reviewSummary?.count ?? 0;
               const score = reviewCount > 0 ? anime.reviewSummary?.average.toFixed(1) : "—";
               const releaseFormat = installment.format.toLowerCase() as AnimeReleaseFormat;
+              const coverUrl = installment.coverUrl ?? anime.coverUrl;
 
               return (
                 <Link className={styles.mediaCard} href={`/anime/${anime.slug}`} key={anime.id}>
                   <div className={styles.mediaCover}>
                     <Image
-                      src={assetUrl(anime.coverUrl) ?? anime.coverUrl}
+                      src={assetUrl(coverUrl) ?? coverUrl}
                       alt={`Capa de ${anime.title}`}
                       fill
                       sizes="(max-width: 560px) 46vw, (max-width: 900px) 30vw, 220px"

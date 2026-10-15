@@ -75,7 +75,9 @@ export default async function ArtistBySlug({ params }: { params: Promise<{ slug:
     name_kanji: artist.nameKanji ?? undefined,
     description: artist.description ?? "",
     origin: artist.origin ?? undefined,
-    date_of_birth: artist.dateOfBirth ?? undefined,
+    ...(artist.kind === "BAND"
+      ? { date_of_creation: artist.dateOfBirth ?? undefined }
+      : { date_of_birth: artist.dateOfBirth ?? undefined }),
     activity_period: artist.activityPeriod ?? undefined,
     record_label: artist.recordLabel ?? undefined,
     musical_genres: artist.genres,

@@ -7,6 +7,7 @@ import { FiBookOpen, FiEdit3, FiEye, FiPlus, FiSearch } from "react-icons/fi";
 
 import { assetUrl, graphqlRequest } from "@/shared/auth/api";
 import { useAuth } from "@/shared/auth/auth-provider";
+import { formatSiteDate } from "@/shared/utils/date-format";
 import styles from "../anime/page.module.css";
 
 const ADMIN_PUBLISHERS = `query AdminPublishers($query: String) { adminPublishers(query: $query) { id displayName slug imageUrl foundation publicationStatus updatedAt } }`;
@@ -46,7 +47,7 @@ export default function PublisherAdminPage() {
         <Image className={styles.studioThumbnail} src={assetUrl(publisher.imageUrl) ?? publisher.imageUrl} alt={publisher.displayName} width={92} height={58} unoptimized />
         <div className={styles.identity}><strong>{publisher.displayName}</strong><span>/{publisher.slug}</span><small>{publisher.foundation ? `Fundada em ${publisher.foundation}` : "Fundação não informada"}</small></div>
         <span className={`${styles.status} ${publisher.publicationStatus === "PUBLISHED" ? styles.published : styles.draft}`}>{publisher.publicationStatus === "PUBLISHED" ? "Publicado" : "Rascunho"}</span>
-        <time dateTime={publisher.updatedAt}>Atualizado em {new Intl.DateTimeFormat("pt-BR", { dateStyle: "short" }).format(new Date(publisher.updatedAt))}</time>
+        <time dateTime={publisher.updatedAt}>Atualizado em {formatSiteDate(publisher.updatedAt)}</time>
         <div className={styles.actions}><Link href={`/publisher/${publisher.slug}`}><FiEye /><span>Visualizar</span></Link><Link className={styles.editButton} href={`/admin/publisher/${publisher.slug}/edit`}><FiEdit3 /><span>Editar</span></Link></div>
       </article>)}</div>}
     </section>

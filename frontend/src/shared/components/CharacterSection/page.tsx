@@ -15,7 +15,7 @@ export type CharacterVoiceCredit = {
   seiyuu: { id: string; displayName: string; slug: string; imageUrl: string | null };
 };
 
-function CharacterSection({ credits = [] }: { credits?: CharacterVoiceCredit[] }) {
+function CharacterSection({ credits = [], limit }: { credits?: CharacterVoiceCredit[]; limit?: number }) {
   const [selectedCredit, setSelectedCredit] = useState<CharacterVoiceCredit | null>(null);
 
   useEffect(() => {
@@ -31,7 +31,7 @@ function CharacterSection({ credits = [] }: { credits?: CharacterVoiceCredit[] }
     <section className={styles.charactersContainer}>
       <h2 className={styles.characterSectionTitle}>Personagens & Seiyuus</h2>
       <div className={styles.characterCardsContainer}>
-        {credits.map((credit) => (
+        {credits.slice(0, limit).map((credit) => (
           <button
             className={styles.characterSeiyuuCard}
             type="button"

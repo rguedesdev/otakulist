@@ -17,6 +17,7 @@ import type { IResolvers, MercuriusContext } from "mercurius";
 import { badInput, unauthenticated } from "../../errors.js";
 import { currentUser, requireZeus } from "../auth/authorization.js";
 import { workHref, reviewSummaryFor } from "../catalog/helpers.js";
+import { cleanupReplacedUploadImages } from "../../../services/upload-cleanup.js";
 
 function normalizeAnimeRating(value: string | null | undefined) {
   const legacyRatings: Record<string, string> = {
@@ -346,6 +347,8 @@ export const animeResolvers: IResolvers<any, MercuriusContext> = {
         });
       }
 
+      const previousImages = anime.toObject();
+
       try {
         const relatedIds = [...new Set(input.relatedWorks.map((item) => item.workId))];
         const existingRelatedWorks = await CatalogWork.countDocuments({ _id: { $in: relatedIds } });
@@ -391,6 +394,7 @@ export const animeResolvers: IResolvers<any, MercuriusContext> = {
           },
           { new: true, upsert: true, setDefaultsOnInsert: true },
         );
+        await cleanupReplacedUploadImages(previousImages, anime.toObject());
         return anime;
       } catch (error: any) {
         if (error?.code === 11000) {

@@ -42,6 +42,7 @@ function ReleaseCoverPicker({ release, onChange }: { release: DiscographyEditorR
 export function ArtistFormPage({ editSlug }: { editSlug?: string }) {
   const { user, accessToken, loading: authLoading } = useAuth();
   const [initial, setInitial] = useState<ArtistData | null>(null);
+  const [artistKind, setArtistKind] = useState<ArtistData["kind"]>("SOLO");
   const [displayName, setDisplayName] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -59,7 +60,7 @@ export function ArtistFormPage({ editSlug }: { editSlug?: string }) {
     void graphqlRequest<{ musicArtist: ArtistData | null }>(ADMIN_ARTIST, { slug: editSlug }, accessToken).then(({ musicArtist }) => {
       if (!active) return;
       if (!musicArtist) throw new Error("Artista não encontrado");
-      setInitial(musicArtist); setDisplayName(musicArtist.displayName); setImageUrl(musicArtist.imageUrl); setDiscography((musicArtist.discography ?? []).map((release) => ({ ...release, coverFile: null })));
+      setInitial(musicArtist); setArtistKind(musicArtist.kind); setDisplayName(musicArtist.displayName); setImageUrl(musicArtist.imageUrl); setDiscography((musicArtist.discography ?? []).map((release) => ({ ...release, coverFile: null })));
     }).catch((caught) => { if (active) setError(caught instanceof Error ? caught.message : "Não foi possível carregar o artista"); }).finally(() => { if (active) setLoadingArtist(false); });
     return () => { active = false; };
   }, [accessToken, editSlug, user?.role]);
@@ -92,9 +93,9 @@ export function ArtistFormPage({ editSlug }: { editSlug?: string }) {
   return <main className={styles.page}><header className={styles.header}><div><span>Administração · Artista musical</span><h1>{editSlug ? "Editar artista" : "Cadastrar artista ou banda"}</h1></div><p>Este perfil poderá ser vinculado às canções dos animes.</p></header>
     <form className={styles.form} autoComplete="off" onSubmit={submit}><section className={styles.card}><div className={styles.sectionTitle}><span>01</span><div><h2>Perfil musical</h2><p>Identidade e informações profissionais.</p></div></div><div className={styles.grid}>
       <label><span>Nome artístico *</span><input required value={displayName} onChange={(event) => setDisplayName(event.target.value)} /></label>
-      <label><span>Tipo *</span><CustomSelect name="kind" defaultValue={initial?.kind ?? "SOLO"} options={[{ value: "SOLO", label: "Artista solo" }, { value: "BAND", label: "Banda ou grupo" }]} /></label>
+      <label><span>Tipo *</span><CustomSelect name="kind" value={artistKind} onChange={(value) => setArtistKind(value as ArtistData["kind"])} options={[{ value: "SOLO", label: "Artista solo" }, { value: "BAND", label: "Banda ou grupo" }]} /></label>
       <label><span>Nome em Japonês</span><input name="nameKanji" defaultValue={initial?.nameKanji ?? ""} /></label><label><span>Origem</span><input name="origin" defaultValue={initial?.origin ?? ""} /></label>
-      <label><span>Data de nascimento</span><input name="dateOfBirth" defaultValue={initial?.dateOfBirth ?? ""} /></label><label><span>Período de atividade</span><input name="activityPeriod" defaultValue={initial?.activityPeriod ?? ""} /></label>
+      <label><span>{artistKind === "BAND" ? "Data de criação" : "Data de nascimento"}</span><input name="dateOfBirth" defaultValue={initial?.dateOfBirth ?? ""} /></label><label><span>Período de atividade</span><input name="activityPeriod" defaultValue={initial?.activityPeriod ?? ""} /></label>
       <label><span>Gravadora</span><input name="recordLabel" defaultValue={initial?.recordLabel ?? ""} /></label><label><span>Gêneros musicais</span><input name="genres" defaultValue={initial?.genres.join(", ") ?? ""} placeholder="J-Pop, Anisong" /></label>
       <label><span>Visibilidade</span><CustomSelect name="publicationStatus" defaultValue={initial?.publicationStatus ?? "DRAFT"} options={[{ value: "DRAFT", label: "Rascunho" }, { value: "PUBLISHED", label: "Publicado" }]} /></label>
       <label className={styles.wide}><span>Sinopse</span><textarea name="description" rows={7} defaultValue={initial?.description ?? ""} /></label>

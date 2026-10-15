@@ -3,6 +3,7 @@ import { LiaCanadianMapleLeaf } from "react-icons/lia";
 import { RiRestartLine } from "react-icons/ri";
 
 import { assetUrl } from "@/shared/auth/api";
+import { formatSiteDate } from "@/shared/utils/date-format";
 import { MediaCreditCard } from "@/shared/components/MediaCreditCard/page";
 import styles from "./animesbystudio.module.css";
 
@@ -19,13 +20,7 @@ export type StudioAnimeCredit = {
 };
 
 function displayDate(value: string | null, fallback = "Não informado") {
-  if (!value) return fallback;
-  const date = new Date(`${value}T00:00:00Z`);
-  if (Number.isNaN(date.getTime())) return fallback;
-  const day = new Intl.DateTimeFormat("pt-BR", { day: "2-digit", timeZone: "UTC" }).format(date);
-  const month = ["Jan", "Fev", "Mar", "Abril", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"][date.getUTCMonth()];
-  const year = new Intl.DateTimeFormat("pt-BR", { year: "numeric", timeZone: "UTC" }).format(date);
-  return `${day} ${month} ${year}`;
+  return formatSiteDate(value, fallback);
 }
 
 function AnimesByStudio({ credits }: { credits: StudioAnimeCredit[] }) {

@@ -7,6 +7,7 @@ import { FiEdit3, FiEye, FiHome, FiPlus, FiSearch } from "react-icons/fi";
 
 import { assetUrl, graphqlRequest } from "@/shared/auth/api";
 import { useAuth } from "@/shared/auth/auth-provider";
+import { formatSiteDate } from "@/shared/utils/date-format";
 import styles from "../anime/page.module.css";
 
 const ADMIN_STUDIOS = `query AdminStudios($query: String) { adminStudios(query: $query) { id displayName slug imageUrl headquarters publicationStatus updatedAt } }`;
@@ -47,7 +48,7 @@ export default function StudioAdminPage() {
         <Image className={styles.studioThumbnail} src={assetUrl(studio.imageUrl) ?? studio.imageUrl} alt={studio.displayName} width={92} height={58} unoptimized />
         <div className={styles.identity}><strong>{studio.displayName}</strong><span>/{studio.slug}</span><small>{studio.headquarters || "Sede não informada"}</small></div>
         <span className={`${styles.status} ${studio.publicationStatus === "PUBLISHED" ? styles.published : styles.draft}`}>{statusLabels[studio.publicationStatus]}</span>
-        <time dateTime={studio.updatedAt}>Atualizado em {new Intl.DateTimeFormat("pt-BR", { dateStyle: "short" }).format(new Date(studio.updatedAt))}</time>
+        <time dateTime={studio.updatedAt}>Atualizado em {formatSiteDate(studio.updatedAt)}</time>
         <div className={styles.actions}><Link href={`/studio/${studio.slug}`}><FiEye /><span>Visualizar</span></Link><Link className={styles.editButton} href={`/admin/studio/${studio.slug}/edit`}><FiEdit3 /><span>Editar</span></Link></div>
       </article>)}</div>}
     </section>

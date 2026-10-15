@@ -6,6 +6,7 @@ import { LuBookHeart, LuCalendarRange } from "react-icons/lu";
 import { VscLibrary } from "react-icons/vsc";
 
 import styles from "./lightnovelslug.module.css";
+import { formatSiteDate } from "@/shared/utils/date-format";
 import { LightNovelTrackerPanel } from "./components/LightNovelTrackerPanel/LightNovelTrackerPanel";
 import { FormatSidebarInfo } from "@/shared/components/FormatSidebarInfo/page";
 import { AdultContentGate } from "@/shared/components/AdultContentGate/page";
@@ -44,13 +45,7 @@ const query = `query LightNovel($slug: String!, $includeAdult: Boolean!) {
 const statuses: Record<string, string> = { ANNOUNCED: "Anunciada", PUBLISHING: "Em publicação", HIATUS: "Em hiato", FINISHED: "Finalizada", CANCELLED: "Cancelada" };
 
 function displayDate(value: string | null) {
-  if (!value) return "—";
-  const date = new Date(`${value}T00:00:00Z`);
-  if (Number.isNaN(date.getTime())) return "—";
-  const day = new Intl.DateTimeFormat("pt-BR", { day: "2-digit", timeZone: "UTC" }).format(date);
-  const month = ["Jan", "Fev", "Mar", "Abril", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"][date.getUTCMonth()];
-  const year = new Intl.DateTimeFormat("pt-BR", { year: "numeric", timeZone: "UTC" }).format(date);
-  return `${day} ${month} ${year}`;
+  return formatSiteDate(value);
 }
 
 export default async function LightNovelBySlug({ params }: { params: Promise<{ slug: string }> }) {
@@ -89,9 +84,9 @@ export default async function LightNovelBySlug({ params }: { params: Promise<{ s
     </div>
     <main className={styles.lightNovelSlugContainer}>
       <WorkSectionTabs classes={styles} sidebar={<FormatSidebarInfo entity={entity} reviewTarget={{ medium: "LIGHT_NOVEL", slug, title: novel.title }} />} tracker={<LightNovelTrackerPanel totalChapters={entity.chapters} workKey={slug} />} sections={[
-        ...(novel.characters.length ? [{ id: "personagens", label: "Personagens", content: <PublicationCharacterSection characters={novel.characters} /> }] : []),
-        ...(novel.staffCredits.length ? [{ id: "staff", label: "Staff", content: <StaffSection credits={novel.staffCredits} /> }] : []),
-        ...(novel.relatedWorks.length ? [{ id: "relacionados", label: "Relacionados", content: <RelatedSection works={novel.relatedWorks} /> }] : []),
+        ...(novel.characters.length ? [{ id: "personagens", label: "Personagens", content: <PublicationCharacterSection characters={novel.characters} />, generalContent: <PublicationCharacterSection characters={novel.characters} limit={6} /> }] : []),
+        ...(novel.staffCredits.length ? [{ id: "staff", label: "Staff", content: <StaffSection credits={novel.staffCredits} />, generalContent: <StaffSection credits={novel.staffCredits} limit={3} /> }] : []),
+        ...(novel.relatedWorks.length ? [{ id: "relacionados", label: "Relacionados", content: <RelatedSection works={novel.relatedWorks} />, generalContent: <RelatedSection works={novel.relatedWorks} limit={3} /> }] : []),
         { id: "comentarios", label: "Reviews", content: <ReviewCommentsSection comments={body.data?.workReviewComments ?? []} /> },
       ]} />
     </main>

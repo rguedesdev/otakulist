@@ -7,6 +7,7 @@ import { FiEdit3, FiEye, FiPlus, FiSearch, FiUser } from "react-icons/fi";
 
 import { assetUrl, graphqlRequest } from "@/shared/auth/api";
 import { useAuth } from "@/shared/auth/auth-provider";
+import { formatSiteDate } from "@/shared/utils/date-format";
 import styles from "../anime/page.module.css";
 
 const ADMIN_CHARACTERS = `query AdminCharacters($query: String) {
@@ -112,7 +113,7 @@ export default function CharacterAdminPage() {
                 <Image src={assetUrl(character.imageUrl) ?? character.imageUrl} alt={character.nameRomaji} width={58} height={82} unoptimized />
                 <div className={styles.identity}><strong>{character.nameRomaji}</strong><span>/{character.slug}</span><small>{character.voiceCredits.length} vínculo(s) de voz</small></div>
                 <span className={`${styles.status} ${character.publicationStatus === "PUBLISHED" ? styles.published : styles.draft}`}>{statusLabels[character.publicationStatus]}</span>
-                <time dateTime={character.updatedAt}>Atualizado em {new Intl.DateTimeFormat("pt-BR", { dateStyle: "short" }).format(new Date(character.updatedAt))}</time>
+                <time dateTime={character.updatedAt}>Atualizado em {formatSiteDate(character.updatedAt)}</time>
                 <div className={styles.actions}>
                   <Link href={`/character/${character.slug}`} title="Abrir página pública"><FiEye /><span>Visualizar</span></Link>
                   <Link className={styles.editButton} href={`/admin/character/${character.slug}/edit`}><FiEdit3 /><span>Editar</span></Link>

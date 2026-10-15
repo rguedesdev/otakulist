@@ -7,6 +7,7 @@ import { FiEdit3, FiEye, FiMusic, FiPlus, FiSearch } from "react-icons/fi";
 
 import { assetUrl, graphqlRequest } from "@/shared/auth/api";
 import { useAuth } from "@/shared/auth/auth-provider";
+import { formatSiteDate } from "@/shared/utils/date-format";
 import styles from "../anime/page.module.css";
 
 const ADMIN_ARTISTS = `query AdminMusicArtists($query: String) {
@@ -59,7 +60,7 @@ export default function ArtistAdminPage() {
         <Image src={assetUrl(artist.imageUrl) ?? artist.imageUrl} alt={artist.displayName} width={58} height={82} unoptimized />
         <div className={styles.identity}><strong>{artist.displayName}</strong><span>/{artist.slug}</span><small>{artist.kind === "BAND" ? "Banda" : "Artista solo"} · {artist.recordLabel || "Sem gravadora informada"}</small></div>
         <span className={`${styles.status} ${artist.publicationStatus === "PUBLISHED" ? styles.published : styles.draft}`}>{statusLabels[artist.publicationStatus]}</span>
-        <time dateTime={artist.updatedAt}>Atualizado em {new Intl.DateTimeFormat("pt-BR", { dateStyle: "short" }).format(new Date(artist.updatedAt))}</time>
+                <time dateTime={artist.updatedAt}>Atualizado em {formatSiteDate(artist.updatedAt)}</time>
         <div className={styles.actions}><Link href={`/artist/${artist.slug}`}><FiEye /><span>Visualizar</span></Link><Link className={styles.editButton} href={`/admin/artist/${artist.slug}/edit`}><FiEdit3 /><span>Editar</span></Link></div>
       </article>)}</div>}
     </section>

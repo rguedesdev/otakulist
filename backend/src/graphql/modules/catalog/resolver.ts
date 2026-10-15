@@ -140,8 +140,39 @@ export const catalogResolvers: IResolvers<any, MercuriusContext> = {
       if (query.length < 2) return [];
       const safeQuery = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
       const hiddenAnimeIds = await legacyAdultAnimeIds(Boolean(args.includeAdult));
+      const [animeIds, mangaIds, lightNovelIds] = await Promise.all([
+        !args.medium || args.medium === "ANIME"
+          ? Anime.distinct("_id", {
+              "alternativeTitles.title": { $regex: safeQuery, $options: "i" },
+              publicationStatus: "PUBLISHED",
+              ...(args.includeAdult ? {} : { adultContent: { $ne: true }, rating: { $ne: "R18" }, _id: { $nin: hiddenAnimeIds } }),
+            })
+          : Promise.resolve([]),
+        !args.medium || args.medium === "MANGA"
+          ? Manga.distinct("_id", {
+              "alternativeTitles.title": { $regex: safeQuery, $options: "i" },
+              publicationStatus: "PUBLISHED",
+              ...(args.includeAdult ? {} : { adultContent: { $ne: true } }),
+            })
+          : Promise.resolve([]),
+        !args.medium || args.medium === "LIGHT_NOVEL"
+          ? LightNovel.distinct("_id", {
+              "alternativeTitles.title": { $regex: safeQuery, $options: "i" },
+              publicationStatus: "PUBLISHED",
+              ...(args.includeAdult ? {} : { adultContent: { $ne: true } }),
+            })
+          : Promise.resolve([]),
+      ]);
+      const matchingTitles: Record<string, unknown>[] = [
+        ...(animeIds.length ? [{ medium: "ANIME", entityId: { $in: animeIds } }] : []),
+        ...(mangaIds.length ? [{ medium: "MANGA", entityId: { $in: mangaIds } }] : []),
+        ...(lightNovelIds.length ? [{ medium: "LIGHT_NOVEL", entityId: { $in: lightNovelIds } }] : []),
+      ];
       return CatalogWork.find({
-        title: { $regex: safeQuery, $options: "i" },
+        $or: [
+          { title: { $regex: safeQuery, $options: "i" } },
+          ...matchingTitles,
+        ],
         publicationStatus: "PUBLISHED",
         ...(args.medium ? { medium: args.medium } : {}),
         ...(args.includeAdult ? {} : { adultContent: { $ne: true } }),

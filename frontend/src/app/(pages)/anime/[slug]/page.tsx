@@ -7,6 +7,7 @@ import { PiTelevisionSimple } from "react-icons/pi";
 
 import { AnimeTrackerPanel } from "./components/AnimeTrackerPanel/AnimeTrackerPanel";
 import { assetUrl } from "@/shared/auth/api";
+import { formatSiteDate } from "@/shared/utils/date-format";
 import styles from "./animeslug.module.css";
 import { AnisongSection } from "@/shared/components/AnisongSection/page";
 import { AdultContentGate } from "@/shared/components/AdultContentGate/page";
@@ -89,13 +90,7 @@ const statusMap = { ANNOUNCED: "Anunciado", AIRING: "Em exibição", FINISHED: "
 const broadcastDayLabels = { SUNDAY: "Domingo", MONDAY: "Segunda-feira", TUESDAY: "Terça-feira", WEDNESDAY: "Quarta-feira", THURSDAY: "Quinta-feira", FRIDAY: "Sexta-feira", SATURDAY: "Sábado" } as const;
 
 function displayDate(value: string | null) {
-  if (!value) return "—";
-  const date = new Date(`${value}T00:00:00Z`);
-  if (Number.isNaN(date.getTime())) return "—";
-  const day = new Intl.DateTimeFormat("pt-BR", { day: "2-digit", timeZone: "UTC" }).format(date);
-  const month = ["Jan", "Fev", "Mar", "Abril", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"][date.getUTCMonth()];
-  const year = new Intl.DateTimeFormat("pt-BR", { year: "numeric", timeZone: "UTC" }).format(date);
-  return `${day} ${month} ${year}`;
+  return formatSiteDate(value);
 }
 
 function episodeRangeLabel(value: string | null) {
@@ -196,11 +191,11 @@ export default async function AnimeBySlug({ params }: { params: Promise<{ slug: 
         sidebar={<FormatSidebarInfo entity={entity} reviewTarget={{ medium: "ANIME", slug, title: anime.title }} />}
         tracker={<AnimeTrackerPanel seasons={seasons} workKey={slug} />}
         sections={[
-          ...(showSeasonsSection ? [{ id: "temporadas" as const, label: "Temporadas", content: <SeasonSection seasons={seasons} workKey={slug} /> }] : []),
-          { id: "personagens", label: "Personagens", content: <CharacterSection credits={anime.characterCredits} /> },
-          ...(anime.staffCredits.length > 0 ? [{ id: "staff" as const, label: "Staff", content: <StaffSection credits={anime.staffCredits} /> }] : []),
+          ...(showSeasonsSection ? [{ id: "temporadas" as const, label: "Temporadas", content: <SeasonSection seasons={seasons} workKey={slug} />, generalContent: <SeasonSection seasons={seasons} workKey={slug} limit={6} /> }] : []),
+          { id: "personagens", label: "Personagens", content: <CharacterSection credits={anime.characterCredits} />, generalContent: <CharacterSection credits={anime.characterCredits} limit={6} /> },
+          ...(anime.staffCredits.length > 0 ? [{ id: "staff" as const, label: "Staff", content: <StaffSection credits={anime.staffCredits} />, generalContent: <StaffSection credits={anime.staffCredits} limit={3} /> }] : []),
           ...(songs.length > 0 ? [{ id: "musicas" as const, label: "Músicas", content: <AnisongSection songs={songs} /> }] : []),
-          ...(anime.relatedWorks.length > 0 ? [{ id: "relacionados" as const, label: "Relacionados", content: <RelatedSection works={anime.relatedWorks} /> }] : []),
+          ...(anime.relatedWorks.length > 0 ? [{ id: "relacionados" as const, label: "Relacionados", content: <RelatedSection works={anime.relatedWorks} />, generalContent: <RelatedSection works={anime.relatedWorks} limit={3} /> }] : []),
           { id: "comentarios", label: "Reviews", content: <ReviewCommentsSection comments={workReviewComments} /> },
         ]}
       />
